@@ -1,185 +1,155 @@
-#  COURTIFY Mobile App – Flutter Version
+# COURTIFY Mobile App – Flutter
 
-Aplikasi mobile **Courtify** dibangun menggunakan **Flutter** sebagai frontend dan **Django** sebagai backend. Aplikasi ini menyediakan layanan booking lapangan olahraga, pengelolaan lapangan oleh penyedia, artikel olahraga, iklan, dan wishlist.
+Courtify Mobile adalah aplikasi Flutter yang terintegrasi dengan web service Django (Proyek Tengah Semester). Aplikasi ini digunakan untuk melakukan booking lapangan olahraga, mengelola lapangan bagi penyedia, membaca artikel olahraga, melihat iklan, serta menyimpan wishlist.
 
----
-
-## Anggota Kelompok
-
-| No | Nama Lengkap | NIM | Peran / Modul (Flutter) |
-|----|--------------|-----|--------------------------|
-| 1  | **Rafa Rally Soelistiono** | 2406344675 | Autentikasi, Role Management, Wishlist |
-| 2  | **Wildan Al Rizka Yusuf** | 2406407083 | Booking Lapangan |
-| 3  | **Justin Timothy Wirawan** | 2406413981 | Manajemen Lapangan (Owner Dashboard) |
-| 4  | **Msy. Aulya Salsabila Putri** | 2406353364 | Modul Iklan |
-| 5  | **Khayra Tazkiya** | 2406428876 | Modul Artikel & Berita Olahraga |
+Aplikasi Flutter ini menggunakan backend Django yang sama dengan aplikasi web sebelumnya, sehingga seluruh data antara web dan mobile saling sinkron.
 
 ---
 
-##  Deskripsi Aplikasi Flutter
+## Daftar Anggota Kelompok
 
-**Courtify Mobile** adalah aplikasi Flutter yang terhubung dengan backend Django untuk mempermudah:
-
-### ✔ Pengguna (User)
-- Mencari dan memesan lapangan olahraga
-- Menyimpan wishlist
-- Membaca artikel olahraga
-- Mengatur profil
-
-### ✔ Penyedia Lapangan (Owner)
-- Menambahkan & mengelola lapangan
-- Membuat iklan
-- Membuat artikel berita olahraga
-- Melihat daftar booking
-
-### **Tujuan Utama**
-- Mempermudah booking lapangan secara mobile  
-- Menjadi wadah komunitas olahraga  
-- Membantu penyedia mengelola fasilitas olahraga
+| No | Nama Lengkap | NIM | Pembagian Tugas |
+|----|--------------|-----|------------------|
+| 1 | Rafa Rally Soelistiono | 2406344675 | Autentikasi, Role Management, Wishlist |
+| 2 | Wildan Al Rizka Yusuf | 2406407083 | Modul Booking Lapangan |
+| 3 | Justin Timothy Wirawan | 2406413981 | Modul Manajemen Lapangan (Owner Dashboard) |
+| 4 | Msy. Aulya Salsabila Putri | 2406353364 | Modul Iklan |
+| 5 | Khayra Tazkiya | 2406428876 | Modul Artikel / Berita Olahraga |
 
 ---
 
-#  Modul Flutter
+## Deskripsi Aplikasi
 
-## 1. Autentikasi & Role Management
-**Penanggung jawab:** Rafa Rally Soelistiono
+Courtify Mobile adalah aplikasi yang bertujuan untuk mempermudah pengguna dalam:
 
-### Fitur
-- Register user & owner
-- Login dengan CookieRequest
-- Redirect halaman sesuai role
-- Edit profil
+- Mencari dan memesan lapangan olahraga.
+- Melihat detail lapangan seperti fasilitas, lokasi, dan harga.
+- Menyimpan wishlist lapangan.
+- Membaca artikel atau berita olahraga.
+- Mengelola profil pengguna.
 
-### Halaman
-- `login_page.dart`
-- `register_page.dart`
-- `profile_page.dart`
+Penyedia lapangan dapat:
 
-### Model
-- UserProfile
+- Menambah, mengedit, dan menghapus lapangan.
+- Membuat dan mengelola iklan promosi.
+- Membuat dan mengelola artikel atau berita olahraga.
 
----
-
-## 2. Booking Lapangan
-**Penanggung jawab:** Wildan Al Rizka Yusuf
-
-### Fitur
-- List lapangan
-- Form booking
-- Update booking
-- Cancel booking
-- History booking
-
-### Halaman
-- `booking_list_page.dart`
-- `booking_form_page.dart`
-- `booking_history_page.dart`
-
-### Model
-- Booking
+Seluruh fitur pada aplikasi diakses melalui API Django yang sudah dibuat pada PTS, sehingga Flutter hanya berperan sebagai frontend mobile.
 
 ---
 
-## 3. Manajemen Lapangan (Owner Dashboard)
-**Penanggung jawab:** Justin Timothy Wirawan
+## Daftar Modul yang Diimplementasikan Beserta Pembagian Kerja
 
-### Fitur
-- Tambah lapangan
-- Edit lapangan
-- Hapus lapangan
-- Lihat daftar lapangan owner
+### 1. Modul Autentikasi dan Role Management  
+Penanggung jawab: Rafa Rally Soelistiono
 
-### Halaman
-- `lapangan_form_page.dart`
-- `lapangan_list_owner_page.dart`
-- `lapangan_detail_page.dart`
-
-### Model
-- Lapangan
+Fitur:
+- Register user dan owner
+- Login menggunakan session cookie
+- Logout
+- Pengaturan profil pengguna
+- Redirect halaman berdasarkan role
 
 ---
 
-## 4. Artikel & Berita Olahraga
-**Penanggung jawab:** Khayra Tazkiya
+### 2. Modul Booking Lapangan  
+Penanggung jawab: Wildan Al Rizka Yusuf
 
-### Fitur
-- List artikel
-- Tambah artikel
-- Edit artikel
-- Hapus artikel
-- Detail artikel
-
-### Halaman
-- `news_list_page.dart`
-- `news_form_page.dart`
-- `news_detail_page.dart`
-
-### Model
-- News
+Fitur:
+- Menampilkan daftar lapangan yang tersedia
+- Membuat booking baru
+- Mengedit jadwal booking
+- Membatalkan booking
+- Melihat riwayat booking pengguna
 
 ---
 
-## 5. Modul Iklan
-**Penanggung jawab:** Msy. Aulya Salsabila Putri
+### 3. Modul Manajemen Lapangan (Owner)  
+Penanggung jawab: Justin Timothy Wirawan
 
-### Fitur
-- Tambah iklan
-- Edit iklan
-- Hapus iklan
-- List iklan owner
-
-### Halaman
-- `iklan_form_page.dart`
-- `iklan_list_owner_page.dart`
-
-### Model
-- Iklan
+Fitur:
+- Menambah lapangan baru
+- Mengedit informasi lapangan
+- Menghapus lapangan
+- Melihat daftar lapangan yang dimiliki oleh penyedia
 
 ---
 
-## 6. Modul Wishlist
-**Penanggung jawab:** Rafa Rally Soelistiono
+### 4. Modul Artikel / Berita Olahraga  
+Penanggung jawab: Khayra Tazkiya
 
-### Fitur
-- Tambah wishlist
-- Hapus wishlist
-- Lihat wishlist user
-
-### Halaman
-- `wishlist_page.dart`
-
-### Model
-- Wishlist
+Fitur:
+- Melihat daftar artikel
+- Menambah artikel
+- Mengedit artikel
+- Menghapus artikel
+- Melihat detail artikel
 
 ---
 
-# Dataset Awal (Backend Django)
+### 5. Modul Iklan  
+Penanggung jawab: Msy. Aulya Salsabila Putri
 
-Dataset awal lapangan olahraga menggunakan data publik:
-
-Kategori: futsal, basket, tenis, badminton, padel  
-Sumber dataset:  
-https://opendata.jabarprov.go.id/id/dataset/jumlah-fasilitaslapangan-olahraga-berdasarkan-kategori-dan-desakelurahan-di-jawa-barat
+Fitur:
+- Menambah iklan
+- Mengedit iklan
+- Menghapus iklan
+- Melihat daftar iklan yang dimiliki owner
 
 ---
 
-# Role Pengguna
+### 6. Modul Wishlist  
+Penanggung jawab: Rafa Rally Soelistiono
+
+Fitur:
+- Menambah wishlist
+- Menghapus wishlist
+- Menampilkan daftar wishlist pengguna
+
+---
+
+## Peran atau Aktor Pengguna Aplikasi
 
 | Role | Deskripsi |
 |------|-----------|
-| **User (Pemain)** | Mencari lapangan, booking, membaca artikel, wishlist |
-| **Owner (Penyedia)** | Mengelola lapangan, artikel, iklan |
-| **Admin** | Manajemen global (backend Django) |
+| User (Pemain) | Dapat mencari lapangan, melakukan booking, membaca artikel, melihat iklan, dan menambah wishlist. |
+| Owner (Penyedia Lapangan) | Dapat mengelola lapangan, membuat iklan, membuat artikel olahraga, dan melihat daftar booking. |
+| Admin | Hanya digunakan di backend Django untuk manajemen global. Tidak digunakan lewat Flutter. |
 
 ---
 
-# Tautan Deployment & Desain
+## Alur Pengintegrasian Flutter dengan Web Service Django
 
-- **Backend (Django / PWS):**  
-  https://justin-timothy-courtify.pbp.cs.ui.ac.id/
+Aplikasi Flutter terhubung sepenuhnya dengan web service Django yang sudah dibuat pada Proyek Tengah Semester. Alurnya sebagai berikut:
 
-- **Desain Figma:**  
-  https://www.figma.com/design/WFXPpXYAMJKiQBmJfbklMn/PBP-COURTIFY
+### 1. Autentikasi Menggunakan Session Cookie
+- Flutter menggunakan library `pbp_django_auth` untuk mengelola login.
+- Flutter mengirim request POST login ke endpoint Django.
+- Django memberikan session cookie jika login berhasil.
+- Session cookie disimpan oleh `CookieRequest`.
+- Semua request selanjutnya ke Django akan otomatis membawa cookie untuk menjaga session.
+
+### 2. Pengambilan Data (GET)
+- Flutter mengambil data dari Django menggunakan endpoint JSON.
+- Contoh data yang diambil: lapangan, booking, artikel, wishlist, iklan.
+- JSON yang diterima Flutter diubah menjadi model Dart menggunakan `fromJson`.
+
+### 3. Pengiriman Data (POST/PUT/DELETE)
+- Untuk membuat booking, menambah lapangan, mengedit artikel, dll:
+  - Flutter mengirim request POST/PUT/DELETE melalui CookieRequest.
+  - Django melakukan validasi user, role, dan izin akses.
+  - Data disimpan pada database backend.
+
+### 4. Kesamaan Struktur Model
+- Model Dart disesuaikan dengan struktur model Django.
+- Hal ini memastikan integrasi data berjalan konsisten dan aman.
+
+### 5. Satu Backend untuk Web dan Mobile
+- Aplikasi web (Django Template) dan aplikasi Flutter menggunakan backend yang sama.
+- Semua perubahan data pada Flutter langsung mempengaruhi data di aplikasi web, dan sebaliknya.
 
 ---
+
+## Link Figma  
+(akan diisi nanti)
 
