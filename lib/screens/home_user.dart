@@ -2,8 +2,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:courtify_mobile/services/auth_service.dart';
-// Pastikan import halaman login Anda
-import 'package:courtify_mobile/screens/login_screen.dart'; 
+import 'package:courtify_mobile/screens/login_screen.dart';
+// --- IMPORT HALAMAN MENU USER ---
+import 'package:courtify_mobile/screens/user/wishlist_user.dart';
+import 'package:courtify_mobile/screens/user/booking_user.dart';
+import 'package:courtify_mobile/screens/user/artikel_user.dart';
+import 'package:courtify_mobile/widgets/right_drawer.dart';
 
 class HomeUserScreen extends StatefulWidget {
   const HomeUserScreen({super.key});
@@ -14,7 +18,7 @@ class HomeUserScreen extends StatefulWidget {
 
 class _HomeUserScreenState extends State<HomeUserScreen> {
   final AuthService _authService = AuthService();
-  String _username = '';
+  String _username = 'Loading...';
 
   @override
   void initState() {
@@ -30,23 +34,16 @@ class _HomeUserScreenState extends State<HomeUserScreen> {
     });
   }
 
-  // Fungsi Logout
+  // Fungsi Logout (Tetap dipertahankan di AppBar, opsional bisa dipindah ke drawer)
   void _handleLogout() async {
-    // Tampilkan loading dialog (opsional, tapi bagus untuk UX)
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) => const Center(child: CircularProgressIndicator()),
     );
-
-    // Panggil service logout ke Django
     await _authService.logout();
-
     if (!mounted) return;
-    // Tutup loading dialog
     Navigator.of(context).pop(); 
-
-    // Navigasi kembali ke halaman Login dan HAPUS semua history navigasi sebelumnya
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (context) => const LoginScreen()),
@@ -58,10 +55,11 @@ class _HomeUserScreenState extends State<HomeUserScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Courtify - User Home"),
-        backgroundColor: Colors.blue, // Warna tema untuk User
+        title: const Text("Courtify"), // Judul dipersingkat
+        backgroundColor: Colors.blueAccent,
+        foregroundColor: Colors.white,
+        // Tombol logout tetap di kanan atas
         actions: [
-          // Tombol Logout di AppBar
           IconButton(
             onPressed: _handleLogout,
             icon: const Icon(Icons.logout),
@@ -69,50 +67,106 @@ class _HomeUserScreenState extends State<HomeUserScreen> {
           ),
         ],
       ),
+      // === MENAMBAHKAN DRAWER (MENU SAMPING) ===
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            // Header Drawer dengan info user
+            UserAccountsDrawerHeader(
+              accountName: Text(
+                _username,
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              ),
+              accountEmail: const Text("Role: Pengguna Biasa"),
+              currentAccountPicture: CircleAvatar(
+                backgroundColor: Colors.white,
+                child: Text(
+                  _username.isNotEmpty ? _username[0].toUpperCase() : 'U',
+                  style: const TextStyle(fontSize: 24.0, color: Colors.blueAccent),
+                ),
+              ),
+              decoration: const BoxDecoration(
+                color: Colors.blueAccent,
+              ),
+            ),
+            // Menu Item 1: Wishlist
+            ListTile(
+              leading: const Icon(Icons.favorite_border),
+              title: const Text('Wishlist'),
+              onTap: () {
+                // Tutup drawer dulu
+                Navigator.pop(context);
+                // Navigasi ke halaman Wishlist
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const WishlistUserScreen()),
+                );
+              },
+            ),
+             // Menu Item 2: Booking
+            ListTile(
+              leading: const Icon(Icons.calendar_today),
+              title: const Text('Booking Saya'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const BookingUserScreen()),
+                );
+              },
+            ),
+             // Menu Item 3: Artikel
+            ListTile(
+              leading: const Icon(Icons.article_outlined),
+              title: const Text('Artikel'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const ArtikelUserScreen()),
+                );
+              },
+            ),
+            const Divider(),
+            // Opsional: Tambahkan tombol logout di drawer juga
+            ListTile(
+              leading: const Icon(Icons.logout, color: Colors.red),
+              title: const Text('Logout', style: TextStyle(color: Colors.red)),
+              onTap: () {
+                Navigator.pop(context); // Tutup drawer
+                _handleLogout(); // Panggil fungsi logout
+              },
+            ),
+          ],
+        ),
+      ),
+      endDrawer: const RightDrawer(),
+      // === BODY HALAMAN UTAMA ===
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Kartu sapaan
+            // Kartu sapaan sederhana di home screen
             Card(
-              elevation: 4,
+              elevation: 2,
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  children: [
-                    const Icon(Icons.person, size: 50, color: Colors.blue),
-                    const SizedBox(width: 20),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text("Selamat Datang,", style: TextStyle(fontSize: 16)),
-                        Text(
-                          _username,
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const Chip(
-                          label: Text('Role: User Biasa'),
-                          backgroundColor: Colors.blueAccent,
-                          labelStyle: TextStyle(color: Colors.white),
-                        )
-                      ],
-                    ),
-                  ],
+                child: Text(
+                  "Selamat datang kembali, $_username!",
+                  style: const TextStyle(fontSize: 16),
                 ),
               ),
             ),
             const SizedBox(height: 30),
             const Center(
               child: Text(
-                "Menu Booking Lapangan akan muncul di sini.",
+                "Gunakan menu di samping (pojok kiri atas) untuk navigasi.",
+                textAlign: TextAlign.center,
                 style: TextStyle(color: Colors.grey),
               ),
             ),
-            // Tambahkan widget lain di sini untuk fitur user...
           ],
         ),
       ),
