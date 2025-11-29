@@ -46,6 +46,29 @@ jobs:
       - name: Decode Keystore
         run: echo "${{ secrets.KEY_JKS }}" | base64 -d > release-keystore.jks
 
+      - name: Debug decoded keystore
+        env:
+          KEY_JKS: ${{ secrets.KEY_JKS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          echo "=== lengths (non-secret) ==="
+          echo "KEY_JKS string length: ${#KEY_JKS}"
+          echo "KEY_PASSWORD string length: ${#KEY_PASSWORD}"
+
+          echo "=== create flat base64 (remove any newlines) ==="
+          echo "$KEY_JKS" | tr -d '\n' > /tmp/keystore_flat.b64
+
+          echo "=== decode to file ==="
+          base64 -d /tmp/keystore_flat.b64 > release-keystore.jks || true
+
+          echo "=== decoded file info ==="
+          ls -l release-keystore.jks || true
+          sha256sum release-keystore.jks || true
+
+          echo "=== try keytool list (will be masked) ==="
+          keytool -list -v -keystore release-keystore.jks -storepass "$KEY_PASSWORD" | sed -n '1,6p' || true
+
+
       - name: Sign APKs
         run: |
           for apk in build/app/outputs/flutter-apk/*.apk; do
