@@ -150,6 +150,13 @@ Aplikasi Flutter terhubung sepenuhnya dengan web service Django yang sudah dibua
 
 ---
 
+# Courtify-Mobile
+
+[![Build Status](https://app.bitrise.io/app/dbf26df0-21fe-41aa-bdeb-6cc6340c9228/status.svg?token=8hHZI9mnDYovnQL1uT8uUw&branch=main)](https://app.bitrise.io/app/dbf26df0-21fe-41aa-bdeb-6cc6340c9228)
+
+## Download
+Download aplikasi versi terbaru: [Download APK](https://app.bitrise.io/app/dbf26df0-21fe-41aa-bdeb-6cc6340c9228/installable-artifacts/47029aec9e2ff2d7/public-install-page/b0e367fa76bc688b08394f073aea71d6)
+
 ## **Tautan Deployment & Desain**
 
 * **Tautan Deployment (PWS):** [link pws](https://justin-timothy-courtify.pbp.cs.ui.ac.id/)
