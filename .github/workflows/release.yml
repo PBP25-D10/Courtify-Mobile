@@ -52,10 +52,11 @@ jobs:
             echo "Signing $apk..."
             jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 \
               -keystore release-keystore.jks \
-              -storepass "${{ secrets.KEY_PASSWORD }}" \
-              -keypass "${{ secrets.KEY_PASSWORD }}" \
+              -storepass ${{ secrets.KEY_PASSWORD }} \
+              -keypass ${{ secrets.KEY_PASSWORD }} \
               "$apk" release
           done
+
 
       - name: Cleanup Keystore
         if: always()
