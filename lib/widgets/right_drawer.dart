@@ -4,7 +4,6 @@ import 'package:courtify_mobile/screens/login_screen.dart';
 
 // Import Menu User
 import 'package:courtify_mobile/screens/user/wishlist_user.dart';
-import 'package:courtify_mobile/screens/user/booking_user.dart';
 import 'package:courtify_mobile/screens/user/artikel_user.dart';
 
 // Import Menu Penyedia
@@ -13,6 +12,8 @@ import 'package:courtify_mobile/screens/penyedia/booking_penyedia.dart';
 import 'package:courtify_mobile/screens/penyedia/lapangan_penyedia.dart';
 import 'package:courtify_mobile/screens/penyedia/iklan_penyedia.dart';
 import 'package:courtify_mobile/screens/penyedia/artikel_penyedia.dart';
+
+import 'package:courtify_mobile/module/booking/screens/home_screen.dart';
 
 class RightDrawer extends StatefulWidget {
   const RightDrawer({super.key});
@@ -52,13 +53,13 @@ class _RightDrawerState extends State<RightDrawer> {
       barrierDismissible: false,
       builder: (context) => const Center(child: CircularProgressIndicator()),
     );
-    
+
     await _authService.logout();
-    
+
     if (!mounted) return;
     // Tutup dialog loading
-    Navigator.of(context).pop(); 
-    
+    Navigator.of(context).pop();
+
     // Kembali ke Login
     Navigator.pushAndRemoveUntil(
       context,
@@ -70,7 +71,9 @@ class _RightDrawerState extends State<RightDrawer> {
   @override
   Widget build(BuildContext context) {
     // Tentukan warna header berdasarkan role
-    final Color headerColor = _role == 'penyedia' ? Colors.teal : Colors.blueAccent;
+    final Color headerColor = _role == 'penyedia'
+        ? Colors.teal
+        : Colors.blueAccent;
 
     return Drawer(
       child: ListView(
@@ -82,7 +85,11 @@ class _RightDrawerState extends State<RightDrawer> {
               _username,
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
-            accountEmail: Text(_role == 'penyedia' ? "Role: Penyedia Lapangan" : "Role: Pengguna Biasa"),
+            accountEmail: Text(
+              _role == 'penyedia'
+                  ? "Role: Penyedia Lapangan"
+                  : "Role: Pengguna Biasa",
+            ),
             currentAccountPicture: CircleAvatar(
               backgroundColor: Colors.white,
               child: Icon(
@@ -91,29 +98,40 @@ class _RightDrawerState extends State<RightDrawer> {
                 color: headerColor,
               ),
             ),
-            decoration: BoxDecoration(
-              color: headerColor,
-            ),
+            decoration: BoxDecoration(color: headerColor),
           ),
 
           // === MENU ITEMS BERDASARKAN ROLE ===
-          
+
           // Opsi 1: Jika Role USER
           if (_role == 'user') ...[
             _buildListTile(
               icon: Icons.favorite_border,
               title: "Wishlist",
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const WishlistUserScreen())),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const WishlistUserScreen(),
+                ),
+              ),
             ),
             _buildListTile(
               icon: Icons.calendar_today,
               title: "Booking Saya",
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const BookingUserScreen())),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const BookingScreen()),
+              ),
             ),
             _buildListTile(
               icon: Icons.article_outlined,
               title: "Artikel",
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ArtikelUserScreen())),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ArtikelUserScreen(),
+                ),
+              ),
             ),
           ],
 
@@ -122,32 +140,57 @@ class _RightDrawerState extends State<RightDrawer> {
             _buildListTile(
               icon: Icons.dashboard,
               title: "Dashboard",
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const DashboardPenyediaScreen())),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const DashboardPenyediaScreen(),
+                ),
+              ),
             ),
             _buildListTile(
               icon: Icons.book_online,
               title: "Booking Masuk",
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const BookingPenyediaScreen())),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const BookingPenyediaScreen(),
+                ),
+              ),
             ),
             _buildListTile(
               icon: Icons.stadium,
               title: "Kelola Lapangan",
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const LapanganPenyediaScreen())),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const LapanganPenyediaScreen(),
+                ),
+              ),
             ),
             _buildListTile(
               icon: Icons.campaign,
               title: "Iklan & Promosi",
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const IklanPenyediaScreen())),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const IklanPenyediaScreen(),
+                ),
+              ),
             ),
             _buildListTile(
               icon: Icons.article,
               title: "Artikel",
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ArtikelPenyediaScreen())),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ArtikelPenyediaScreen(),
+                ),
+              ),
             ),
           ],
 
           const Divider(),
-          
+
           // === LOGOUT ===
           ListTile(
             leading: const Icon(Icons.logout, color: Colors.red),
@@ -160,7 +203,11 @@ class _RightDrawerState extends State<RightDrawer> {
   }
 
   // Helper Widget agar kodingan lebih rapi
-  Widget _buildListTile({required IconData icon, required String title, required VoidCallback onTap}) {
+  Widget _buildListTile({
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+  }) {
     return ListTile(
       leading: Icon(icon),
       title: Text(title),

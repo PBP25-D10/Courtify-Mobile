@@ -5,9 +5,10 @@ import 'package:courtify_mobile/services/auth_service.dart';
 import 'package:courtify_mobile/screens/login_screen.dart';
 // --- IMPORT HALAMAN MENU USER ---
 import 'package:courtify_mobile/screens/user/wishlist_user.dart';
-import 'package:courtify_mobile/screens/user/booking_user.dart';
 import 'package:courtify_mobile/screens/user/artikel_user.dart';
 import 'package:courtify_mobile/widgets/right_drawer.dart';
+
+import 'package:courtify_mobile/module/booking/screens/home_screen.dart';
 
 class HomeUserScreen extends StatefulWidget {
   const HomeUserScreen({super.key});
@@ -112,7 +113,7 @@ class _HomeUserScreenState extends State<HomeUserScreen> {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const BookingUserScreen()),
+                  MaterialPageRoute(builder: (context) => const BookingScreen()),
                 );
               },
             ),

@@ -1,0 +1,171 @@
+{
+   "checksum": "3393c4b16f8c758c5023b9682f1ba100",
+   "roots": {
+      "bookmark_bar": {
+         "children": [ {
+            "date_added": "13408984126725852",
+            "date_last_used": "0",
+            "guid": "5629dc00-93c0-44df-a9e6-16362b539aed",
+            "id": "23",
+            "name": "ASUS Software Portal - Exclusive technology",
+            "show_icon": false,
+            "source": "oem_preload",
+            "type": "url",
+            "url": "https://www.asus.com/Software-and-Innovations-Portal/",
+            "visit_count": 0
+         }, {
+            "date_added": "13408984126725717",
+            "date_last_used": "0",
+            "guid": "faae71ac-80e1-438d-89a7-269f88a58647",
+            "id": "22",
+            "name": "MyASUS Software - Get the best from ASUS PC",
+            "show_icon": false,
+            "source": "oem_preload",
+            "type": "url",
+            "url": "https://www.asus.com/ASUS-Software/",
+            "visit_count": 0
+         }, {
+            "date_added": "13408984126725424",
+            "date_last_used": "0",
+            "guid": "abc94e66-8730-4397-9a7e-15f35c552e7e",
+            "id": "21",
+            "name": "McAfee LiveSafe",
+            "show_icon": false,
+            "source": "oem_preload",
+            "type": "url",
+            "url": "https://home.mcafee.com/root/campaign.aspx?cid=247829",
+            "visit_count": 0
+         }, {
+            "date_added": "13408983505069373",
+            "date_last_used": "0",
+            "guid": "7dbab812-328e-47ba-a8b3-d15625028625",
+            "id": "18",
+            "name": "ASUS Software Portal - Exclusive technology",
+            "show_icon": false,
+            "source": "oem_preload",
+            "type": "url",
+            "url": "https://www.asus.com/Software-and-Innovations-Portal/",
+            "visit_count": 0
+         }, {
+            "date_added": "13408983505069238",
+            "date_last_used": "0",
+            "guid": "d625739c-57dc-470d-8fde-f4c7e7dc5ff9",
+            "id": "17",
+            "name": "MyASUS Software - Get the best from ASUS PC",
+            "show_icon": false,
+            "source": "oem_preload",
+            "type": "url",
+            "url": "https://www.asus.com/ASUS-Software/",
+            "visit_count": 0
+         }, {
+            "date_added": "13408983505068934",
+            "date_last_used": "0",
+            "guid": "83954ae2-3789-45a8-bbcd-5adbb442839f",
+            "id": "16",
+            "name": "McAfee LiveSafe",
+            "show_icon": false,
+            "source": "oem_preload",
+            "type": "url",
+            "url": "https://home.mcafee.com/root/campaign.aspx?cid=247829",
+            "visit_count": 0
+         }, {
+            "date_added": "13408966891871257",
+            "date_last_used": "0",
+            "guid": "58f211c6-6e24-45d1-84c8-09db0252e89c",
+            "id": "13",
+            "name": "ASUS Software Portal - Exclusive technology",
+            "show_icon": false,
+            "source": "oem_preload",
+            "type": "url",
+            "url": "https://www.asus.com/Software-and-Innovations-Portal/",
+            "visit_count": 0
+         }, {
+            "date_added": "13408966891871164",
+            "date_last_used": "0",
+            "guid": "b06e0dbe-dadd-4750-bb6e-3b77df84f6b8",
+            "id": "12",
+            "name": "MyASUS Software - Get the best from ASUS PC",
+            "show_icon": false,
+            "source": "oem_preload",
+            "type": "url",
+            "url": "https://www.asus.com/ASUS-Software/",
+            "visit_count": 0
+         }, {
+            "date_added": "13408966891870871",
+            "date_last_used": "0",
+            "guid": "ed597cc0-eb2f-4233-8029-fcfe319614ad",
+            "id": "11",
+            "name": "McAfee LiveSafe",
+            "show_icon": false,
+            "source": "oem_preload",
+            "type": "url",
+            "url": "https://home.mcafee.com/root/campaign.aspx?cid=247829",
+            "visit_count": 0
+         }, {
+            "date_added": "13408688906353349",
+            "date_last_used": "0",
+            "guid": "3dde0b18-a8d5-4340-96e9-11906af81330",
+            "id": "8",
+            "name": "ASUS Software Portal - Exclusive technology",
+            "show_icon": false,
+            "source": "oem_preload",
+            "type": "url",
+            "url": "https://www.asus.com/Software-and-Innovations-Portal/",
+            "visit_count": 0
+         }, {
+            "date_added": "13408688906353139",
+            "date_last_used": "0",
+            "guid": "b66f4ef9-89bd-41fb-9c48-fed730b8456b",
+            "id": "7",
+            "name": "MyASUS Software - Get the best from ASUS PC",
+            "show_icon": false,
+            "source": "oem_preload",
+            "type": "url",
+            "url": "https://www.asus.com/ASUS-Software/",
+            "visit_count": 0
+         }, {
+            "date_added": "13408688906352675",
+            "date_last_used": "0",
+            "guid": "326b7d70-3457-44e7-85a3-54d1d5b80450",
+            "id": "6",
+            "name": "McAfee LiveSafe",
+            "show_icon": false,
+            "source": "oem_preload",
+            "type": "url",
+            "url": "https://home.mcafee.com/root/campaign.aspx?cid=247829",
+            "visit_count": 0
+         } ],
+         "date_added": "13408688905926342",
+         "date_last_used": "0",
+         "date_modified": "13408984126725852",
+         "guid": "0bc5d13f-2cba-5d74-951f-3f233fe6c908",
+         "id": "1",
+         "name": "Favorites bar",
+         "source": "unknown",
+         "type": "folder"
+      },
+      "other": {
+         "children": [  ],
+         "date_added": "13408688905926342",
+         "date_last_used": "0",
+         "date_modified": "0",
+         "guid": "82b081ec-3dd3-529c-8475-ab6c344590dd",
+         "id": "2",
+         "name": "Other favorites",
+         "source": "unknown",
+         "type": "folder"
+      },
+      "synced": {
+         "children": [  ],
+         "date_added": "13408688905926342",
+         "date_last_used": "0",
+         "date_modified": "0",
+         "guid": "4cf2e351-0e85-532b-bb37-df045d8f8d0f",
+         "id": "3",
+         "name": "Mobile favorites",
+         "source": "unknown",
+         "type": "folder"
+      }
+   },
+   "version": 1
+}
