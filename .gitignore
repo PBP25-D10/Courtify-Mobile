@@ -3,3 +3,43 @@
 *.keystore
 *.jks
 #rebuild
+
+# Flutter / Dart build dirs & cache
+/.dart_tool/
+/build/
+/.packages
+.pub-cache/          
+.flutter-plugins
+.flutter-plugins-dependencies
+.package-config.json
+
+# Android / Gradle build artifacts
+/android/.gradle/
+/android/**/build/
+/android/**/app/build/
+/android/local.properties
+
+# iOS / macOS build / workspace files
+/ios/Runner.xcworkspace/
+/ios/Pods/
+/ios/Flutter/Flutter.framework/
+/ios/Flutter/Flutter.podspec
+/ios/Flutter/Generated.xcconfig
+/ios/Runner/GeneratedPluginRegistrant.*   # if generated
+/ios/Flutter/.ios/                  # if present
+macos/                                # if not targeting macOS
+windows/                              # if not targeting Windows
+linux/                                # if not targeting Linux
+web/                                  # if not targeting Web
+
+# IDE / editor configs
+/.idea/
+/*.iml
+/.vscode/
+/*.metadata                   # optional if auto-generated
+*.log
+
+# OS-specific or temp files
+.DS_Store
+Thumbs.db
+*.swp
