@@ -13,6 +13,17 @@
 .flutter-plugins-dependencies
 .package-config.json
 
+
+.flutter-plugins
+.flutter-plugins-dependencies
+
+
+*.iml
+*.ipr
+*.iws
+.idea/
+
+
 # Android / Gradle build artifacts
 /android/.gradle/
 /android/**/build/
