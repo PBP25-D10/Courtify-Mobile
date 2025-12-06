@@ -1,3 +1,4 @@
+import 'package:courtify_mobile/module/iklan/screens/iklan_list_screen.dart';
 import 'package:flutter/material.dart';
 
 class IklanPenyediaScreen extends StatelessWidget {
@@ -5,15 +6,6 @@ class IklanPenyediaScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Kelola Iklan"),
-        backgroundColor: Colors.teal,
-        foregroundColor: Colors.white,
-      ),
-      body: const Center(
-        child: Text("Halaman Iklan/Promosi (Penyedia)"),
-      ),
-    );
+    return const IklanListScreen();
   }
 }
