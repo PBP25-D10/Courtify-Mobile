@@ -1,59 +1,83 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'package:courtify_mobile/services/auth_service.dart';
 import 'package:courtify_mobile/module/lapangan/models/lapangan.dart';
 
 class LapanganApiService {
-  final String baseUrl = "http://10.0.2.2:8000";
+  final String baseUrl = "https://justin-timothy-courtify.pbp.cs.ui.ac.id";
 
-  Future<List<Lapangan>> getPenyediaLapangan(int penyediaId) async {
-    final url = Uri.parse("$baseUrl/lapangan/api/penyedia/$penyediaId/");
-
-    final response = await http.get(url);
-
-    if (response.statusCode == 200) {
-      final List data = jsonDecode(response.body);
-      return data.map((e) => Lapangan.fromJson(e)).toList();
-    } else {
-      throw Exception("Gagal mengambil data lapangan penyedia");
+  Future<List<Lapangan>> getPenyediaLapangan(AuthService request) async {
+    try {
+      final response = await request.get("$baseUrl/manajemen/api/list/");
+      
+      if (response is Map && response['status'] == 'success') {
+        final List data = response['lapangan_list'];
+        return data.map((e) => Lapangan.fromJson(e)).toList();
+      } else if (response is List) {
+        // Handle if response is directly a list
+        return response.map((e) => Lapangan.fromJson(e)).toList();
+      } else {
+        throw Exception(response['message'] ?? "Failed to fetch data");
+      }
+    } catch (e) {
+      throw Exception("Error fetching lapangan: $e");
     }
   }
+
   Future<Map<String, dynamic>> createLapangan(
+    AuthService request,
     Map<String, dynamic> payload,
   ) async {
-    final url = Uri.parse("$baseUrl/lapangan/api/create/");
-
-    final res = await http.post(
-      url,
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode(payload),
-    );
-
-    return jsonDecode(res.body);
+    try {
+      final response = await request.postJson(
+        "$baseUrl/manajemen/api/create/",
+        jsonEncode(payload),
+      );
+      
+      return response;
+    } catch (e) {
+      return {
+        'status': 'error',
+        'message': 'Error creating lapangan: $e'
+      };
+    }
   }
 
   Future<Map<String, dynamic>> updateLapangan(
+    AuthService request,
     String lapanganId,
     Map<String, dynamic> payload,
   ) async {
-    final url = Uri.parse("$baseUrl/lapangan/api/update/$lapanganId/");
-
-    final res = await http.put(
-      url,
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode(payload),
-    );
-
-    return jsonDecode(res.body);
+    try {
+      final response = await request.postJson(
+        "$baseUrl/manajemen/api/update/$lapanganId/",
+        jsonEncode(payload),
+      );
+      
+      return response;
+    } catch (e) {
+      return {
+        'status': 'error',
+        'message': 'Error updating lapangan: $e'
+      };
+    }
   }
 
-  // ===========================
-  // DELETE LAPANGAN
-  // ===========================
-  Future<Map<String, dynamic>> deleteLapangan(String lapanganId) async {
-    final url = Uri.parse("$baseUrl/lapangan/api/delete/$lapanganId/");
-
-    final res = await http.delete(url);
-
-    return jsonDecode(res.body);
+  Future<Map<String, dynamic>> deleteLapangan(
+    AuthService request,
+    String lapanganId,
+  ) async {
+    try {
+      final response = await request.post(
+        "$baseUrl/manajemen/api/delete/$lapanganId/",
+        {},
+      );
+      
+      return response;
+    } catch (e) {
+      return {
+        'status': 'error',
+        'message': 'Error deleting lapangan: $e'
+      };
+    }
   }
 }

@@ -1,16 +1,18 @@
-// lib/screens/home_penyedia.dart
-
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:courtify_mobile/services/auth_service.dart';
+
 import 'package:courtify_mobile/screens/login_screen.dart';
+
 // --- IMPORT HALAMAN MENU PENYEDIA ---
 import 'package:courtify_mobile/screens/penyedia/dashboard_penyedia.dart';
 import 'package:courtify_mobile/screens/penyedia/booking_penyedia.dart';
 import 'package:courtify_mobile/screens/penyedia/lapangan_penyedia.dart';
 import 'package:courtify_mobile/screens/penyedia/iklan_penyedia.dart';
 import 'package:courtify_mobile/screens/penyedia/artikel_penyedia.dart';
+
 import 'package:courtify_mobile/widgets/right_drawer.dart';
-////
+
 class HomePenyediaScreen extends StatefulWidget {
   const HomePenyediaScreen({super.key});
 
@@ -19,8 +21,7 @@ class HomePenyediaScreen extends StatefulWidget {
 }
 
 class _HomePenyediaScreenState extends State<HomePenyediaScreen> {
-  final AuthService _authService = AuthService();
-  String _username = 'Loading...';
+  String _username = "Loading...";
 
   @override
   void initState() {
@@ -28,26 +29,35 @@ class _HomePenyediaScreenState extends State<HomePenyediaScreen> {
     _loadUserData();
   }
 
-  Future<void> _loadUserData() async {
-    String? name = await _authService.getCurrentUsername();
+  void _loadUserData() async {
+    final request = context.read<AuthService>();
+
+    // Username otomatis dari Django
+
+    final data = await request.getJsonData();
+
     setState(() {
-      _username = name ?? 'Penyedia';
+      _username = data["username"] ?? "Penyedia";
     });
   }
 
-  void _handleLogout() async {
+  Future<void> _handleLogout() async {
+    final request = context.read<AuthService>();
+
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => const Center(child: CircularProgressIndicator()),
+      builder: (_) => const Center(child: CircularProgressIndicator()),
     );
-    await _authService.logout();
+
+    await request.logout();
+
     if (!mounted) return;
-    Navigator.of(context).pop(); 
-    Navigator.pushAndRemoveUntil(
+
+    Navigator.pop(context); // tutup loading
+    Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => const LoginScreen()),
-      (Route<dynamic> route) => false,
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
     );
   }
 
@@ -62,11 +72,10 @@ class _HomePenyediaScreenState extends State<HomePenyediaScreen> {
           IconButton(
             onPressed: _handleLogout,
             icon: const Icon(Icons.logout),
-            tooltip: 'Logout',
           ),
         ],
       ),
-      // === MENAMBAHKAN DRAWER KHUSUS PENYEDIA ===
+
       drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
@@ -74,18 +83,17 @@ class _HomePenyediaScreenState extends State<HomePenyediaScreen> {
             UserAccountsDrawerHeader(
               accountName: Text(
                 _username,
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                style:
+                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
               ),
               accountEmail: const Text("Role: Penyedia Lapangan"),
-              currentAccountPicture: CircleAvatar(
+              currentAccountPicture: const CircleAvatar(
                 backgroundColor: Colors.white,
                 child: Icon(Icons.store, size: 40, color: Colors.teal),
               ),
-              decoration: const BoxDecoration(
-                color: Colors.teal,
-              ),
+              decoration: const BoxDecoration(color: Colors.teal),
             ),
-            // Menu Item 1: Dashboard
+
             ListTile(
               leading: const Icon(Icons.dashboard),
               title: const Text('Dashboard'),
@@ -93,11 +101,12 @@ class _HomePenyediaScreenState extends State<HomePenyediaScreen> {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const DashboardPenyediaScreen()),
+                  MaterialPageRoute(
+                      builder: (_) => const DashboardPenyediaScreen()),
                 );
               },
             ),
-            // Menu Item 2: Booking
+
             ListTile(
               leading: const Icon(Icons.book_online),
               title: const Text('Booking Masuk'),
@@ -105,11 +114,12 @@ class _HomePenyediaScreenState extends State<HomePenyediaScreen> {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const BookingPenyediaScreen()),
+                  MaterialPageRoute(
+                      builder: (_) => const BookingPenyediaScreen()),
                 );
               },
             ),
-            // Menu Item 3: Lapangan
+
             ListTile(
               leading: const Icon(Icons.stadium),
               title: const Text('Kelola Lapangan'),
@@ -117,11 +127,12 @@ class _HomePenyediaScreenState extends State<HomePenyediaScreen> {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const LapanganPenyediaScreen()),
+                  MaterialPageRoute(
+                      builder: (_) => const LapanganPenyediaScreen()),
                 );
               },
             ),
-             // Menu Item 4: Iklan
+
             ListTile(
               leading: const Icon(Icons.campaign),
               title: const Text('Iklan & Promosi'),
@@ -129,11 +140,12 @@ class _HomePenyediaScreenState extends State<HomePenyediaScreen> {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const IklanPenyediaScreen()),
+                  MaterialPageRoute(
+                      builder: (_) => const IklanPenyediaScreen()),
                 );
               },
             ),
-             // Menu Item 5: Artikel
+
             ListTile(
               leading: const Icon(Icons.article),
               title: const Text('Artikel'),
@@ -141,41 +153,44 @@ class _HomePenyediaScreenState extends State<HomePenyediaScreen> {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const ArtikelPenyediaScreen()),
+                  MaterialPageRoute(
+                      builder: (_) => const ArtikelPenyediaScreen()),
                 );
               },
             ),
-             const Divider(),
+
+            const Divider(),
+
             ListTile(
               leading: const Icon(Icons.logout, color: Colors.red),
               title: const Text('Logout', style: TextStyle(color: Colors.red)),
-              onTap: () {
-                Navigator.pop(context);
-                _handleLogout();
-              },
+              onTap: _handleLogout,
             ),
           ],
         ),
       ),
+
       endDrawer: const RightDrawer(),
-      // === BODY HALAMAN UTAMA ===
+
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.all(20.0),
+          padding: const EdgeInsets.all(20),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.store_mall_directory, size: 80, color: Colors.teal),
+              const Icon(Icons.store_mall_directory,
+                  size: 80, color: Colors.teal),
               const SizedBox(height: 20),
               Text(
                 "Halo, $_username!",
-                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
-               const SizedBox(height: 10),
+              const SizedBox(height: 10),
               const Text(
                 "Tekan ikon garis tiga di pojok kiri atas untuk mengakses menu pengelolaan.",
                 textAlign: TextAlign.center,
-                 style: TextStyle(color: Colors.grey),
+                style: TextStyle(color: Colors.grey),
               ),
             ],
           ),

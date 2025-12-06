@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:courtify_mobile/services/auth_service.dart';
 import 'package:courtify_mobile/module/lapangan/services/api_services.dart';
 import 'package:courtify_mobile/module/lapangan/models/lapangan.dart';
 import 'package:courtify_mobile/module/lapangan/screens/lapangan_form_screen.dart';
@@ -18,12 +20,20 @@ class _LapanganListScreenState extends State<LapanganListScreen> {
   @override
   void initState() {
     super.initState();
-    const int penyediaId = 1;
-    _futureLapangan = _apiService.getPenyediaLapangan(penyediaId);
+    _loadLapangan();
+  }
+
+  void _loadLapangan() {
+    final request = context.read<AuthService>();
+    setState(() {
+      _futureLapangan = _apiService.getPenyediaLapangan(request);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    final request = context.watch<AuthService>();
+    
     return Scaffold(
       backgroundColor: const Color(0xFF111827),
       appBar: AppBar(
@@ -45,9 +55,20 @@ class _LapanganListScreenState extends State<LapanganListScreen> {
 
           if (snapshot.hasError) {
             return Center(
-              child: Text(
-                "Error: ${snapshot.error}",
-                style: const TextStyle(color: Colors.white),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    "Error: ${snapshot.error}",
+                    style: const TextStyle(color: Colors.white),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: _loadLapangan,
+                    child: const Text("Retry"),
+                  ),
+                ],
               ),
             );
           }
@@ -80,14 +101,13 @@ class _LapanganListScreenState extends State<LapanganListScreen> {
     );
   }
 
-
   void _navigateToForm(Lapangan? lapangan) {
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => LapanganFormScreen(lapangan: lapangan),
       ),
-    ).then((_) => _refreshList());
+    ).then((_) => _loadLapangan());
   }
 
   void _deleteLapangan(Lapangan lap) {
@@ -103,31 +123,35 @@ class _LapanganListScreenState extends State<LapanganListScreen> {
           ),
           TextButton(
             onPressed: () async {
+              final request = context.read<AuthService>();
               try {
-                await _apiService.deleteLapangan(lap.idLapangan);
+                final response = await _apiService.deleteLapangan(request, lap.idLapangan);
+                
+                if (!mounted) return;
                 Navigator.pop(context);
-                _refreshList();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Lapangan berhasil dihapus")),
-                );
+                
+                if (response['status'] == 'success') {
+                  _loadLapangan();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Lapangan berhasil dihapus")),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(response['message'] ?? "Gagal menghapus lapangan")),
+                  );
+                }
               } catch (e) {
+                if (!mounted) return;
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text("Error: $e")),
                 );
               }
             },
-            child: const Text("Hapus"),
+            child: const Text("Hapus", style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
     );
-  }
-
-  void _refreshList() {
-    setState(() {
-      const int penyediaId = 1;
-      _futureLapangan = _apiService.getPenyediaLapangan(penyediaId);
-    });
   }
 }

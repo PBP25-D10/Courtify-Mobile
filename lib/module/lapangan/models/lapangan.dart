@@ -23,14 +23,16 @@ class Lapangan {
 
   factory Lapangan.fromJson(Map<String, dynamic> json) {
     return Lapangan(
-      idLapangan: json['id_lapangan'],
+      idLapangan: json['id_lapangan'].toString(),
       nama: json['nama'],
       deskripsi: json['deskripsi'],
       kategori: json['kategori'],
       lokasi: json['lokasi'],
-      hargaPerJam: json['harga_per_jam'],
+      hargaPerJam: json['harga_per_jam'] is int 
+          ? json['harga_per_jam'] 
+          : int.parse(json['harga_per_jam'].toString()),
       fotoUrl: json['foto'] != null
-          ? "http://10.0.2.2:8000${json['foto']}"
+          ? "https://justin-timothy-courtify.pbp.cs.ui.ac.id${json['foto']}"
           : null,
       jamBuka: json['jam_buka'],
       jamTutup: json['jam_tutup'],

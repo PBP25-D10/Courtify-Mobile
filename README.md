@@ -123,10 +123,10 @@ Fitur:
 Aplikasi Flutter terhubung sepenuhnya dengan web service Django yang sudah dibuat pada Proyek Tengah Semester. Alurnya sebagai berikut:
 
 ### 1. Autentikasi Menggunakan Session Cookie
-- Flutter menggunakan library `pbp_django_auth` untuk mengelola login.
+- Flutter menggunakan `AuthService` custom untuk mengelola login.
 - Flutter mengirim request POST login ke endpoint Django.
 - Django memberikan session cookie jika login berhasil.
-- Session cookie disimpan oleh `CookieRequest`.
+- Session cookie disimpan oleh `AuthService`.
 - Semua request selanjutnya ke Django akan otomatis membawa cookie untuk menjaga session.
 
 ### 2. Pengambilan Data (GET)
@@ -136,7 +136,7 @@ Aplikasi Flutter terhubung sepenuhnya dengan web service Django yang sudah dibua
 
 ### 3. Pengiriman Data (POST/PUT/DELETE)
 - Untuk membuat booking, menambah lapangan, mengedit artikel, dll:
-  - Flutter mengirim request POST/PUT/DELETE melalui CookieRequest.
+  - Flutter mengirim request POST/PUT/DELETE melalui AuthService.
   - Django melakukan validasi user, role, dan izin akses.
   - Data disimpan pada database backend.
 
