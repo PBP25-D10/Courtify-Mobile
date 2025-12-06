@@ -1,143 +1,140 @@
-import 'package:flutter/material.dart';
-import 'package:courtify_mobile/module/booking/services/api_services.dart';
-import 'package:courtify_mobile/module/lapangan/models/lapangan.dart';
-import 'package:courtify_mobile/module/booking/screens/booking_form_screen.dart';
+// import 'package:flutter/material.dart';
+// import 'package:courtify_mobile/module/lapangan/models/lapangan.dart';
+// import 'package:courtify_mobile/module/booking/services/api_services_booking.dart';
 
-class BookingScreen extends StatefulWidget {
-  const BookingScreen({super.key});
+// class BookingFormScreen extends StatefulWidget {
+//   final Lapangan lapangan;
+//   // 1. Tambahkan parameter cookies
+//   final Map<String, String> cookies;
 
-  @override
-  State<BookingScreen> createState() => _BookingScreenState();
-}
+//   const BookingFormScreen({
+//     super.key,
+//     required this.lapangan,
+//     required this.cookies, // Wajib diisi
+//   });
 
-class _BookingScreenState extends State<BookingScreen> {
-    final BookingApiService _apiService = BookingApiService(); // ✅ Benar
+//   @override
+//   State<BookingFormScreen> createState() => _BookingFormScreenState();
+// }
 
+// class _BookingFormScreenState extends State<BookingFormScreen> {
+//   final _formKey = GlobalKey<FormState>();
+//   final BookingApiService _apiService = BookingApiService();
+  
+//   // State Form
+//   DateTime _selectedDate = DateTime.now();
+//   TimeOfDay _timeMulai = const TimeOfDay(hour: 8, minute: 0);
+//   TimeOfDay _timeSelesai = const TimeOfDay(hour: 10, minute: 0);
+//   bool _isLoading = false;
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF111827),
-      appBar: AppBar(
-        title: const Text("Daftar Lapangan", style: TextStyle(color: Colors.white)),
-        backgroundColor: const Color(0xFF111827),
-      ),
-      body: FutureBuilder<List<Lapangan>>(
-        future: _apiService.getLapanganList(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
+//   // Fungsi Submit
+//   void _submitBooking() async {
+//     setState(() => _isLoading = true);
 
-          if (snapshot.hasError) {
-            return Center(
-              child: Text(
-                "Error: ${snapshot.error}",
-                style: const TextStyle(color: Colors.white),
-              ),
-            );
-          }
+//     // Format tanggal YYYY-MM-DD
+//     String dateStr = "${_selectedDate.year}-${_selectedDate.month.toString().padLeft(2, '0')}-${_selectedDate.day.toString().padLeft(2, '0')}";
 
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(
-              child: Text(
-                "Tidak ada lapangan",
-                style: TextStyle(color: Colors.white),
-              ),
-            );
-          }
+//     Map<String, dynamic> payload = {
+//       // Pastikan key ini sesuai form Django kamu
+//       //"lapangan": widget.lapangan.id, // atau "lapangan_id" tergantung backend
+//       "tanggal": dateStr,
+//       "jam_mulai": _timeMulai.hour, // Kirim integer jam
+//       "jam_selesai": _timeSelesai.hour, 
+//     };
 
-          final lapanganList = snapshot.data!;
+//     try {
+//       // 2. Panggil API dengan Cookies
+//       final response = await _apiService.createBooking(payload, widget.cookies);
 
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: lapanganList.length,
-            itemBuilder: (context, index) {
-              return _buildLapanganCard(context, lapanganList[index]);
-            },
-          );
-        },
-      ),
-    );
-  }
+//       if (!mounted) return;
 
-  Widget _buildLapanganCard(BuildContext context, Lapangan lap) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1F2937),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        children: [
-          // FOTO LAPANGAN
-          ClipRRect(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-            child: Image.network(
-              lap.fotoUrl ?? "https://via.placeholder.com/400x200",
-              height: 160,
-              width: double.infinity,
-              fit: BoxFit.cover,
-            ),
-          ),
+//       if (response['success'] == true) {
+//         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Booking Berhasil!"), backgroundColor: Colors.green));
+//         Navigator.pop(context); // Kembali ke list
+//       } else {
+//         // Tampilkan error dari Django (misal: Bentrok jam)
+//         String msg = response['message'] ?? "Gagal booking.";
+//         if(response['errors'] != null) msg += " ${response['errors']}";
+        
+//         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg), backgroundColor: Colors.red));
+//       }
+//     } catch (e) {
+//       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error: $e"), backgroundColor: Colors.red));
+//     } finally {
+//       if (mounted) setState(() => _isLoading = false);
+//     }
+//   }
 
-          // DETAIL LAPANGAN
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  lap.nama,
-                  style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white),
-                ),
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       backgroundColor: const Color(0xFF111827),
+//       appBar: AppBar(
+//         title: Text("Booking ${widget.lapangan.nama}"),
+//         backgroundColor: const Color(0xFF111827),
+//         iconTheme: const IconThemeData(color: Colors.white),
+//         titleTextStyle: const TextStyle(color: Colors.white, fontSize: 20),
+//       ),
+//       body: SingleChildScrollView(
+//         padding: const EdgeInsets.all(16),
+//         child: Column(
+//           children: [
+//             // Pilih Tanggal
+//             ListTile(
+//               title: const Text("Tanggal", style: TextStyle(color: Colors.white)),
+//               subtitle: Text("${_selectedDate.toLocal()}".split(' ')[0], style: const TextStyle(color: Colors.grey)),
+//               trailing: const Icon(Icons.calendar_today, color: Colors.blueAccent),
+//               onTap: () async {
+//                 final picked = await showDatePicker(
+//                   context: context,
+//                   initialDate: _selectedDate,
+//                   firstDate: DateTime.now(),
+//                   lastDate: DateTime(2026),
+//                 );
+//                 if (picked != null) setState(() => _selectedDate = picked);
+//               },
+//             ),
+//             const Divider(color: Colors.grey),
 
-                const SizedBox(height: 4),
+//             // Pilih Jam Mulai
+//             ListTile(
+//               title: const Text("Jam Mulai", style: TextStyle(color: Colors.white)),
+//               subtitle: Text("${_timeMulai.format(context)}", style: const TextStyle(color: Colors.grey)),
+//               trailing: const Icon(Icons.access_time, color: Colors.blueAccent),
+//               onTap: () async {
+//                 final picked = await showTimePicker(context: context, initialTime: _timeMulai);
+//                 if (picked != null) setState(() => _timeMulai = picked);
+//               },
+//             ),
+            
+//             // Pilih Jam Selesai
+//             ListTile(
+//               title: const Text("Jam Selesai", style: TextStyle(color: Colors.white)),
+//               subtitle: Text("${_timeSelesai.format(context)}", style: const TextStyle(color: Colors.grey)),
+//               trailing: const Icon(Icons.access_time_filled, color: Colors.blueAccent),
+//               onTap: () async {
+//                 final picked = await showTimePicker(context: context, initialTime: _timeSelesai);
+//                 if (picked != null) setState(() => _timeSelesai = picked);
+//               },
+//             ),
 
-                Text(
-                  "${lap.kategori} • ${lap.lokasi}",
-                  style: const TextStyle(color: Colors.grey),
-                ),
+//             const SizedBox(height: 30),
 
-                const SizedBox(height: 8),
-
-                Text(
-                  "Rp ${lap.hargaPerJam} / jam",
-                  style: const TextStyle(
-                    color: Colors.greenAccent,
-                    fontSize: 16,
-                  ),
-                ),
-
-                const SizedBox(height: 12),
-
-                // TOMBOL PESAN
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => BookingFormScreen(lapangan: lap),
-                        ),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.greenAccent,
-                      foregroundColor: Colors.black,
-                    ),
-                    child: const Text("Pesan Sekarang"),
-                  ),
-                )
-              ],
-            ),
-          )
-        ],
-      ),
-    );
-  }
-}
+//             // Tombol Submit
+//             SizedBox(
+//               width: double.infinity,
+//               height: 50,
+//               child: ElevatedButton(
+//                 onPressed: _isLoading ? null : _submitBooking,
+//                 style: ElevatedButton.styleFrom(backgroundColor: Colors.greenAccent),
+//                 child: _isLoading 
+//                   ? const CircularProgressIndicator(color: Colors.black)
+//                   : const Text("Konfirmasi Booking", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+//               ),
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }

@@ -1,26 +1,33 @@
 import 'dart:convert'; // Untuk mengubah data ke/dari format JSON
 import 'package:http/http.dart' as http; // Untuk melakukan request API ke Django
 import 'package:shared_preferences/shared_preferences.dart'; // Untuk menyimpan data sesi di memori HP
+import 'package:flutter/foundation.dart'; // <--- TAMBAHAN untuk kIsWeb
 
 class AuthService {
   // =================================================================
   // KONFIGURASI URL SERVER (PENTING!)
   // =================================================================
-  // Ganti IP ini sesuai lingkungan pengembangan Anda:
-  // - Gunakan '10.0.2.2' jika menjalankan di Android Emulator.
-  // - Gunakan IP LAN laptop Anda (misal: '192.168.1.X') jika menggunakan HP fisik atau iOS Simulator.
-  // - JANGAN gunakan 'localhost' atau '127.0.0.1' di sini.
-  static const String _baseUrl = 'http://127.0.0.1:8000';
+  // Menggunakan getter agar bisa menyesuaikan base URL dengan environment (Web/Emulator)
+  String get _baseUrl {
+    // KIsWeb adalah true jika aplikasi berjalan di web
+    if (kIsWeb) {
+      return "http://127.0.0.1:8000";
+    }
+    // Asumsi: 10.0.2.2 untuk Android Emulator
+    return "http://10.0.2.2:8000";
+  }
 
   // Endpoint API yang telah kita buat khusus untuk Flutter di Django
-  static const String _loginUrl = '$_baseUrl/auth/api/flutter/login/';
-  static const String _registerUrl = '$_baseUrl/auth/api/flutter/register/';
-  static const String _logoutUrl = '$_baseUrl/auth/api/flutter/logout/';
+  // Harus: /auth/api/flutter/login/
+  String get _loginUrl => '$_baseUrl/auth/api/flutter/login/';
+  String get _registerUrl => '$_baseUrl/auth/api/flutter/register/';
+  String get _logoutUrl => '$_baseUrl/auth/api/flutter/logout/';
 
   // Key (kunci) string untuk menyimpan data di SharedPreferences
   static const String _keyCookie = 'session_cookie';
   static const String _keyRole = 'user_role';
   static const String _keyUsername = 'user_username';
+  static const String _keyUserId = 'user_id'; // <--- TAMBAHAN KRUSIAL: Menyimpan ID User
 
   // =================================================================
   // FUNGSI UTAMA: LOGIN
@@ -44,26 +51,28 @@ class AuthService {
       if (response.statusCode == 200 && responseData['status'] == true) {
         
         // --- BAGIAN KRUSIAL: MENANGKAP COOKIE SESSION ---
-        // Django mengirim cookie 'sessionid' di header 'set-cookie'.
-        // Kita harus menangkapnya agar dianggap "sedang login" oleh server.
         String? rawCookie = response.headers['set-cookie'];
         if (rawCookie != null) {
-          // Cookie string biasanya panjang (e.g., "sessionid=abc123; Path=/; HttpOnly").
-          // Kita hanya butuh bagian sebelum titik koma pertama.
           int indexSemiColon = rawCookie.indexOf(';');
           String sessionCookie = (indexSemiColon == -1) 
               ? rawCookie 
               : rawCookie.substring(0, indexSemiColon);
-          
-          // Simpan cookie session ini ke penyimpanan HP
           await _saveToLocal(_keyCookie, sessionCookie);
         }
-        // ------------------------------------------------
+        
+        // 4. Simpan 'role', 'username', dan ID yang dikirim balik oleh Django
+        
+        // <--- TAMBAHAN KRUSIAL: SIMPAN USER ID
+        if (responseData.containsKey('id')) {
+           await _saveToLocal(_keyUserId, responseData['id'].toString());
+        }
 
-        // 4. Simpan 'role' dan 'username' yang dikirim balik oleh Django
-        // Data ini penting untuk navigasi UI dan tampilan Home screen.
-        await _saveToLocal(_keyRole, responseData['role']);
-        await _saveToLocal(_keyUsername, responseData['username']);
+        if (responseData.containsKey('role')) {
+           await _saveToLocal(_keyRole, responseData['role']);
+        }
+        if (responseData.containsKey('username')) {
+           await _saveToLocal(_keyUsername, responseData['username']);
+        }
       }
 
       // 5. Kembalikan data JSON mentah ke UI untuk diproses (misal untuk navigasi)
@@ -76,7 +85,7 @@ class AuthService {
   }
 
   // =================================================================
-  // FUNGSI UTAMA: REGISTER
+  // FUNGSI UTAMA: REGISTER (Tetap sama, tidak ada perubahan)
   // =================================================================
   Future<Map<String, dynamic>> register(String username, String email, String password, String role) async {
     try {
@@ -87,11 +96,10 @@ class AuthService {
           'username': username,
           'email': email,
           'password': password,
-          'role': role, // Role wajib dikirim ('user' atau 'penyedia') saat register
+          'role': role,
         }),
       );
       
-      // Mengembalikan respons JSON dari server (sukses atau error validasi)
       return jsonDecode(response.body);
 
     } catch (e) {
@@ -100,32 +108,27 @@ class AuthService {
   }
 
   // =================================================================
-  // FUNGSI UTAMA: LOGOUT
+  // FUNGSI UTAMA: LOGOUT (Tetap sama, 'clear()' otomatis menghapus ID)
   // =================================================================
   Future<void> logout() async {
-    // 1. Ambil cookie session yang sedang tersimpan
     String? sessionCookie = await _getFromLocal(_keyCookie);
     
-    // 2. Jika ada cookie, kirim request logout ke server
     if (sessionCookie != null) {
       try {
         await http.post(
           Uri.parse(_logoutUrl),
           headers: {
              'Content-Type': 'application/json',
-             // PENTING: Kirim balik cookie session di header agar server tahu siapa yg logout
              'Cookie': sessionCookie, 
           }
         );
       } catch (e) {
-        // Jika server error saat logout, biarkan saja, tetap lanjut hapus data lokal.
         print("Warning: Server logout error: $e");
       }
     }
 
-    // 3. HAPUS SEMUA data sesi dari penyimpanan HP (ini yang paling penting di sisi client)
     final prefs = await SharedPreferences.getInstance();
-    await prefs.clear(); // Menghapus cookie, role, dan username yang tersimpan.
+    await prefs.clear(); 
   }
 
 
@@ -146,20 +149,24 @@ class AuthService {
   }
 
   // --- FUNGSI PUBLIK UNTUK UI ---
+  
+  // <--- TAMBAHAN KRUSIAL: MENGAMBIL USER ID
+  Future<int?> getCurrentUserId() async {
+    String? idStr = await _getFromLocal(_keyUserId);
+    // Coba konversi ke integer. Jika gagal (misal null), kembalikan null.
+    if (idStr != null) return int.tryParse(idStr);
+    return null;
+  }
 
-  // Cek apakah user sedang login (berguna untuk Splash Screen)
-  // Logikanya: jika ada cookie tersimpan, berarti sedang login.
   Future<bool> isLoggedIn() async {
     String? cookie = await _getFromLocal(_keyCookie);
     return cookie != null && cookie.isNotEmpty;
   }
   
-  // Mengambil role user saat ini (misal: 'penyedia' atau 'user')
   Future<String?> getCurrentRole() async {
       return await _getFromLocal(_keyRole);
   }
 
-  // Mengambil username user saat ini untuk ditampilkan di Home Screen
   Future<String?> getCurrentUsername() async {
       return await _getFromLocal(_keyUsername);
   }

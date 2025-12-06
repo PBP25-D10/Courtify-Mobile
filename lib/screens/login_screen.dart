@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
-// Import service untuk komunikasi backend
-import 'package:courtify_mobile/services/auth_service.dart';
-// Import halaman tujuan navigasi
-import 'package:courtify_mobile/screens/home_user.dart';
-import 'package:courtify_mobile/screens/home_penyedia.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // <--- (1) Import ini WAJIB ada
+import 'package:courtify_mobile/services/auth_service.dart'; 
+import 'package:courtify_mobile/screens/home_user.dart'; 
+import 'package:courtify_mobile/screens/home_penyedia.dart'; 
 import 'package:courtify_mobile/screens/register_screen.dart';
-// Import halaman register jika sudah ada (jika belum, biarkan di-komen)
-// import 'package:courtify_mobile/screens/register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -16,62 +13,57 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  // Controller untuk mengambil teks dari input field
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-
-  // Instance dari AuthService
   final AuthService _authService = AuthService();
 
-  // Status untuk menampilkan loading spinner
   bool _isLoading = false;
-  // Status untuk menyembunyikan/menampilkan password
   bool _obscurePassword = true;
 
-  // Fungsi yang dijalankan saat tombol Login ditekan
   void _handleLogin() async {
-    // 1. Validasi Input Dasar
     final username = _usernameController.text.trim();
     final password = _passwordController.text.trim();
 
     if (username.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Username dan Password harus diisi!'),
-          backgroundColor: Colors.redAccent,
-        ),
+        const SnackBar(content: Text('Username dan Password harus diisi!'), backgroundColor: Colors.redAccent),
       );
       return;
     }
 
-    // 2. Ubah status menjadi loading (munculkan spinner)
-    setState(() {
-      _isLoading = true;
-    });
-    // Tutup keyboard jika terbuka
+    setState(() => _isLoading = true);
     FocusScope.of(context).unfocus();
 
-    // 3. Panggil API Login via AuthService
-    // (AuthService akan menangkap cookie session secara otomatis)
+    // 1. Panggil API Login
+    // AuthService hanya bertugas komunikasi ke server & menangkap cookie.
+    // Data ID, Role, dll dikembalikan ke sini dalam variabel responseData.
     final responseData = await _authService.login(username, password);
 
-    // 4. Kembalikan status loading (hilangkan spinner)
-    setState(() {
-      _isLoading = false;
-    });
+    setState(() => _isLoading = false);
 
-    // Cek apakah widget masih aktif sebelum menggunakan 'context' setelah await
     if (!mounted) return;
 
-    // 5. Cek respons dari server
     if (responseData['status'] == true) {
       // === LOGIN SUKSES ===
-
-      // Ambil data penting dari respons JSON
+      
+      // 2. AMBIL DATA DARI RESPONSE SERVER
+      // Pastikan server Django mengirim key 'id' (integer), 'role', dan 'username'
+      int userId = responseData['id']; 
       String role = responseData['role'];
       String successUsername = responseData['username'];
 
-      // Tampilkan pesan sukses sekilas
+      // 3. SIMPAN ID DAN DATA LAINNYA SECARA MANUAL (TERLIHAT JELAS DI SINI)
+      final prefs = await SharedPreferences.getInstance();
+      
+      // Simpan User ID (Penting untuk fetch data nanti)
+      // Kita ubah ke String agar aman, atau gunakan setInt jika yakin ID selalu angka
+      await prefs.setString('user_id', userId.toString()); 
+      print("User ID disimpan: $userId"); // Debugging di console
+
+      // Simpan Role & Username
+      await prefs.setString('user_role', role);
+      await prefs.setString('user_username', successUsername);
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Login berhasil! Hai, $successUsername.'),
@@ -80,9 +72,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       );
 
-      // === LOGIKA NAVIGASI BERDASARKAN ROLE ===
-      // Kita gunakan pushReplacement agar pengguna tidak bisa kembali
-      // ke halaman login dengan menekan tombol 'Back'.
+      // 4. NAVIGASI SESUAI ROLE
       if (role == 'penyedia') {
         Navigator.pushReplacement(
           context,
@@ -94,29 +84,20 @@ class _LoginScreenState extends State<LoginScreen> {
           MaterialPageRoute(builder: (context) => const HomeUserScreen()),
         );
       } else {
-        // Fallback jika role tidak dikenali
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Role tidak dikenali: $role. Hubungi admin.'),
-            backgroundColor: Colors.orange,
-          ),
+          SnackBar(content: Text('Role tidak dikenali: $role'), backgroundColor: Colors.orange),
         );
       }
     } else {
       // === LOGIN GAGAL ===
-      // Tampilkan pesan error yang dikirim dari Django
-      String message =
-          responseData['message'] ?? 'Terjadi kesalahan saat login.';
+      String message = responseData['message'] ?? 'Terjadi kesalahan saat login.';
       showDialog(
         context: context,
         builder: (ctx) => AlertDialog(
           title: const Text('Login Gagal'),
           content: Text(message),
           actions: [
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(),
-              child: const Text('OK'),
-            ),
+            TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('OK')),
           ],
         ),
       );
@@ -125,7 +106,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   void dispose() {
-    // Bersihkan controller saat widget dihancurkan untuk mencegah kebocoran memori
     _usernameController.dispose();
     _passwordController.dispose();
     super.dispose();
@@ -134,7 +114,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Menggunakan SingleChildScrollView agar tidak overflow saat keyboard muncul di HP kecil
+      backgroundColor: const Color(0xFF111827), // Dark Theme
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
@@ -142,21 +122,12 @@ class _LoginScreenState extends State<LoginScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // --- Bagian Header/Logo ---
-              const Icon(
-                Icons.sports_tennis_rounded, // Ganti ikon sesuai tema aplikasi
-                size: 80,
-                color: Colors.blueAccent,
-              ),
+              const Icon(Icons.sports_tennis_rounded, size: 80, color: Colors.blueAccent),
               const SizedBox(height: 20),
               const Text(
                 "Selamat Datang di Courtify",
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
               ),
               const SizedBox(height: 10),
               const Text(
@@ -166,105 +137,72 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 40),
 
-              // --- Bagian Form Input ---
-              // Input Username
+              // Username Field
               TextField(
                 controller: _usernameController,
-                keyboardType: TextInputType.text,
-                textInputAction: TextInputAction.next,
+                style: const TextStyle(color: Colors.black87),
                 decoration: InputDecoration(
                   labelText: 'Username',
-                  prefixIcon: const Icon(Icons.person_outline),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                  labelStyle: const TextStyle(color: Colors.grey),
+                  prefixIcon: const Icon(Icons.person_outline, color: Colors.blueAccent),
                   filled: true,
-                  fillColor: Colors.grey.shade100,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 ),
               ),
               const SizedBox(height: 20),
 
-              // Input Password
+              // Password Field
               TextField(
                 controller: _passwordController,
-                obscureText: _obscurePassword, // Menyembunyikan teks
-                textInputAction: TextInputAction.done,
-                // Saat tombol enter ditekan di keyboard, langsung coba login
+                obscureText: _obscurePassword,
+                style: const TextStyle(color: Colors.black87),
                 onSubmitted: (_) => _handleLogin(),
                 decoration: InputDecoration(
                   labelText: 'Password',
-                  prefixIcon: const Icon(Icons.lock_outline),
-                  // Tombol mata untuk melihat/menyembunyikan password
+                  labelStyle: const TextStyle(color: Colors.grey),
+                  prefixIcon: const Icon(Icons.lock_outline, color: Colors.blueAccent),
                   suffixIcon: IconButton(
-                    icon: Icon(
-                      _obscurePassword
-                          ? Icons.visibility_off
-                          : Icons.visibility,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _obscurePassword = !_obscurePassword;
-                      });
-                    },
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility, color: Colors.grey),
+                    onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                   ),
                   filled: true,
-                  fillColor: Colors.grey.shade100,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 ),
               ),
               const SizedBox(height: 30),
 
-              // --- Tombol Login ---
-              // Menampilkan CircularProgressIndicator jika sedang loading,
-              // jika tidak, tampilkan ElevatedButton.
-              _isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : ElevatedButton(
-                      onPressed: _handleLogin,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blueAccent,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+              // Login Button
+              SizedBox(
+                height: 50,
+                child: _isLoading
+                    ? const Center(child: CircularProgressIndicator(color: Colors.blueAccent))
+                    : ElevatedButton(
+                        onPressed: _handleLogin,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blueAccent,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         ),
-                        elevation: 5,
+                        child: const Text("MASUK", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                       ),
-                      child: const Text(
-                        "MASUK",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
+              ),
               const SizedBox(height: 20),
 
-              // --- Tombol Navigasi ke Register ---
+              // Register Link
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text("Belum punya akun?"),
+                  const Text("Belum punya akun? ", style: TextStyle(color: Colors.grey)),
                   TextButton(
                     onPressed: () {
-                      // Navigasi ke halaman register jika sudah dibuat
-                      // Navigator.push(context, MaterialPageRoute(builder: (context) => const RegisterScreen()));
                       Navigator.push(
                         context,
-                        MaterialPageRoute(
-                          builder: (context) => const RegisterScreen(),
-                        ),
+                        MaterialPageRoute(builder: (context) => const RegisterScreen()),
                       );
                     },
-                    child: const Text(
-                      "Daftar di sini",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.blueAccent,
-                      ),
-                    ),
+                    child: const Text("Daftar di sini", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blueAccent)),
                   ),
                 ],
               ),
