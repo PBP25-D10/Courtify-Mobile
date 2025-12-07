@@ -29,7 +29,7 @@ class IklanApiService {
   ) async {
     try {
 
-      final response = await request.postJson(
+      final response = await request.post(
         "$baseUrl/iklan/tambah/",
         jsonEncode(payload),
       );
@@ -50,7 +50,7 @@ class IklanApiService {
     Map<String, dynamic> payload,
   ) async {
     try {
-      final response = await request.postJson(
+      final response = await request.post(
         "$baseUrl/iklan/edit/$id/",
         jsonEncode(payload),
       );
