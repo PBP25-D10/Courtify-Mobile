@@ -251,7 +251,7 @@ class _LapanganFormScreenState extends State<LapanganFormScreen> {
       'harga_per_jam': int.parse(_hargaController.text),
       'jam_buka': _jamBukaController.text,
       'jam_tutup': _jamTutupController.text,
-      'foto': _fotoController.text.isEmpty ? null : _fotoController.text,
+      
     };
 
     try {

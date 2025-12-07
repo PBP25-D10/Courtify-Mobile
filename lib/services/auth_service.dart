@@ -44,34 +44,42 @@ class AuthService {
       // 3. Cek jika login berhasil (status code 200 DAN status: true di JSON)
       if (response.statusCode == 200 && responseData['status'] == true) {
 
-        // --- BAGIAN KRUSIAL: MENANGKAP SEMUA COOKIES ---
-        // Django mengirim multiple cookies termasuk sessionid dan csrftoken
-        String? setCookieHeader = response.headers['set-cookie'];
-        if (setCookieHeader != null && setCookieHeader.isNotEmpty) {
-          Map<String, String> cookies = {};
+      // --- BAGIAN KRUSIAL: MENANGKAP SEMUA COOKIES (FIX) ---
+      // NOTE: response.headers['set-cookie'] sering digabung jadi 1 string,
+      // dan atribut Expires punya koma, jadi split(',') itu BISA RUSAK.
+      // Kita ambil cookie pakai regex yang aman.
+      final String? setCookieHeader = response.headers['set-cookie'];
 
-          // Handle multiple cookies separated by commas
-          List<String> cookieHeaders = setCookieHeader.split(',');
+      if (setCookieHeader != null && setCookieHeader.isNotEmpty) {
+        final Map<String, String> cookies = {};
 
-          for (String cookieHeader in cookieHeaders) {
-            cookieHeader = cookieHeader.trim();
-            // Parse cookie: "name=value; attributes..."
-            int equalsIndex = cookieHeader.indexOf('=');
-            if (equalsIndex != -1) {
-              int semicolonIndex = cookieHeader.indexOf(';', equalsIndex);
-              String cookieName = cookieHeader.substring(0, equalsIndex).trim();
-              String cookieValue = (semicolonIndex == -1)
-                  ? cookieHeader.substring(equalsIndex + 1).trim()
-                  : cookieHeader.substring(equalsIndex + 1, semicolonIndex).trim();
+        final RegExp cookieRegex = RegExp(r'(^|,)\s*([^=;\s]+)=([^;]+)');
+        for (final match in cookieRegex.allMatches(setCookieHeader)) {
+          final String name = match.group(2)!;
+          final String value = match.group(3)!;
 
-              cookies[cookieName] = cookieValue;
-            }
+          // Safety: kalau ada atribut yang ikut ketangkap (harusnya tidak), skip saja
+          final lower = name.toLowerCase();
+          if (lower == 'expires' ||
+              lower == 'max-age' ||
+              lower == 'path' ||
+              lower == 'domain' ||
+              lower == 'samesite' ||
+              lower == 'secure' ||
+              lower == 'httponly') {
+            continue;
           }
 
-          // Simpan semua cookies sebagai JSON
-          await _saveToLocal(_keyCookies, jsonEncode(cookies));
+          cookies[name] = value;
         }
-        // ------------------------------------------------
+
+        await _saveToLocal(_keyCookies, jsonEncode(cookies));
+      } else {
+        // Biar jelas kalau login sukses tapi server tidak kirim cookie
+        throw Exception('Login berhasil tapi Set-Cookie tidak ada. Cek backend login endpoint.');
+      }
+      // ----------------------------------------------------
+
 
         // 4. Simpan 'role' dan 'username' yang dikirim balik oleh Django
         // Data ini penting untuk navigasi UI dan tampilan Home screen.
