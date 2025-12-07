@@ -1,12 +1,14 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:image_picker/image_picker.dart';
+
 import 'package:courtify_mobile/services/auth_service.dart';
 import 'package:courtify_mobile/module/lapangan/services/api_services.dart';
 import 'package:courtify_mobile/module/lapangan/models/lapangan.dart';
 
 class LapanganFormScreen extends StatefulWidget {
   final Lapangan? lapangan;
-
   const LapanganFormScreen({super.key, this.lapangan});
 
   @override
@@ -17,17 +19,20 @@ class _LapanganFormScreenState extends State<LapanganFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final LapanganApiService _api = LapanganApiService();
 
-  final TextEditingController _namaController = TextEditingController();
-  final TextEditingController _deskripsiController = TextEditingController();
-  final TextEditingController _lokasiController = TextEditingController();
-  final TextEditingController _hargaController = TextEditingController();
-  final TextEditingController _jamBukaController = TextEditingController();
-  final TextEditingController _jamTutupController = TextEditingController();
-  final TextEditingController _fotoController = TextEditingController();
+  final _namaController = TextEditingController();
+  final _deskripsiController = TextEditingController();
+  final _lokasiController = TextEditingController();
+  final _hargaController = TextEditingController();
+  final _jamBukaController = TextEditingController();
+  final _jamTutupController = TextEditingController();
+
+  final _picker = ImagePicker();
+  File? _pickedImage;
 
   String? _selectedKategori;
-
   bool _isEditing = false;
+
+  String _normTime(String s) => s.length >= 5 ? s.substring(0, 5) : s;
 
   @override
   void initState() {
@@ -39,9 +44,8 @@ class _LapanganFormScreenState extends State<LapanganFormScreen> {
       _selectedKategori = widget.lapangan!.kategori;
       _lokasiController.text = widget.lapangan!.lokasi;
       _hargaController.text = widget.lapangan!.hargaPerJam.toString();
-      _jamBukaController.text = widget.lapangan!.jamBuka;
-      _jamTutupController.text = widget.lapangan!.jamTutup;
-      _fotoController.text = widget.lapangan!.fotoUrl ?? '';
+      _jamBukaController.text = _normTime(widget.lapangan!.jamBuka);
+      _jamTutupController.text = _normTime(widget.lapangan!.jamTutup);
     }
   }
 
@@ -53,32 +57,33 @@ class _LapanganFormScreenState extends State<LapanganFormScreen> {
     _hargaController.dispose();
     _jamBukaController.dispose();
     _jamTutupController.dispose();
-    _fotoController.dispose();
     super.dispose();
   }
 
-  Future<void> _selectTime(BuildContext context, TextEditingController controller) async {
-    final TimeOfDay? picked = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.now(),
-    );
-
-    if (picked != null) {
-      // Force minute to 0
-      final adjusted = TimeOfDay(hour: picked.hour, minute: 0);
-      controller.text = "${adjusted.hour.toString().padLeft(2, '0')}:${adjusted.minute.toString().padLeft(2, '0')}";
-    }
+  Future<void> _pickImage() async {
+    final XFile? file = await _picker.pickImage(source: ImageSource.gallery);
+    if (file == null) return;
+    setState(() => _pickedImage = File(file.path));
   }
+
+  Future<void> _selectTime(BuildContext context, TextEditingController controller) async {
+    final picked = await showTimePicker(context: context, initialTime: TimeOfDay.now());
+    if (picked == null) return;
+    final adjusted = TimeOfDay(hour: picked.hour, minute: 0);
+    controller.text =
+        "${adjusted.hour.toString().padLeft(2, '0')}:${adjusted.minute.toString().padLeft(2, '0')}";
+  }
+
+  int _hour(String hhmm) => int.parse(_normTime(hhmm).split(':')[0]);
+  int _minute(String hhmm) => int.parse(_normTime(hhmm).split(':')[1]);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF111827),
       appBar: AppBar(
-        title: Text(
-          _isEditing ? "Edit Lapangan" : "Tambah Lapangan",
-          style: const TextStyle(color: Colors.white),
-        ),
+        title: Text(_isEditing ? "Edit Lapangan" : "Tambah Lapangan",
+            style: const TextStyle(color: Colors.white)),
         backgroundColor: const Color(0xFF111827),
         iconTheme: const IconThemeData(color: Colors.white),
       ),
@@ -98,16 +103,11 @@ class _LapanganFormScreenState extends State<LapanganFormScreen> {
                 decoration: InputDecoration(
                   labelText: "Kategori",
                   labelStyle: const TextStyle(color: Colors.grey),
-                  prefixIcon: Icon(Icons.category, color: Colors.blueAccent),
+                  prefixIcon: const Icon(Icons.category, color: Colors.blueAccent),
                   filled: true,
                   fillColor: const Color(0xFF374151),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                  focusedBorder: const OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.blueAccent),
-                  ),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                  focusedBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.blueAccent)),
                 ),
                 dropdownColor: const Color(0xFF374151),
                 style: const TextStyle(color: Colors.white),
@@ -119,31 +119,38 @@ class _LapanganFormScreenState extends State<LapanganFormScreen> {
                   DropdownMenuItem(value: 'voli', child: Text('Voli')),
                   DropdownMenuItem(value: 'lainnya', child: Text('Lainnya')),
                 ],
-                onChanged: (value) {
-                  setState(() {
-                    _selectedKategori = value;
-                  });
-                },
-                validator: (value) => value == null ? "Kategori tidak boleh kosong" : null,
+                onChanged: (v) => setState(() => _selectedKategori = v),
+                validator: (v) => v == null ? "Kategori tidak boleh kosong" : null,
               ),
               const SizedBox(height: 16),
               _buildTextField(_lokasiController, "Lokasi", Icons.location_on),
               const SizedBox(height: 16),
-              _buildTextField(_hargaController, "Harga Per Jam", Icons.attach_money, keyboardType: TextInputType.number),
+              _buildTextField(_hargaController, "Harga Per Jam", Icons.attach_money,
+                  keyboardType: TextInputType.number),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(child: _buildTimeField(_jamBukaController, "Jam Buka")),
+                  const SizedBox(width: 16),
+                  Expanded(child: _buildTimeField(_jamTutupController, "Jam Tutup")),
+                ],
+              ),
               const SizedBox(height: 16),
               Row(
                 children: [
                   Expanded(
-                    child: _buildTimeField(_jamBukaController, "Jam Buka"),
+                    child: ElevatedButton.icon(
+                      onPressed: _pickImage,
+                      icon: const Icon(Icons.image),
+                      label: Text(_pickedImage == null ? "Pilih Foto (Opsional)" : "Ganti Foto"),
+                      style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF374151)),
+                    ),
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: _buildTimeField(_jamTutupController, "Jam Tutup"),
-                  ),
+                  const SizedBox(width: 12),
+                  if (_pickedImage != null)
+                    const Text("✓ Dipilih", style: TextStyle(color: Colors.white70)),
                 ],
               ),
-              const SizedBox(height: 16),
-              _buildTextField(_fotoController, "URL Foto (Opsional)", Icons.image, isRequired: false),
               const SizedBox(height: 32),
               SizedBox(
                 width: double.infinity,
@@ -152,17 +159,10 @@ class _LapanganFormScreenState extends State<LapanganFormScreen> {
                   onPressed: _submitForm,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blueAccent,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
-                  child: Text(
-                    _isEditing ? "Update" : "Simpan",
-                    style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold),
-                  ),
+                  child: Text(_isEditing ? "Update" : "Simpan",
+                      style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
                 ),
               )
             ],
@@ -172,7 +172,14 @@ class _LapanganFormScreenState extends State<LapanganFormScreen> {
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String label, IconData icon, {int maxLines = 1, TextInputType keyboardType = TextInputType.text, bool isRequired = true}) {
+  Widget _buildTextField(
+    TextEditingController controller,
+    String label,
+    IconData icon, {
+    int maxLines = 1,
+    TextInputType keyboardType = TextInputType.text,
+    bool isRequired = true,
+  }) {
     return TextFormField(
       controller: controller,
       maxLines: maxLines,
@@ -183,16 +190,11 @@ class _LapanganFormScreenState extends State<LapanganFormScreen> {
         prefixIcon: Icon(icon, color: Colors.blueAccent),
         filled: true,
         fillColor: const Color(0xFF374151),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
-        ),
-        focusedBorder: const OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.blueAccent),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+        focusedBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.blueAccent)),
       ),
       style: const TextStyle(color: Colors.white),
-      validator: isRequired ? (v) => v!.isEmpty ? "$label tidak boleh kosong" : null : null,
+      validator: isRequired ? (v) => (v == null || v.isEmpty) ? "$label tidak boleh kosong" : null : null,
     );
   }
 
@@ -206,35 +208,22 @@ class _LapanganFormScreenState extends State<LapanganFormScreen> {
         prefixIcon: const Icon(Icons.access_time, color: Colors.blueAccent),
         filled: true,
         fillColor: const Color(0xFF374151),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
-        ),
-        focusedBorder: const OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.blueAccent),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+        focusedBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.blueAccent)),
       ),
       style: const TextStyle(color: Colors.white),
-      validator: (v) => v!.isEmpty ? "$label tidak boleh kosong" : null,
+      validator: (v) => (v == null || v.isEmpty) ? "$label tidak boleh kosong" : null,
       onTap: () => _selectTime(context, controller),
     );
   }
 
-  void _submitForm() async {
+  Future<void> _submitForm() async {
     if (!_formKey.currentState!.validate()) return;
 
-    // Validate time difference
-    final bukaParts = _jamBukaController.text.split(':');
-    final tutupParts = _jamTutupController.text.split(':');
-    final bukaHour = int.parse(bukaParts[0]);
-    final tutupHour = int.parse(tutupParts[0]);
-    final bukaMinute = int.parse(bukaParts[1]);
-    final tutupMinute = int.parse(tutupParts[1]);
-
-    final bukaTime = DateTime(2023, 1, 1, bukaHour, bukaMinute);
-    final tutupTime = DateTime(2023, 1, 1, tutupHour, tutupMinute);
-
-    if (tutupTime.isBefore(bukaTime.add(const Duration(hours: 1)))) {
+    // validate minimal 1 jam
+    final buka = DateTime(2023, 1, 1, _hour(_jamBukaController.text), _minute(_jamBukaController.text));
+    final tutup = DateTime(2023, 1, 1, _hour(_jamTutupController.text), _minute(_jamTutupController.text));
+    if (tutup.isBefore(buka.add(const Duration(hours: 1)))) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Jam tutup harus minimal 1 jam setelah jam buka")),
       );
@@ -246,17 +235,17 @@ class _LapanganFormScreenState extends State<LapanganFormScreen> {
     final payload = {
       'nama': _namaController.text,
       'deskripsi': _deskripsiController.text,
-      'kategori': _selectedKategori,
+      'kategori': _selectedKategori ?? '',
       'lokasi': _lokasiController.text,
-      'harga_per_jam': int.parse(_hargaController.text),
-      'jam_buka': _jamBukaController.text,
-      'jam_tutup': _jamTutupController.text,
-      
+      'harga_per_jam': _hargaController.text,
+      'jam_buka': _normTime(_jamBukaController.text),
+      'jam_tutup': _normTime(_jamTutupController.text),
+      // ❌ jangan kirim "foto" (ImageField harus multipart)
     };
 
     try {
       Map<String, dynamic> response;
-      
+
       if (_isEditing) {
         response = await _api.updateLapangan(request, widget.lapangan!.idLapangan, payload);
       } else {
@@ -266,20 +255,28 @@ class _LapanganFormScreenState extends State<LapanganFormScreen> {
       if (!mounted) return;
 
       if (response['status'] == 'success') {
+        final lapanganId = _isEditing
+            ? widget.lapangan!.idLapangan
+            : (response['lapangan']?['id']?.toString() ?? '');
+
+        // optional upload foto
+        if (_pickedImage != null && lapanganId.isNotEmpty) {
+          await _api.uploadFotoLapangan(request, lapanganId: lapanganId, imageFile: _pickedImage!);
+        }
+
+        if (!mounted) return;
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(_isEditing ? "Lapangan berhasil diupdate" : "Lapangan berhasil ditambahkan")),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(response['message'] ?? "Terjadi kesalahan")),
+          SnackBar(content: Text(response['message']?.toString() ?? "Terjadi kesalahan")),
         );
       }
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: $e")),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error: $e")));
     }
   }
 }
