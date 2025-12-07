@@ -5,9 +5,9 @@ class Lapangan {
   final String kategori;
   final String lokasi;
   final int hargaPerJam;
-  final String? fotoUrl;
-  final String jamBuka;
-  final String jamTutup;
+  final String? fotoUrl; // full url
+  final String jamBuka;  // "HH:mm"
+  final String jamTutup; // "HH:mm"
 
   Lapangan({
     required this.idLapangan,
@@ -21,21 +21,31 @@ class Lapangan {
     required this.jamTutup,
   });
 
+  static String _normTime(dynamic v) {
+    final s = (v ?? "").toString();
+    return s.length >= 5 ? s.substring(0, 5) : s; // "07:00:00" -> "07:00"
+  }
+
   factory Lapangan.fromJson(Map<String, dynamic> json) {
+    final id = (json['id_lapangan'] ?? json['id']).toString();
+
+    final foto = json['foto'];
+    final fotoUrl = (foto != null && foto.toString().isNotEmpty)
+        ? "https://justin-timothy-courtify.pbp.cs.ui.ac.id${foto.toString()}"
+        : null;
+
     return Lapangan(
-      idLapangan: json['id_lapangan'].toString(),
-      nama: json['nama'],
-      deskripsi: json['deskripsi'],
-      kategori: json['kategori'],
-      lokasi: json['lokasi'],
-      hargaPerJam: json['harga_per_jam'] is int 
-          ? json['harga_per_jam'] 
+      idLapangan: id,
+      nama: json['nama']?.toString() ?? '',
+      deskripsi: json['deskripsi']?.toString() ?? '',
+      kategori: json['kategori']?.toString() ?? '',
+      lokasi: json['lokasi']?.toString() ?? '',
+      hargaPerJam: json['harga_per_jam'] is int
+          ? json['harga_per_jam']
           : int.parse(json['harga_per_jam'].toString()),
-      fotoUrl: json['foto'] != null
-          ? "https://justin-timothy-courtify.pbp.cs.ui.ac.id${json['foto']}"
-          : null,
-      jamBuka: json['jam_buka'],
-      jamTutup: json['jam_tutup'],
+      fotoUrl: fotoUrl,
+      jamBuka: _normTime(json['jam_buka']),
+      jamTutup: _normTime(json['jam_tutup']),
     );
   }
 }

@@ -15,76 +15,66 @@ class LapanganCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1F2937),
-        borderRadius: BorderRadius.circular(12),
-      ),
+    return Card(
+      elevation: 2,
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ClipRRect(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-            child: Image.network(
-              lapangan.fotoUrl ?? "https://via.placeholder.com/400x200",
-              height: 160,
-              width: double.infinity,
-              fit: BoxFit.cover,
-            ),
-          ),
+          _imageBlock(),
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  lapangan.nama,
-                  style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  "Tanggal: ${lapangan.jamBuka} - ${lapangan.jamTutup}",
-                  style: const TextStyle(color: Colors.grey),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  "Status: Tersedia",
-                  style: const TextStyle(color: Colors.greenAccent),
-                ),
+                Text(lapangan.nama, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 6),
+                Text('${lapangan.kategori} • ${lapangan.lokasi}', maxLines: 2, overflow: TextOverflow.ellipsis),
                 const SizedBox(height: 8),
-                Text(
-                  "${lapangan.kategori} • ${lapangan.lokasi}",
-                  style: const TextStyle(color: Colors.grey),
-                ),
+                Text('Rp ${lapangan.hargaPerJam} / jam', style: const TextStyle(fontWeight: FontWeight.w600)),
                 const SizedBox(height: 8),
-                Text(
-                  "Rp ${lapangan.hargaPerJam} / jam",
-                  style: const TextStyle(
-                    color: Colors.greenAccent,
-                    fontSize: 16,
-                  ),
-                ),
+                Text('⏰ ${lapangan.jamBuka} - ${lapangan.jamTutup}'),
                 const SizedBox(height: 12),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    IconButton(
-                      icon: const Icon(Icons.edit, color: Colors.blueAccent),
-                      onPressed: onEdit,
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.delete, color: Colors.redAccent),
+                    ElevatedButton(onPressed: onEdit, child: const Text('Edit')),
+                    ElevatedButton(
                       onPressed: onDelete,
+                      style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                      child: const Text('Hapus'),
                     ),
                   ],
                 )
               ],
             ),
-          )
+          ),
         ],
+      ),
+    );
+  }
+
+  Widget _imageBlock() {
+    if (lapangan.fotoUrl == null) {
+      return Container(
+        height: 160,
+        width: double.infinity,
+        alignment: Alignment.center,
+        color: const Color(0xFFE5E7EB),
+        child: const Text("Tidak ada foto"),
+      );
+    }
+
+    return Image.network(
+      lapangan.fotoUrl!,
+      height: 160,
+      width: double.infinity,
+      fit: BoxFit.cover,
+      errorBuilder: (_, __, ___) => Container(
+        height: 160,
+        width: double.infinity,
+        alignment: Alignment.center,
+        color: const Color(0xFFE5E7EB),
+        child: const Text("Gagal load foto"),
       ),
     );
   }
