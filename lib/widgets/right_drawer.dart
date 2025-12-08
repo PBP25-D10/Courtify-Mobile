@@ -13,7 +13,7 @@ import 'package:courtify_mobile/screens/penyedia/lapangan_penyedia.dart';
 import 'package:courtify_mobile/screens/penyedia/iklan_penyedia.dart';
 import 'package:courtify_mobile/screens/penyedia/artikel_penyedia.dart';
 
-import 'package:courtify_mobile/module/booking/screens/home_screen.dart';
+import 'package:courtify_mobile/module/booking/screens/booking_dashboard_screen.dart';
 
 class RightDrawer extends StatefulWidget {
   const RightDrawer({super.key});
