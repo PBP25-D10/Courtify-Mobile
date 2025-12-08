@@ -120,7 +120,7 @@ class _RightDrawerState extends State<RightDrawer> {
               title: "Booking Saya",
               onTap: () => Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const BookingScreen()),
+                MaterialPageRoute(builder: (context) => const BookingDashboardScreen()),
               ),
             ),
             _buildListTile(
