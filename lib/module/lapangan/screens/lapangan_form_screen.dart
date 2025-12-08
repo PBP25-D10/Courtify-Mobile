@@ -99,7 +99,7 @@ class _LapanganFormScreenState extends State<LapanganFormScreen> {
               _buildTextField(_deskripsiController, "Deskripsi", Icons.description, maxLines: 3),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
-                value: _selectedKategori,
+                initialValue: _selectedKategori,
                 decoration: InputDecoration(
                   labelText: "Kategori",
                   labelStyle: const TextStyle(color: Colors.grey),
