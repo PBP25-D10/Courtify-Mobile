@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:courtify_mobile/services/auth_service.dart';
-import 'package:courtify_mobile/module/iklan/services/api_services.dart';
+import 'package:courtify_mobile/module/iklan/services/iklan_api_services.dart'; 
 import 'package:courtify_mobile/module/iklan/models/iklan.dart';
 import 'package:courtify_mobile/module/iklan/widgets/iklan_card.dart';
 import 'package:courtify_mobile/module/iklan/screens/iklan_form_screen.dart';
@@ -36,6 +36,7 @@ class _IklanListScreenState extends State<IklanListScreen> {
   }
 
   void _loadIklan() {
+    // Menggunakan context.read karena dipanggil di luar build (event handler/init)
     final request = context.read<AuthService>();
     setState(() {
       _futureIklan = _apiService.fetchIklan(request);
@@ -265,6 +266,7 @@ class _IklanListScreenState extends State<IklanListScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
+        // Pastikan IklanFormScreen juga disesuaikan logic simpan-nya
         builder: (_) => IklanFormScreen(iklan: iklan, lapangan: null), 
       ),
     ).then((_) => _loadIklan()); 
@@ -274,21 +276,18 @@ class _IklanListScreenState extends State<IklanListScreen> {
   void _deleteIklan(Iklan iklan) {
     showDialog(
       context: context,
-      // 1. BARRIER COLOR: Ini yang membuat background menjadi hitam gelap transparan
       barrierColor: Colors.black.withOpacity(0.7), 
       builder: (context) => Dialog(
-        // Menggunakan Dialog (bukan AlertDialog) agar lebih mudah custom shape dan warna
-        backgroundColor: const Color(0xFF262626), // Warna gelap abu-abu pekat
+        backgroundColor: const Color(0xFF262626), 
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
         child: Container(
           padding: const EdgeInsets.all(24),
-          constraints: const BoxConstraints(maxWidth: 350), // Membatasi lebar agar rapi
+          constraints: const BoxConstraints(maxWidth: 350), 
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Judul
               const Text(
                 "Konfirmasi Hapus",
                 style: TextStyle(
@@ -300,7 +299,6 @@ class _IklanListScreenState extends State<IklanListScreen> {
               ),
               const SizedBox(height: 12),
               
-              // Isi Pesan
               const Text(
                 "Apakah Anda yakin untuk menghapus?",
                 style: TextStyle(
@@ -311,16 +309,15 @@ class _IklanListScreenState extends State<IklanListScreen> {
               ),
               const SizedBox(height: 24),
               
-              // Tombol Aksi
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Tombol TIDAK (Abu-abu)
+                  // Tombol TIDAK
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () => Navigator.pop(context),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF6B7280), // Abu-abu slate
+                        backgroundColor: const Color(0xFF6B7280),
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
@@ -333,36 +330,47 @@ class _IklanListScreenState extends State<IklanListScreen> {
                   
                   const SizedBox(width: 12),
                   
-                  // Tombol YA (Pink/Merah)
+                  // Tombol YA
                   Expanded(
                     child: ElevatedButton(
+                      // --- PERUBAHAN LOGIC DI SINI ---
                       onPressed: () async {
-                        Navigator.pop(context); // Tutup dialog
+                        Navigator.pop(context); // Tutup dialog dulu
                         
                         final request = context.read<AuthService>();
                         try {
-                          final response = await _apiService.deleteIklan(request, iklan.pk);
+                          // Service deleteIklan yang baru return bool jika sukses
+                          // atau throw Exception jika gagal.
+                          await _apiService.deleteIklan(request, iklan.pk);
+                          
                           if (!mounted) return;
                           
-                          if (response['status'] == 'success' || response['success'] == true) {
-                            _loadIklan(); 
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text("Iklan berhasil dihapus")),
-                            );
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(response['message'] ?? "Gagal menghapus iklan")),
-                            );
-                          }
-                        } catch (e) {
-                          if (!mounted) return;
+                          // Jika berhasil (tidak throw error)
+                          _loadIklan(); 
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text("Error: $e")),
+                            const SnackBar(
+                              content: Text("Iklan berhasil dihapus"),
+                              backgroundColor: Colors.green,
+                            ),
+                          );
+
+                        } catch (e) {
+                          // Jika gagal (menangkap throw Exception dari service)
+                          if (!mounted) return;
+                          
+                          // Membersihkan pesan error agar lebih rapi (menghapus "Exception: ")
+                          String errorMessage = e.toString().replaceAll("Exception: ", "");
+                          
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text("Gagal: $errorMessage"),
+                              backgroundColor: Colors.red,
+                            ),
                           );
                         }
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFD63E6D), // Warna Pink
+                        backgroundColor: const Color(0xFFD63E6D),
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
