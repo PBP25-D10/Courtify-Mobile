@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
-// Import service untuk komunikasi backend
 import 'package:courtify_mobile/services/auth_service.dart';
-// Import halaman tujuan navigasi
 import 'package:courtify_mobile/screens/home_user.dart';
 import 'package:courtify_mobile/screens/home_penyedia.dart';
 import 'package:courtify_mobile/screens/register_screen.dart';
-// Import halaman register jika sudah ada (jika belum, biarkan di-komen)
-// import 'package:courtify_mobile/screens/register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -16,21 +12,13 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  // Controller untuk mengambil teks dari input field
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-
-  // Instance dari AuthService
   final AuthService _authService = AuthService();
-
-  // Status untuk menampilkan loading spinner
   bool _isLoading = false;
-  // Status untuk menyembunyikan/menampilkan password
   bool _obscurePassword = true;
 
-  // Fungsi yang dijalankan saat tombol Login ditekan
   void _handleLogin() async {
-    // 1. Validasi Input Dasar
     final username = _usernameController.text.trim();
     final password = _passwordController.text.trim();
 
@@ -44,34 +32,23 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    // 2. Ubah status menjadi loading (munculkan spinner)
     setState(() {
       _isLoading = true;
     });
-    // Tutup keyboard jika terbuka
     FocusScope.of(context).unfocus();
 
-    // 3. Panggil API Login via AuthService
-    // (AuthService akan menangkap cookie session secara otomatis)
     final responseData = await _authService.login(username, password);
 
-    // 4. Kembalikan status loading (hilangkan spinner)
     setState(() {
       _isLoading = false;
     });
 
-    // Cek apakah widget masih aktif sebelum menggunakan 'context' setelah await
     if (!mounted) return;
 
-    // 5. Cek respons dari server
     if (responseData['status'] == true) {
-      // === LOGIN SUKSES ===
-
-      // Ambil data penting dari respons JSON
       String role = responseData['role'];
       String successUsername = responseData['username'];
 
-      // Tampilkan pesan sukses sekilas
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Login berhasil! Hai, $successUsername.'),
@@ -80,9 +57,6 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       );
 
-      // === LOGIKA NAVIGASI BERDASARKAN ROLE ===
-      // Kita gunakan pushReplacement agar pengguna tidak bisa kembali
-      // ke halaman login dengan menekan tombol 'Back'.
       if (role == 'penyedia') {
         Navigator.pushReplacement(
           context,
@@ -94,7 +68,6 @@ class _LoginScreenState extends State<LoginScreen> {
           MaterialPageRoute(builder: (context) => const HomeUserScreen()),
         );
       } else {
-        // Fallback jika role tidak dikenali
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Role tidak dikenali: $role. Hubungi admin.'),
@@ -103,8 +76,6 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       }
     } else {
-      // === LOGIN GAGAL ===
-      // Tampilkan pesan error yang dikirim dari Django
       String message =
           responseData['message'] ?? 'Terjadi kesalahan saat login.';
       showDialog(
@@ -117,7 +88,7 @@ class _LoginScreenState extends State<LoginScreen> {
               onPressed: () => Navigator.of(ctx).pop(),
               child: const Text('OK'),
             ),
-          ], ////
+          ],
         ),
       );
     }
@@ -125,7 +96,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   void dispose() {
-    // Bersihkan controller saat widget dihancurkan untuk mencegah kebocoran memori
     _usernameController.dispose();
     _passwordController.dispose();
     super.dispose();
@@ -134,7 +104,6 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Menggunakan SingleChildScrollView agar tidak overflow saat keyboard muncul di HP kecil
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
@@ -142,9 +111,8 @@ class _LoginScreenState extends State<LoginScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // --- Bagian Header/Logo ---
               const Icon(
-                Icons.sports_tennis_rounded, // Ganti ikon sesuai tema aplikasi
+                Icons.sports_tennis_rounded,
                 size: 80,
                 color: Colors.blueAccent,
               ),
@@ -166,8 +134,6 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 40),
 
-              // --- Bagian Form Input ---
-              // Input Username
               TextField(
                 controller: _usernameController,
                 keyboardType: TextInputType.text,
@@ -184,17 +150,14 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 20),
 
-              // Input Password
               TextField(
                 controller: _passwordController,
-                obscureText: _obscurePassword, // Menyembunyikan teks
+                obscureText: _obscurePassword,
                 textInputAction: TextInputAction.done,
-                // Saat tombol enter ditekan di keyboard, langsung coba login
                 onSubmitted: (_) => _handleLogin(),
                 decoration: InputDecoration(
                   labelText: 'Password',
                   prefixIcon: const Icon(Icons.lock_outline),
-                  // Tombol mata untuk melihat/menyembunyikan password
                   suffixIcon: IconButton(
                     icon: Icon(
                       _obscurePassword
@@ -216,9 +179,6 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 30),
 
-              // --- Tombol Login ---
-              // Menampilkan CircularProgressIndicator jika sedang loading,
-              // jika tidak, tampilkan ElevatedButton.
               _isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : ElevatedButton(
@@ -242,15 +202,12 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
               const SizedBox(height: 20),
 
-              // --- Tombol Navigasi ke Register ---
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Text("Belum punya akun?"),
                   TextButton(
                     onPressed: () {
-                      // Navigasi ke halaman register jika sudah dibuat
-                      // Navigator.push(context, MaterialPageRoute(builder: (context) => const RegisterScreen()));
                       Navigator.push(
                         context,
                         MaterialPageRoute(

@@ -8,7 +8,7 @@ import 'package:courtify_mobile/screens/user/wishlist_user.dart';
 import 'package:courtify_mobile/screens/user/artikel_user.dart';
 import 'package:courtify_mobile/widgets/right_drawer.dart';
 
-import 'package:courtify_mobile/module/booking/screens/home_screen.dart';
+import 'package:courtify_mobile/module/booking/screens/booking_dashboard_screen.dart';
 
 class HomeUserScreen extends StatefulWidget {
   const HomeUserScreen({super.key});
@@ -44,7 +44,7 @@ class _HomeUserScreenState extends State<HomeUserScreen> {
     );
     await _authService.logout();
     if (!mounted) return;
-    Navigator.of(context).pop(); 
+    Navigator.of(context).pop();
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (context) => const LoginScreen()),
@@ -77,19 +77,23 @@ class _HomeUserScreenState extends State<HomeUserScreen> {
             UserAccountsDrawerHeader(
               accountName: Text(
                 _username,
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
               ),
               accountEmail: const Text("Role: Pengguna Biasa"),
               currentAccountPicture: CircleAvatar(
                 backgroundColor: Colors.white,
                 child: Text(
                   _username.isNotEmpty ? _username[0].toUpperCase() : 'U',
-                  style: const TextStyle(fontSize: 24.0, color: Colors.blueAccent),
+                  style: const TextStyle(
+                    fontSize: 24.0,
+                    color: Colors.blueAccent,
+                  ),
                 ),
               ),
-              decoration: const BoxDecoration(
-                color: Colors.blueAccent,
-              ),
+              decoration: const BoxDecoration(color: Colors.blueAccent),
             ),
             // Menu Item 1: Wishlist
             ListTile(
@@ -101,11 +105,13 @@ class _HomeUserScreenState extends State<HomeUserScreen> {
                 // Navigasi ke halaman Wishlist
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const WishlistUserScreen()),
+                  MaterialPageRoute(
+                    builder: (context) => const WishlistUserScreen(),
+                  ),
                 );
               },
             ),
-             // Menu Item 2: Booking
+            // Menu Item 2: Booking
             ListTile(
               leading: const Icon(Icons.calendar_today),
               title: const Text('Booking Saya'),
@@ -113,11 +119,13 @@ class _HomeUserScreenState extends State<HomeUserScreen> {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const BookingScreen()),
+                  MaterialPageRoute(
+                    builder: (context) => const BookingDashboardScreen(),
+                  ),
                 );
               },
             ),
-             // Menu Item 3: Artikel
+            // Menu Item 3: Artikel
             ListTile(
               leading: const Icon(Icons.article_outlined),
               title: const Text('Artikel'),
@@ -125,7 +133,9 @@ class _HomeUserScreenState extends State<HomeUserScreen> {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const ArtikelUserScreen()),
+                  MaterialPageRoute(
+                    builder: (context) => const ArtikelUserScreen(),
+                  ),
                 );
               },
             ),
