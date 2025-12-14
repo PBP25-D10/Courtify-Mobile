@@ -1,21 +1,18 @@
 import 'dart:convert';
-import 'dart:io'; 
+import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb; // [PERBAIKAN 1] Import ini untuk deteksi Web
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-// Import Service
 import 'package:courtify_mobile/services/auth_service.dart';
 import 'package:courtify_mobile/module/iklan/services/iklan_api_services.dart';
 import 'package:courtify_mobile/module/lapangan/services/api_services.dart';
-// Import Model
 import 'package:courtify_mobile/module/iklan/models/iklan.dart';
 import 'package:courtify_mobile/module/lapangan/models/lapangan.dart';
-// Import Image Picker (Pastikan sudah 'flutter pub add image_picker')
 import 'package:image_picker/image_picker.dart';
 
 class IklanFormScreen extends StatefulWidget {
   final Iklan? iklan; // Jika null = Buat Baru, Jika ada = Edit
-  // Parameter lapangan dihapus dari sini karena kita fetch di initState sesuai diskusi sebelumnya
-  final List<Lapangan>? lapangan; 
+  final List<Lapangan>? lapangan;
 
   const IklanFormScreen({super.key, this.iklan, this.lapangan});
 
@@ -35,20 +32,18 @@ class _IklanFormScreenState extends State<IklanFormScreen> {
   // State Variables
   bool _isLoading = false;
   List<Lapangan> _lapanganList = [];
-  String? _selectedLapanganId; // Menyimpan ID Lapangan yang dipilih
-  XFile? _selectedImage; // Untuk menyimpan file gambar yang dipilih
+  String? _selectedLapanganId;
+  XFile? _selectedImage;
 
   @override
   void initState() {
     super.initState();
-    _fetchLapangan(); // Ambil data lapangan saat screen dibuka
+    _fetchLapangan();
 
     // Jika mode Edit, isi form dengan data yang ada
     if (widget.iklan != null) {
       _judulController.text = widget.iklan!.judul;
       _deskripsiController.text = widget.iklan!.deskripsi;
-      // Catatan: Logic untuk set _selectedLapanganId tergantung apakah API Iklan mengembalikan ID lapangan
-      // Disini kita asumsikan tidak ada data lapangan di object Iklan list screen, jadi user pilih ulang/kosong
     }
   }
 
@@ -68,9 +63,15 @@ class _IklanFormScreenState extends State<IklanFormScreen> {
       final list = await _lapanganApi.getPenyediaLapangan(request);
       setState(() {
         _lapanganList = list;
+
+        if (widget.iklan != null) {
+          _selectedLapanganId = widget.iklan!.lapangan.toString();
+
+          bool exists = _lapanganList.any((l) => l.idLapangan.toString() == _selectedLapanganId);
+          if (!exists) _selectedLapanganId = null;
+        }
       });
     } catch (e) {
-      // Handle error silent atau snackbar
       print("Error fetching lapangan: $e");
     }
   }
@@ -81,7 +82,7 @@ class _IklanFormScreenState extends State<IklanFormScreen> {
   Future<void> _pickImage() async {
     final ImagePicker picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
-    
+
     if (image != null) {
       setState(() {
         _selectedImage = image;
@@ -100,23 +101,16 @@ class _IklanFormScreenState extends State<IklanFormScreen> {
     final request = context.read<AuthService>();
     final isEdit = widget.iklan != null;
 
-    // Persiapkan Payload
-    // Catatan: Karena ada upload gambar, idealnya menggunakan Multipart Request.
-    // Namun untuk mengikuti pola postJson sebelumnya, kita kirim data teks dulu.
-    // Jika backend Django kamu memerlukan Multipart untuk ImageField, 
-    // logic di ApiService perlu disesuaikan. 
-    // Di sini saya kirim map standard.
     Map<String, dynamic> payload = {
       'judul': _judulController.text,
       'deskripsi': _deskripsiController.text,
-      'lapangan_id': _selectedLapanganId, 
+      'lapangan': _selectedLapanganId,
     };
 
-    // Jika implementasi upload gambar menggunakan Base64:
     if (_selectedImage != null) {
-        List<int> imageBytes = await File(_selectedImage!.path).readAsBytes();
-        String base64Image = base64Encode(imageBytes);
-        payload['banner'] = base64Image; 
+      List<int> imageBytes = await _selectedImage!.readAsBytes();
+      String base64Image = base64Encode(imageBytes);
+      payload['banner'] = base64Image;
     }
 
     try {
@@ -130,7 +124,6 @@ class _IklanFormScreenState extends State<IklanFormScreen> {
       setState(() => _isLoading = false);
 
       if (response['status'] == 'success' || response['success'] == true) {
-        // Tampilkan Modal Sukses
         if (mounted) _showSuccessDialog(isEdit);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -152,10 +145,10 @@ class _IklanFormScreenState extends State<IklanFormScreen> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      barrierColor: Colors.black.withOpacity(0.7), // Background gelap transparan
+      barrierColor: Colors.black.withOpacity(0.7),
       builder: (context) {
         return Dialog(
-          backgroundColor: const Color(0xFF1A1A1A), // Warna background modal
+          backgroundColor: const Color(0xFF1E1E1E),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
@@ -163,23 +156,23 @@ class _IklanFormScreenState extends State<IklanFormScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start, // Rata kiri sesuai gambar
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
                   "Berhasil!",
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
-                    fontSize: 18,
+                    fontSize: 16,
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  isEdit 
-                      ? "Perubahan berhasil disimpan." 
+                  isEdit
+                      ? "Perubahan berhasil disimpan."
                       : "Iklan berhasil dibuat.",
                   style: const TextStyle(
-                    color: Colors.white70,
+                    color: Colors.white,
                     fontSize: 14,
                   ),
                 ),
@@ -188,12 +181,12 @@ class _IklanFormScreenState extends State<IklanFormScreen> {
                   alignment: Alignment.centerRight,
                   child: ElevatedButton(
                     onPressed: () {
-                      Navigator.pop(context); // Tutup Dialog
-                      Navigator.pop(context); // Kembali ke List Screen
+                      Navigator.pop(context);
+                      Navigator.pop(context);
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF6EE7B7), // Warna Hijau Muda (Sesuai gambar)
-                      foregroundColor: const Color(0xFF064E3B), // Warna teks hijau tua
+                      backgroundColor: const Color(0xFF25EB7B),
+                      foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -221,7 +214,7 @@ class _IklanFormScreenState extends State<IklanFormScreen> {
     final isEdit = widget.iklan != null;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF111827), // Background Screen Gelap
+      backgroundColor: const Color(0xFF111827),
       appBar: AppBar(
         title: Text(
           isEdit ? "Edit Iklan" : "Buat Iklan",
@@ -252,7 +245,7 @@ class _IklanFormScreenState extends State<IklanFormScreen> {
               _buildLabel("Deskripsi"),
               TextFormField(
                 controller: _deskripsiController,
-                maxLines: 4, // Input area besar
+                maxLines: 4,
                 style: const TextStyle(color: Colors.white),
                 decoration: _inputDecoration("Masukkan deskripsi iklan"),
                 validator: (val) => val!.isEmpty ? "Deskripsi tidak boleh kosong" : null,
@@ -262,14 +255,14 @@ class _IklanFormScreenState extends State<IklanFormScreen> {
               // 3. DROPDOWN LAPANGAN
               _buildLabel("Lapangan"),
               DropdownButtonFormField<String>(
-                dropdownColor: const Color(0xFF1F2937),
+                dropdownColor: const Color(0xFF1E1E1E),
                 style: const TextStyle(color: Colors.white),
                 decoration: _inputDecoration(""),
                 hint: const Text("-- Pilih Lapangan --", style: TextStyle(color: Colors.grey)),
                 value: _selectedLapanganId,
                 items: _lapanganList.map((lap) {
                   return DropdownMenuItem(
-                    value: lap.idLapangan.toString(), // Sesuaikan dengan tipe ID model kamu (String/UUID)
+                    value: lap.idLapangan.toString(),
                     child: Text(
                       lap.nama,
                       overflow: TextOverflow.ellipsis,
@@ -291,22 +284,56 @@ class _IklanFormScreenState extends State<IklanFormScreen> {
                 onTap: _pickImage,
                 child: Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1F2937), // Warna fill input
+                    color: const Color(0xFF1E1E1E),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: const Color(0xFF3758F9)), // Border biru sesuai gambar
+                    border: Border.all(color: const Color(0xFF2563EB)),
                   ),
-                  child: Text(
-                    _selectedImage != null 
-                        ? _selectedImage!.name // Tampilkan nama file jika sudah pilih
-                        : "No file chosen",     // Placeholder
-                    style: const TextStyle(color: Colors.white),
-                    textAlign: TextAlign.center,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      if (_selectedImage != null) ...[
+                        // --- [PERBAIKAN 3] Logika Preview Gambar Web vs HP ---
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(4),
+                          child: kIsWeb
+                              ? Image.network(
+                                  _selectedImage!.path, // Kalau Web pakai network/blob URL
+                                  width: 40,
+                                  height: 40,
+                                  fit: BoxFit.cover,
+                                )
+                              : Image.file(
+                                  File(_selectedImage!.path), // Kalau HP pakai File
+                                  width: 40,
+                                  height: 40,
+                                  fit: BoxFit.cover,
+                                ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            _selectedImage!.name,
+                            style: const TextStyle(color: Colors.white),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const Icon(Icons.edit, color: Colors.white, size: 20),
+                      ] else ...[
+                        // --- Tampilan jika belum ada gambar ---
+                        const Icon(Icons.image, color: Colors.white, size: 24),
+                        const SizedBox(width: 8),
+                        const Text(
+                          "No image chosen",
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ],
+                    ],
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 40),
 
               // 5. TOMBOL AKSI (Batal & Simpan)
@@ -319,7 +346,7 @@ class _IklanFormScreenState extends State<IklanFormScreen> {
                       child: ElevatedButton(
                         onPressed: () => Navigator.pop(context),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF6B7280), // Warna Abu-abu
+                          backgroundColor: const Color(0xFF6B7280),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
@@ -329,7 +356,7 @@ class _IklanFormScreenState extends State<IklanFormScreen> {
                     ),
                   ),
                   const SizedBox(width: 16),
-                  
+
                   // Tombol Simpan
                   Expanded(
                     child: SizedBox(
@@ -337,14 +364,14 @@ class _IklanFormScreenState extends State<IklanFormScreen> {
                       child: ElevatedButton(
                         onPressed: _isLoading ? null : _submit,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF3758F9), // Warna Biru Courtify
+                          backgroundColor: const Color(0xFF2563EB),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                        child: _isLoading 
+                        child: _isLoading
                             ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                            : const Text("Simpan Berita", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                            : const Text("Simpan Iklan", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                       ),
                     ),
                   ),
@@ -377,21 +404,21 @@ class _IklanFormScreenState extends State<IklanFormScreen> {
   InputDecoration _inputDecoration(String hint) {
     return InputDecoration(
       hintText: hint,
-      hintStyle: const TextStyle(color: Colors.grey),
+      hintStyle: const TextStyle(color: Colors.white),
       filled: true,
-      fillColor: const Color(0xFF1F2937), // Warna input box gelap (agak terang dari bg)
+      fillColor: const Color(0xFF1E1E1E),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: Color(0xFF3758F9)), // Default border biru
+        borderSide: const BorderSide(color: Color(0xFF2563EB)),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: Color(0xFF3758F9)), // Border biru saat idle
+        borderSide: const BorderSide(color: Color(0xFF2563EB)),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: Colors.blueAccent, width: 2), // Lebih terang saat fokus
+        borderSide: const BorderSide(color: Color(0xFF2563EB), width: 2),
       ),
     );
   }

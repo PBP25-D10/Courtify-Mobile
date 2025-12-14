@@ -12,6 +12,7 @@ class Iklan {
   String deskripsi;
   String? banner;
   DateTime tanggal;
+  String lapangan; 
 
   Iklan({
     required this.pk,
@@ -19,6 +20,7 @@ class Iklan {
     required this.deskripsi,
     this.banner,
     required this.tanggal,
+    required this.lapangan,
   });
 
   factory Iklan.fromJson(Map<String, dynamic> json) => Iklan(
@@ -27,6 +29,7 @@ class Iklan {
     deskripsi: json["deskripsi"],
     banner: json["banner"],
     tanggal: DateTime.parse(json["tanggal"]),
+    lapangan: json["lapangan"].toString(),
   );
 
   Map<String, dynamic> toJson() => {
@@ -35,5 +38,6 @@ class Iklan {
     "deskripsi": deskripsi,
     "banner": banner,
     "tanggal": tanggal.toIso8601String(),
+    "lapangan": lapangan,
   };
 }

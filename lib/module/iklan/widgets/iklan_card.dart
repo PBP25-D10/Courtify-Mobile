@@ -22,19 +22,19 @@ class IklanCard extends StatelessWidget {
       if (iklan.banner!.startsWith('http')) {
         imageUrl = iklan.banner;
       } else {
-        // Jika URL relatif (misal: /media/iklan_banners/foto.jpg)
         imageUrl = '$baseUrl${iklan.banner}';
       }
     }
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      height: 200, 
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      height: 280,
       child: Card(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16.0),
+          borderRadius: BorderRadius.circular(24.0), // Radius lebih besar
         ),
         elevation: 4,
+        color: const Color(0xFF1F2937),
         clipBehavior: Clip.antiAlias, 
         child: InkWell(
           onTap: onTap,
@@ -63,24 +63,24 @@ class IklanCard extends StatelessWidget {
 
               // 2. Layer Tengah: GRADIENT (Agar teks putih terbaca)
               Container(
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
                       Colors.transparent,
-                      Colors.black54, 
+                      Colors.black.withOpacity(0.0),
+                      Colors.black.withOpacity(0.8), 
                     ],
-                    stops: [0.6, 1.0], 
+                    stops: const [0.0, 0.6, 1.0], 
                   ),
                 ),
               ),
 
               // 3. Layer Teks: Judul & Deskripsi (Kiri Bawah)
               Positioned(
-                bottom: 16,
-                left: 16,
-                // Beri batas kanan agar tidak menabrak icon delete
+                bottom: 24,
+                left: 20,
                 right: 60, 
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -90,7 +90,7 @@ class IklanCard extends StatelessWidget {
                     Text(
                       iklan.judul,
                       style: const TextStyle(
-                        fontSize: 20.0,
+                        fontSize: 22.0,
                         fontWeight: FontWeight.bold,
                         color: Colors.white, 
                       ),
@@ -114,23 +114,17 @@ class IklanCard extends StatelessWidget {
               ),
 
               // 4. Layer Paling Atas: ICON DELETE (Kanan Bawah)
-              // Hanya tampilkan jika onDelete tidak null (opsional)
               if (onDelete != null)
                 Positioned(
-                  bottom: 12,
-                  right: 12,
+                  bottom: 20,
+                  right: 20,
                   child: Material(
-                    color: Colors.transparent, // Agar efek ripple terlihat di atas gambar
+                    color: Colors.transparent,
                     child: IconButton(
                       onPressed: onDelete,
-                      // Menggunakan icon tong sampah outline berwarna putih
-                      icon: const Icon(Icons.delete_outline, color: Colors.white),
+                      icon: const Icon(Icons.delete_outline, color: Colors.white, size: 28),
                       tooltip: "Hapus Iklan",
-                      // Sedikit background agar lebih kontras (opsional, sesuai selera)
-                      // style: IconButton.styleFrom(
-                      //   backgroundColor: Colors.black26, 
-                      // ),
-                    ),
+                     ),
                   ),
                 ),
             ],
