@@ -220,4 +220,6 @@ class AuthService {
       client.close();
     }
   }
+
+  Future postJson(String s, Map<String, dynamic> data) async {}
 }
