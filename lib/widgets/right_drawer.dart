@@ -7,7 +7,6 @@ import 'package:courtify_mobile/screens/user/wishlist_user.dart';
 
 // Import Menu Penyedia
 import 'package:courtify_mobile/screens/penyedia/dashboard_penyedia.dart';
-import 'package:courtify_mobile/screens/penyedia/booking_penyedia.dart';
 import 'package:courtify_mobile/screens/penyedia/lapangan_penyedia.dart';
 import 'package:courtify_mobile/screens/penyedia/iklan_penyedia.dart';
 import 'package:courtify_mobile/screens/penyedia/artikel_penyedia.dart';
@@ -23,6 +22,10 @@ class RightDrawer extends StatefulWidget {
 }
 
 class _RightDrawerState extends State<RightDrawer> {
+  static const Color backgroundColor = Color(0xFF111827);
+  static const Color cardColor = Color(0xFF1F2937);
+  static const Color accent = Color(0xFF2563EB);
+
   final AuthService _authService = AuthService();
   String _username = '';
   String _role = '';
@@ -70,134 +73,123 @@ class _RightDrawerState extends State<RightDrawer> {
 
   @override
   Widget build(BuildContext context) {
-    // Tentukan warna header berdasarkan role
-    final Color headerColor = _role == 'penyedia'
-        ? Colors.teal
-        : Colors.blueAccent;
-
     return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: [
-          // === HEADER ===
-          UserAccountsDrawerHeader(
-            accountName: Text(
-              _username,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-            ),
-            accountEmail: Text(
-              _role == 'penyedia'
-                  ? "Role: Penyedia Lapangan"
-                  : "Role: Pengguna Biasa",
-            ),
-            currentAccountPicture: CircleAvatar(
-              backgroundColor: Colors.white,
-              child: Icon(
-                _role == 'penyedia' ? Icons.store : Icons.person,
-                size: 40,
-                color: headerColor,
+      child: Container(
+        color: backgroundColor,
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            // === HEADER ===
+            UserAccountsDrawerHeader(
+              accountName: Text(
+                _username,
+                style:
+                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
               ),
-            ),
-            decoration: BoxDecoration(color: headerColor),
-          ),
-
-          // === MENU ITEMS BERDASARKAN ROLE ===
-
-          // Opsi 1: Jika Role USER
-          if (_role == 'user') ...[
-            _buildListTile(
-              icon: Icons.favorite_border,
-              title: "Wishlist",
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const WishlistUserScreen(),
+              accountEmail: Text(
+                _role == 'penyedia'
+                    ? "Role: Penyedia Lapangan"
+                    : "Role: Pengguna Biasa",
+              ),
+              currentAccountPicture: CircleAvatar(
+                backgroundColor: Colors.white,
+                child: Icon(
+                  _role == 'penyedia' ? Icons.store : Icons.person,
+                  size: 40,
+                  color: accent,
                 ),
               ),
+              decoration: const BoxDecoration(color: accent),
             ),
-            _buildListTile(
-              icon: Icons.calendar_today,
-              title: "Booking Saya",
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const BookingDashboardScreen(),
+
+            // === MENU ITEMS BERDASARKAN ROLE ===
+
+            // Opsi 1: Jika Role USER
+            if (_role == 'user') ...[
+              _buildListTile(
+                icon: Icons.favorite_border,
+                title: "Wishlist",
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const WishlistUserScreen(),
+                  ),
                 ),
               ),
-            ),
-            _buildListTile(
-              icon: Icons.article_outlined,
-              title: "Artikel",
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const NewsListPage()),
+              _buildListTile(
+                icon: Icons.calendar_today,
+                title: "Booking Saya",
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const BookingDashboardScreen(),
+                  ),
+                ),
               ),
+              _buildListTile(
+                icon: Icons.article_outlined,
+                title: "Artikel",
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const NewsListPage()),
+                ),
+              ),
+            ],
+
+            // Opsi 2: Jika Role PENYEDIA
+            if (_role == 'penyedia') ...[
+              _buildListTile(
+                icon: Icons.campaign,
+                title: "Iklan & Promosi",
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const IklanPenyediaScreen(),
+                  ),
+                ),
+              ),
+              _buildListTile(
+                icon: Icons.dashboard,
+                title: "Dashboard",
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const DashboardPenyediaScreen(),
+                  ),
+                ),
+              ),
+              _buildListTile(
+                icon: Icons.stadium,
+                title: "Kelola Lapangan",
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const LapanganPenyediaScreen(),
+                  ),
+                ),
+              ),
+              _buildListTile(
+                icon: Icons.article,
+                title: "Artikel",
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ArtikelPenyediaScreen(),
+                  ),
+                ),
+              ),
+            ],
+
+            const Divider(color: Colors.white24),
+
+            // === LOGOUT ===
+            ListTile(
+              leading: const Icon(Icons.logout, color: Colors.red),
+              title: const Text('Logout', style: TextStyle(color: Colors.red)),
+              onTap: _handleLogout,
             ),
           ],
-
-          // Opsi 2: Jika Role PENYEDIA
-          if (_role == 'penyedia') ...[
-            _buildListTile(
-              icon: Icons.dashboard,
-              title: "Dashboard",
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const DashboardPenyediaScreen(),
-                ),
-              ),
-            ),
-            _buildListTile(
-              icon: Icons.book_online,
-              title: "Booking Masuk",
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const BookingPenyediaScreen(),
-                ),
-              ),
-            ),
-            _buildListTile(
-              icon: Icons.stadium,
-              title: "Kelola Lapangan",
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const LapanganPenyediaScreen(),
-                ),
-              ),
-            ),
-            _buildListTile(
-              icon: Icons.campaign,
-              title: "Iklan & Promosi",
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const IklanPenyediaScreen(),
-                ),
-              ),
-            ),
-            _buildListTile(
-              icon: Icons.article,
-              title: "Artikel",
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const ArtikelPenyediaScreen(),
-                ),
-              ),
-            ),
-          ],
-
-          const Divider(),
-
-          // === LOGOUT ===
-          ListTile(
-            leading: const Icon(Icons.logout, color: Colors.red),
-            title: const Text('Logout', style: TextStyle(color: Colors.red)),
-            onTap: _handleLogout,
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -209,12 +201,19 @@ class _RightDrawerState extends State<RightDrawer> {
     required VoidCallback onTap,
   }) {
     return ListTile(
-      leading: Icon(icon),
-      title: Text(title),
+      leading: Icon(icon, color: Colors.white),
+      title: Text(
+        title,
+        style: const TextStyle(color: Colors.white),
+      ),
       onTap: () {
         Navigator.pop(context); // Tutup drawer sebelum pindah halaman
         onTap();
       },
+      tileColor: cardColor,
+      shape: const Border(
+        bottom: BorderSide(color: Colors.white10),
+      ),
     );
   }
 }
