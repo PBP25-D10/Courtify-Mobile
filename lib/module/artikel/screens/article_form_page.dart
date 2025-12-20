@@ -16,6 +16,7 @@ class _ArticleFormPageState extends State<ArticleFormPage> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
+  final _thumbnailController = TextEditingController();
   String _kategori = 'Komunitas';
 
   static const Color backgroundColor = Color(0xFF111827);
@@ -36,6 +37,7 @@ class _ArticleFormPageState extends State<ArticleFormPage> {
   void dispose() {
     _titleController.dispose();
     _contentController.dispose();
+    _thumbnailController.dispose();
     super.dispose();
   }
 
@@ -46,6 +48,7 @@ class _ArticleFormPageState extends State<ArticleFormPage> {
       _titleController.text = widget.news!.title;
       _contentController.text = widget.news!.content;
       _kategori = widget.news!.kategori.isNotEmpty ? widget.news!.kategori : 'Komunitas';
+      _thumbnailController.text = widget.news!.thumbnailUrl;
     }
   }
 
@@ -55,18 +58,19 @@ class _ArticleFormPageState extends State<ArticleFormPage> {
     final service = NewsApiService();
 
     try {
+      final payload = {
+        'title': _titleController.text,
+        'content': _contentController.text,
+        'kategori': _kategori,
+      };
+      if (_thumbnailController.text.isNotEmpty) {
+        payload['url_thumbnail'] = _thumbnailController.text;
+      }
+
       if (widget.news == null) {
-        await service.createNews(auth, {
-          'title': _titleController.text,
-          'content': _contentController.text,
-          'kategori': _kategori,
-        });
+        await service.createNews(auth, payload);
       } else {
-        await service.updateNews(auth, widget.news!.id, {
-          'title': _titleController.text,
-          'content': _contentController.text,
-          'kategori': _kategori,
-        });
+        await service.updateNews(auth, widget.news!.id, payload);
       }
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -117,6 +121,12 @@ class _ArticleFormPageState extends State<ArticleFormPage> {
                   style: const TextStyle(color: Colors.white),
                   maxLines: 5,
                   validator: (v) => (v == null || v.isEmpty) ? 'Konten tidak boleh kosong' : null,
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _thumbnailController,
+                  decoration: _inputDecoration('URL Thumbnail (opsional)'),
+                  style: const TextStyle(color: Colors.white),
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<String>(

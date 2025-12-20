@@ -17,7 +17,7 @@ class Iklan {
   String pk;
   String judul;
   String deskripsi;
-  String? banner; 
+  String banner; 
   DateTime tanggal;
   String lapanganId;
   String lapanganNama;
@@ -33,21 +33,30 @@ class Iklan {
   });
 
   factory Iklan.fromJson(Map<String, dynamic> json) {
-    String? fullBannerUrl;
-    final raw = json["banner"]?.toString() ?? "";
-    if (raw.isNotEmpty) {
-      fullBannerUrl = raw.startsWith("http")
-          ? raw
-          : "${AuthService.baseHost}$raw";
-    } else {
-      fullBannerUrl = "https://images.pexels.com/photos/17724042/pexels-photo-17724042.jpeg";
+    const fallback =
+        "https://images.pexels.com/photos/17724042/pexels-photo-17724042.jpeg";
+
+    String _abs(String? url) {
+      if (url == null || url.isEmpty) return "";
+      return url.startsWith("http") ? url : "${AuthService.baseHost}$url";
     }
+
+    final candidates = [
+      _abs(json["url_thumbnail"]?.toString()),
+      _abs(json["banner"]?.toString()),
+      _abs(json["lapangan_foto"]?.toString()),
+    ];
+
+    final resolved = candidates.firstWhere(
+      (u) => u.isNotEmpty,
+      orElse: () => fallback,
+    );
 
     return Iklan(
       pk: json["pk"].toString(),
       judul: json["judul"] ?? "Tanpa Judul",
       deskripsi: json["deskripsi"] ?? "",
-      banner: fullBannerUrl,
+      banner: resolved,
       tanggal: DateTime.parse(json["tanggal"]),
       lapanganId: json["lapangan_id"].toString(),
       lapanganNama: json["lapangan_nama"] ?? "",

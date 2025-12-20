@@ -9,6 +9,9 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
+  static const Color backgroundColor = Color(0xFF0F1624);
+  static const Color cardColor = Color(0xFF1F2937);
+  static const Color accent = Color(0xFF2563EB);
   // Controllers untuk text fields
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
@@ -119,111 +122,150 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: backgroundColor,
       appBar: AppBar(
         title: const Text("Daftar Akun Baru"),
-        backgroundColor: Colors.blueAccent,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         foregroundColor: Colors.white,
       ),
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const Icon(Icons.person_add_alt_1, size: 60, color: Colors.blueAccent),
-              const SizedBox(height: 20),
-              const Text(
-                "Buat Akun Courtify",
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+      body: Stack(
+        children: [
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Color(0xFF111827),
+                  Color(0xFF0F1624),
+                  Color(0xFF1a2f4f),
+                ],
               ),
-              const SizedBox(height: 30),
-
-              // --- Form Inputs ---
-              // Username Input
-              _buildTextField(_usernameController, 'Username', Icons.person),
-              const SizedBox(height: 16),
-              // Email Input
-              _buildTextField(_emailController, 'Email', Icons.email, inputType: TextInputType.emailAddress),
-              const SizedBox(height: 16),
-              // First name (opsional)
-              _buildTextField(_firstNameController, 'Nama Depan (opsional)', Icons.badge, isRequired: false),
-              const SizedBox(height: 16),
-              // Last name (opsional)
-              _buildTextField(_lastNameController, 'Nama Belakang (opsional)', Icons.badge_outlined, isRequired: false),
-              const SizedBox(height: 16),
-              // Password Input
-              TextField(
-                controller: _passwordController,
-                obscureText: _obscurePassword,
-                decoration: InputDecoration(
-                  labelText: 'Password',
-                  prefixIcon: const Icon(Icons.lock),
-                  suffixIcon: IconButton(
-                    icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
-                    onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
-                  ),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                  filled: true,
-                  fillColor: Colors.grey.shade100,
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // --- Role Selection (Dropdown) ---
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            ),
+          ),
+          Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24.0),
+              child: Container(
+                width: 480,
+                padding: const EdgeInsets.all(22),
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey.shade400),
+                  color: cardColor.withOpacity(0.92),
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(color: Colors.white10),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.35),
+                      blurRadius: 16,
+                      offset: const Offset(0, 10),
+                    ),
+                  ],
                 ),
-                child: DropdownButtonHideUnderline(
-                  child: DropdownButton<String>(
-                    value: _selectedRole,
-                    hint: const Text("Pilih Peran (Role)"),
-                    isExpanded: true,
-                    icon: const Icon(Icons.arrow_drop_down_circle, color: Colors.blueAccent),
-                    items: const [
-                      DropdownMenuItem(
-                        value: 'user',
-                        child: Row(children: [Icon(Icons.person_outline), SizedBox(width: 10), Text("Pengguna Biasa")]),
-                      ),
-                      DropdownMenuItem(
-                        value: 'penyedia',
-                        child: Row(children: [Icon(Icons.store_outlined), SizedBox(width: 10), Text("Penyedia Lapangan")]),
-                      ),
-                    ],
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedRole = value;
-                      });
-                    },
-                  ),
-                ),
-              ),
-              const SizedBox(height: 30),
-
-              // --- Tombol Register ---
-              _isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : ElevatedButton(
-                      onPressed: _handleRegister,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blueAccent,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        elevation: 5,
-                      ),
-                      child: const Text(
-                        "DAFTAR SEKARANG",
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: const [
+                        Icon(Icons.person_add_alt_1, size: 40, color: Colors.white),
+                        SizedBox(width: 10),
+                        Text(
+                          "Buat Akun Courtify",
+                          style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    _buildTextField(_usernameController, 'Username', Icons.person),
+                    const SizedBox(height: 14),
+                    _buildTextField(_emailController, 'Email', Icons.email, inputType: TextInputType.emailAddress),
+                    const SizedBox(height: 14),
+                    _buildTextField(_firstNameController, 'Nama Depan (opsional)', Icons.badge, isRequired: false),
+                    const SizedBox(height: 14),
+                    _buildTextField(_lastNameController, 'Nama Belakang (opsional)', Icons.badge_outlined, isRequired: false),
+                    const SizedBox(height: 14),
+                    TextField(
+                      controller: _passwordController,
+                      obscureText: _obscurePassword,
+                      style: const TextStyle(color: Colors.white),
+                      decoration: InputDecoration(
+                        labelText: 'Password',
+                        labelStyle: const TextStyle(color: Colors.white70),
+                        prefixIcon: const Icon(Icons.lock, color: Colors.white70),
+                        suffixIcon: IconButton(
+                          icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility, color: Colors.white70),
+                          onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                        ),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Colors.white.withOpacity(0.12)),
+                        ),
+                        focusedBorder: const OutlineInputBorder(
+                          borderSide: BorderSide(color: accent),
+                          borderRadius: BorderRadius.all(Radius.circular(12)),
+                        ),
+                        filled: true,
+                        fillColor: Colors.white.withOpacity(0.04),
                       ),
                     ),
-            ],
+                    const SizedBox(height: 14),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.04),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.white.withOpacity(0.12)),
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          dropdownColor: cardColor,
+                          value: _selectedRole,
+                          hint: const Text("Pilih Peran (Role)", style: TextStyle(color: Colors.white70)),
+                          isExpanded: true,
+                          icon: const Icon(Icons.arrow_drop_down_circle, color: accent),
+                          items: const [
+                            DropdownMenuItem(
+                              value: 'user',
+                              child: Row(children: [Icon(Icons.person_outline, color: Colors.white70), SizedBox(width: 10), Text("Pengguna Biasa")]),
+                            ),
+                            DropdownMenuItem(
+                              value: 'penyedia',
+                              child: Row(children: [Icon(Icons.store_outlined, color: Colors.white70), SizedBox(width: 10), Text("Penyedia Lapangan")]),
+                            ),
+                          ],
+                          onChanged: (value) {
+                            setState(() {
+                              _selectedRole = value;
+                            });
+                          },
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    _isLoading
+                        ? const Center(child: CircularProgressIndicator(color: accent))
+                        : ElevatedButton(
+                            onPressed: _handleRegister,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: accent,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            ),
+                            child: const Text(
+                              "Daftar Sekarang",
+                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                  ],
+                ),
+              ),
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -239,12 +281,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return TextField(
       controller: controller,
       keyboardType: inputType,
+      style: const TextStyle(color: Colors.white),
       decoration: InputDecoration(
         labelText: label,
-        prefixIcon: Icon(icon),
+        labelStyle: const TextStyle(color: Colors.white70),
+        prefixIcon: Icon(icon, color: Colors.white70),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.white.withOpacity(0.12)),
+        ),
+        focusedBorder: const OutlineInputBorder(
+          borderSide: BorderSide(color: accent),
+          borderRadius: BorderRadius.all(Radius.circular(12)),
+        ),
         filled: true,
-        fillColor: Colors.grey.shade100,
+        fillColor: Colors.white.withOpacity(0.04),
       ),
     );
   }

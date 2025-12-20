@@ -18,6 +18,10 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
   bool _obscurePassword = true;
 
+  static const Color backgroundColor = Color(0xFF0F1624);
+  static const Color cardColor = Color(0xFF1F2937);
+  static const Color accent = Color(0xFF2563EB);
+
   void _handleLogin() async {
     final username = _usernameController.text.trim();
     final password = _passwordController.text.trim();
@@ -104,129 +108,190 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const Icon(
-                Icons.sports_tennis_rounded,
-                size: 80,
-                color: Colors.blueAccent,
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                "Selamat Datang di Courtify",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-              ),
-              const SizedBox(height: 10),
-              const Text(
-                "Silakan login untuk melanjutkan",
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.grey),
-              ),
-              const SizedBox(height: 40),
-
-              TextField(
-                controller: _usernameController,
-                keyboardType: TextInputType.text,
-                textInputAction: TextInputAction.next,
-                decoration: InputDecoration(
-                  labelText: 'Username',
-                  prefixIcon: const Icon(Icons.person_outline),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  filled: true,
-                  fillColor: Colors.grey.shade100,
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              TextField(
-                controller: _passwordController,
-                obscureText: _obscurePassword,
-                textInputAction: TextInputAction.done,
-                onSubmitted: (_) => _handleLogin(),
-                decoration: InputDecoration(
-                  labelText: 'Password',
-                  prefixIcon: const Icon(Icons.lock_outline),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _obscurePassword
-                          ? Icons.visibility_off
-                          : Icons.visibility,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _obscurePassword = !_obscurePassword;
-                      });
-                    },
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  filled: true,
-                  fillColor: Colors.grey.shade100,
-                ),
-              ),
-              const SizedBox(height: 30),
-
-              _isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : ElevatedButton(
-                      onPressed: _handleLogin,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blueAccent,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        elevation: 5,
-                      ),
-                      child: const Text(
-                        "MASUK",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-              const SizedBox(height: 20),
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text("Belum punya akun?"),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const RegisterScreen(),
-                        ),
-                      );
-                    },
-                    child: const Text(
-                      "Daftar di sini",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.blueAccent,
-                      ),
-                    ),
-                  ),
+      backgroundColor: backgroundColor,
+      body: Stack(
+        children: [
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFF111827),
+                  Color(0xFF0F1624),
+                  Color(0xFF1a2f4f),
                 ],
               ),
-            ],
+            ),
           ),
+          Positioned(
+            top: -80,
+            right: -60,
+            child: Container(
+              width: 200,
+              height: 200,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: accent.withOpacity(0.2),
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: -60,
+            left: -40,
+            child: Container(
+              width: 180,
+              height: 180,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.blueAccent.withOpacity(0.12),
+              ),
+            ),
+          ),
+          Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24.0),
+              child: Container(
+                width: 420,
+                padding: const EdgeInsets.all(22),
+                decoration: BoxDecoration(
+                  color: cardColor.withOpacity(0.9),
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(color: Colors.white10),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.35),
+                      blurRadius: 16,
+                      offset: const Offset(0, 10),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: const [
+                        Icon(Icons.sports_tennis_rounded, size: 46, color: Colors.white),
+                        SizedBox(width: 10),
+                        Text(
+                          "Courtify",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    const Text(
+                      "Masuk untuk melanjutkan",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.white70),
+                    ),
+                    const SizedBox(height: 24),
+
+                    _buildField(
+                      controller: _usernameController,
+                      label: 'Username',
+                      icon: Icons.person_outline,
+                      action: TextInputAction.next,
+                    ),
+                    const SizedBox(height: 16),
+                    _buildField(
+                      controller: _passwordController,
+                      label: 'Password',
+                      icon: Icons.lock_outline,
+                      obscure: _obscurePassword,
+                      action: TextInputAction.done,
+                      onSubmitted: (_) => _handleLogin(),
+                      suffix: IconButton(
+                        icon: Icon(
+                          _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                          color: Colors.white70,
+                        ),
+                        onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                      ),
+                    ),
+                    const SizedBox(height: 22),
+
+                    _isLoading
+                        ? const Center(child: CircularProgressIndicator(color: accent))
+                        : ElevatedButton(
+                            onPressed: _handleLogin,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: accent,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            child: const Text(
+                              "Masuk",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                    const SizedBox(height: 12),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const RegisterScreen(),
+                          ),
+                        );
+                      },
+                      child: const Text(
+                        "Belum punya akun? Daftar",
+                        style: TextStyle(color: Colors.white70),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    TextInputType inputType = TextInputType.text,
+    bool obscure = false,
+    TextInputAction action = TextInputAction.next,
+    Widget? suffix,
+    void Function(String)? onSubmitted,
+  }) {
+    return TextField(
+      controller: controller,
+      keyboardType: inputType,
+      textInputAction: action,
+      onSubmitted: onSubmitted,
+      obscureText: obscure,
+      style: const TextStyle(color: Colors.white),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: const TextStyle(color: Colors.white70),
+        prefixIcon: Icon(icon, color: Colors.white70),
+        suffixIcon: suffix,
+        filled: true,
+        fillColor: Colors.white.withOpacity(0.04),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.white.withOpacity(0.12)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: accent),
         ),
       ),
     );

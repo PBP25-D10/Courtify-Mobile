@@ -25,11 +25,13 @@ class IklanApiService {
   }
 
   Future<Map<String, dynamic>> createIklan(AuthService request, Map<String, dynamic> payload) async {
+    // payload can include: judul, deskripsi, lapangan, banner (base64/file), url_thumbnail
     final res = await request.postJson("$baseUrl/create/", payload);
     return Map<String, dynamic>.from(res);
   }
 
   Future<Map<String, dynamic>> updateIklan(AuthService request, String id, Map<String, dynamic> payload) async {
+    // payload can include: judul, deskripsi, lapangan, banner (base64/file), url_thumbnail
     final res = await request.postJson("$baseUrl/edit/$id/", payload);
     return Map<String, dynamic>.from(res);
   }

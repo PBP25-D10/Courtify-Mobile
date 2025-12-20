@@ -15,16 +15,7 @@ class IklanCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const String baseUrl = 'https://justin-timothy-courtify.pbp.cs.ui.ac.id';
-
-    String? imageUrl;
-    if (iklan.banner != null && iklan.banner!.isNotEmpty) {
-      if (iklan.banner!.startsWith('http')) {
-        imageUrl = iklan.banner;
-      } else {
-        imageUrl = '$baseUrl${iklan.banner}';
-      }
-    }
+    final imageUrl = iklan.banner;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -42,24 +33,17 @@ class IklanCard extends StatelessWidget {
             fit: StackFit.expand, 
             children: [
               // 1. Layer Paling Bawah: GAMBAR
-              imageUrl != null
-                  ? Image.network(
-                      imageUrl,
-                      fit: BoxFit.cover, 
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          color: Colors.grey[300],
-                          child: const Center(
-                              child: Icon(Icons.broken_image, size: 50, color: Colors.grey)),
-                        );
-                      },
-                    )
-                  : Container(
-                      color: Colors.blueGrey, 
-                      child: const Center(
-                        child: Icon(Icons.image, size: 50, color: Colors.white54),
-                      ),
-                    ),
+              Image.network(
+                imageUrl,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    color: Colors.grey[300],
+                    child: const Center(
+                        child: Icon(Icons.broken_image, size: 50, color: Colors.grey)),
+                  );
+                },
+              ),
 
               // 2. Layer Tengah: GRADIENT (Agar teks putih terbaca)
               Container(

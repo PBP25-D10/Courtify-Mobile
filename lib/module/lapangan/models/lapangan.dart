@@ -7,7 +7,7 @@ class Lapangan {
   final String kategori;
   final String lokasi;
   final int hargaPerJam;
-  final String? fotoUrl; // full url
+  final String fotoUrl; // full url with default fallback
   final String jamBuka;  // "HH:mm"
   final String jamTutup; // "HH:mm"
 
@@ -29,13 +29,22 @@ class Lapangan {
   }
 
   factory Lapangan.fromJson(Map<String, dynamic> json) {
+    const fallbackFoto =
+        'https://images.pexels.com/photos/17724042/pexels-photo-17724042.jpeg';
     final id = (json['id_lapangan'] ?? json['id']).toString();
 
-    final foto = json['foto'];
-    final fotoPath = foto?.toString() ?? '';
-    final fotoUrl = fotoPath.isNotEmpty
-        ? (fotoPath.startsWith('http') ? fotoPath : "${AuthService.baseHost}$fotoPath")
-        : null;
+    String _abs(String? path) {
+      if (path == null || path.isEmpty) return '';
+      return path.startsWith('http') ? path : "${AuthService.baseHost}$path";
+    }
+
+    final fotoUrl = () {
+      final candidates = [
+        _abs(json['url_thumbnail']?.toString()),
+        _abs(json['foto']?.toString()),
+      ];
+      return candidates.firstWhere((v) => v.isNotEmpty, orElse: () => fallbackFoto);
+    }();
 
     return Lapangan(
       idLapangan: id,
