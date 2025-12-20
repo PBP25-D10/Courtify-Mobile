@@ -6,12 +6,9 @@ import 'package:courtify_mobile/screens/login_screen.dart';
 
 // --- IMPORT HALAMAN MENU PENYEDIA ---
 import 'package:courtify_mobile/screens/penyedia/dashboard_penyedia.dart';
-import 'package:courtify_mobile/screens/penyedia/booking_penyedia.dart';
 import 'package:courtify_mobile/screens/penyedia/lapangan_penyedia.dart';
 import 'package:courtify_mobile/screens/penyedia/iklan_penyedia.dart';
 import 'package:courtify_mobile/screens/penyedia/artikel_penyedia.dart';
-
-import 'package:courtify_mobile/widgets/right_drawer.dart';
 
 class HomePenyediaScreen extends StatefulWidget {
   const HomePenyediaScreen({super.key});
@@ -21,11 +18,18 @@ class HomePenyediaScreen extends StatefulWidget {
 }
 
 class _HomePenyediaScreenState extends State<HomePenyediaScreen> {
+  static const Color backgroundColor = Color(0xFF111827);
+  static const Color cardColor = Color(0xFF1F2937);
+  static const Color accent = Color(0xFF2563EB);
+
   String _username = "Loading...";
+  int _selectedIndex = 0;
+  late PageController _pageController;
 
   @override
   void initState() {
     super.initState();
+    _pageController = PageController();
     _loadUserData();
   }
 
@@ -61,138 +65,160 @@ class _HomePenyediaScreenState extends State<HomePenyediaScreen> {
     );
   }
 
+  void _onNavItemTapped(int index) {
+    _pageController.animateToPage(
+      index,
+      duration: const Duration(milliseconds: 400),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  void _onPageChanged(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Courtify Owner"),
-        backgroundColor: Colors.teal,
-        foregroundColor: Colors.white,
-        actions: [
-          IconButton(
-            onPressed: _handleLogout,
-            icon: const Icon(Icons.logout),
+      backgroundColor: backgroundColor,
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0xFF111827),
+              Color(0xFF1a2f4f),
+              Color(0xFF0F1624),
+              Color(0xFF1a3a5a),
+              Color(0xFF1F2937),
+              Color(0xFF2a1f3f),
+            ],
+            stops: [0.0, 0.25, 0.5, 0.65, 0.85, 1.0],
           ),
-        ],
-      ),
-
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            UserAccountsDrawerHeader(
-              accountName: Text(
-                _username,
-                style:
-                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-              ),
-              accountEmail: const Text("Role: Penyedia Lapangan"),
-              currentAccountPicture: const CircleAvatar(
-                backgroundColor: Colors.white,
-                child: Icon(Icons.store, size: 40, color: Colors.teal),
-              ),
-              decoration: const BoxDecoration(color: Colors.teal),
-            ),
-
-            ListTile(
-              leading: const Icon(Icons.dashboard),
-              title: const Text('Dashboard'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (_) => const DashboardPenyediaScreen()),
-                );
-              },
-            ),
-
-            ListTile(
-              leading: const Icon(Icons.book_online),
-              title: const Text('Booking Masuk'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (_) => const BookingPenyediaScreen()),
-                );
-              },
-            ),
-
-            ListTile(
-              leading: const Icon(Icons.stadium),
-              title: const Text('Kelola Lapangan'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (_) => const LapanganPenyediaScreen()),
-                );
-              },
-            ),
-
-            ListTile(
-              leading: const Icon(Icons.campaign),
-              title: const Text('Iklan & Promosi'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (_) => const IklanPenyediaScreen()),
-                );
-              },
-            ),
-
-            ListTile(
-              leading: const Icon(Icons.article),
-              title: const Text('Artikel'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (_) => const ArtikelPenyediaScreen()),
-                );
-              },
-            ),
-
-            const Divider(),
-
-            ListTile(
-              leading: const Icon(Icons.logout, color: Colors.red),
-              title: const Text('Logout', style: TextStyle(color: Colors.red)),
-              onTap: _handleLogout,
-            ),
-          ],
         ),
-      ),
-
-      endDrawer: const RightDrawer(),
-
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.store_mall_directory,
-                  size: 80, color: Colors.teal),
-              const SizedBox(height: 20),
-              Text(
-                "Halo, $_username!",
-                style:
-                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 10),
-              const Text(
-                "Tekan ikon garis tiga di pojok kiri atas untuk mengakses menu pengelolaan.",
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.grey),
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            foregroundColor: Colors.white,
+            title: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  "Hello,",
+                  style: TextStyle(fontSize: 14, color: Colors.white70),
+                ),
+                Text(
+                  _username,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              IconButton(
+                onPressed: _handleLogout,
+                icon: const Icon(Icons.logout),
+                tooltip: 'Logout',
               ),
             ],
+          ),
+          body: PageView(
+            controller: _pageController,
+            onPageChanged: _onPageChanged,
+            children: const [
+              IklanPenyediaScreen(),
+              DashboardPenyediaScreen(),
+              LapanganPenyediaScreen(),
+              ArtikelPenyediaScreen(),
+            ],
+          ),
+          bottomNavigationBar: SizedBox(
+            height: 72,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Positioned.fill(
+                  top: 0,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: cardColor,
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(18),
+                        topRight: Radius.circular(18),
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.35),
+                          blurRadius: 14,
+                          offset: const Offset(0, -6),
+                        ),
+                      ],
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: List.generate(4, (index) {
+                        final icons = [
+                          Icons.campaign,
+                          Icons.dashboard,
+                          Icons.stadium,
+                          Icons.article,
+                        ];
+                        final labels = [
+                          "Iklan",
+                          "Dashboard",
+                          "Lapangan",
+                          "Artikel",
+                        ];
+                        final isSelected = _selectedIndex == index;
+                        return GestureDetector(
+                          onTap: () => _onNavItemTapped(index),
+                          behavior: HitTestBehavior.opaque,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                icons[index],
+                                size: 22,
+                                color: isSelected ? accent : Colors.white54,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                labels[index],
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: isSelected ? accent : Colors.white54,
+                                  fontWeight: isSelected
+                                      ? FontWeight.w600
+                                      : FontWeight.normal,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
