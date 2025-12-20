@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:flutter/foundation.dart' show kIsWeb; // [PERBAIKAN 1] Import ini untuk deteksi Web
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:courtify_mobile/services/auth_service.dart';
@@ -8,10 +9,9 @@ import 'package:courtify_mobile/module/iklan/services/iklan_api_services.dart';
 import 'package:courtify_mobile/module/lapangan/services/api_services.dart';
 import 'package:courtify_mobile/module/iklan/models/iklan.dart';
 import 'package:courtify_mobile/module/lapangan/models/lapangan.dart';
-import 'package:image_picker/image_picker.dart';
 
 class IklanFormScreen extends StatefulWidget {
-  final Iklan? iklan; // Jika null = Buat Baru, Jika ada = Edit
+  final Iklan? iklan; 
   final List<Lapangan>? lapangan;
 
   const IklanFormScreen({super.key, this.iklan, this.lapangan});
@@ -40,7 +40,6 @@ class _IklanFormScreenState extends State<IklanFormScreen> {
     super.initState();
     _fetchLapangan();
 
-    // Jika mode Edit, isi form dengan data yang ada
     if (widget.iklan != null) {
       _judulController.text = widget.iklan!.judul;
       _deskripsiController.text = widget.iklan!.deskripsi;
@@ -61,12 +60,15 @@ class _IklanFormScreenState extends State<IklanFormScreen> {
     final request = context.read<AuthService>();
     try {
       final list = await _lapanganApi.getPenyediaLapangan(request);
+      if (!mounted) return;
+      
       setState(() {
         _lapanganList = list;
 
         if (widget.iklan != null) {
-          _selectedLapanganId = widget.iklan!.lapangan.toString();
+          _selectedLapanganId = widget.iklan!.lapanganId; 
 
+          // Validasi apakah lapangan ID lama masih ada di list
           bool exists = _lapanganList.any((l) => l.idLapangan.toString() == _selectedLapanganId);
           if (!exists) _selectedLapanganId = null;
         }
@@ -85,7 +87,7 @@ class _IklanFormScreenState extends State<IklanFormScreen> {
 
     if (image != null) {
       setState(() {
-        _selectedImage = image;
+        _selectedImage = image; 
       });
     }
   }
@@ -94,7 +96,7 @@ class _IklanFormScreenState extends State<IklanFormScreen> {
   // SUBMIT FORM
   // ============================
   Future<void> _submit() async {
-    if (!_formKey.currentState!.validate()) return;
+    if (!_formKey.currentState!.validate()) {};
 
     setState(() => _isLoading = true);
 
@@ -110,27 +112,30 @@ class _IklanFormScreenState extends State<IklanFormScreen> {
     if (_selectedImage != null) {
       List<int> imageBytes = await _selectedImage!.readAsBytes();
       String base64Image = base64Encode(imageBytes);
-      payload['banner'] = base64Image;
+      
+      payload['banner'] = "data:image/jpeg;base64,$base64Image";
     }
 
     try {
       Map<String, dynamic> response;
       if (isEdit) {
-        response = await _iklanApi.updateIklan(request, widget.iklan!.pk, payload);
+        response = await _iklanApi.updateIklan(request, widget.iklan!.pk.toString(), payload);
       } else {
         response = await _iklanApi.createIklan(request, payload);
       }
 
+      if (!mounted) return;
       setState(() => _isLoading = false);
 
       if (response['status'] == 'success' || response['success'] == true) {
-        if (mounted) _showSuccessDialog(isEdit);
+        _showSuccessDialog(isEdit);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(response['message'] ?? "Gagal menyimpan data")),
         );
       }
     } catch (e) {
+      if (!mounted) return;
       setState(() => _isLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Terjadi kesalahan: $e")),
@@ -181,11 +186,11 @@ class _IklanFormScreenState extends State<IklanFormScreen> {
                   alignment: Alignment.centerRight,
                   child: ElevatedButton(
                     onPressed: () {
-                      Navigator.pop(context);
-                      Navigator.pop(context);
+                      Navigator.pop(context); 
+                      Navigator.pop(context, true);
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF25EB7B),
+                      backgroundColor: Colors.blueAccent, 
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
@@ -207,6 +212,38 @@ class _IklanFormScreenState extends State<IklanFormScreen> {
   }
 
   // ============================
+  // HELPER UI BUILDER
+  // ============================
+   
+  Widget _buildTextField(
+    TextEditingController controller,
+    String label, {
+    int maxLines = 1,
+    TextInputType keyboardType = TextInputType.text,
+  }) {
+    return TextFormField(
+      controller: controller,
+      maxLines: maxLines,
+      keyboardType: keyboardType,
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: const TextStyle(color: Colors.grey),
+        filled: true,
+        fillColor: const Color(0xFF374151),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none
+        ),
+        focusedBorder: const OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.blueAccent)
+        ),
+      ),
+      style: const TextStyle(color: Colors.white),
+      validator: (val) => val!.isEmpty ? "$label tidak boleh kosong" : null,
+    );
+  }
+
+  // ============================
   // UI BUILDER
   // ============================
   @override
@@ -218,7 +255,7 @@ class _IklanFormScreenState extends State<IklanFormScreen> {
       appBar: AppBar(
         title: Text(
           isEdit ? "Edit Iklan" : "Buat Iklan",
-          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style: const TextStyle(color: Colors.white),
         ),
         backgroundColor: const Color(0xFF111827),
         iconTheme: const IconThemeData(color: Colors.white),
@@ -232,33 +269,30 @@ class _IklanFormScreenState extends State<IklanFormScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // 1. JUDUL
-              _buildLabel("Judul"),
-              TextFormField(
-                controller: _judulController,
-                style: const TextStyle(color: Colors.white),
-                decoration: _inputDecoration("Masukkan judul iklan"),
-                validator: (val) => val!.isEmpty ? "Judul tidak boleh kosong" : null,
-              ),
+              _buildTextField(_judulController, "Judul Iklan"),
               const SizedBox(height: 16),
 
               // 2. DESKRIPSI
-              _buildLabel("Deskripsi"),
-              TextFormField(
-                controller: _deskripsiController,
-                maxLines: 4,
-                style: const TextStyle(color: Colors.white),
-                decoration: _inputDecoration("Masukkan deskripsi iklan"),
-                validator: (val) => val!.isEmpty ? "Deskripsi tidak boleh kosong" : null,
-              ),
+              _buildTextField(_deskripsiController, "Deskripsi Iklan", maxLines: 4),
               const SizedBox(height: 16),
 
               // 3. DROPDOWN LAPANGAN
-              _buildLabel("Lapangan"),
               DropdownButtonFormField<String>(
-                dropdownColor: const Color(0xFF1E1E1E),
+                dropdownColor: const Color(0xFF374151),
                 style: const TextStyle(color: Colors.white),
-                decoration: _inputDecoration(""),
-                hint: const Text("-- Pilih Lapangan --", style: TextStyle(color: Colors.grey)),
+                decoration: InputDecoration(
+                  labelText: "Pilih Lapangan",
+                  labelStyle: const TextStyle(color: Colors.grey),
+                  filled: true,
+                  fillColor: const Color(0xFF374151),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12), 
+                    borderSide: BorderSide.none
+                  ),
+                  focusedBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.blueAccent)
+                  ),
+                ),
                 value: _selectedLapanganId,
                 items: _lapanganList.map((lap) {
                   return DropdownMenuItem(
@@ -278,77 +312,101 @@ class _IklanFormScreenState extends State<IklanFormScreen> {
               ),
               const SizedBox(height: 16),
 
-              // 4. BANNER (Image Picker)
-              _buildLabel("Banner"),
-              InkWell(
-                onTap: _pickImage,
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF1E1E1E),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: const Color(0xFF2563EB)),
+              // 4. BANNER (Image Picker dengan Logic Preview Gambar Lama)
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _pickImage,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF374151),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    elevation: 0,
                   ),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      if (_selectedImage != null) ...[
-                        // --- [PERBAIKAN 3] Logika Preview Gambar Web vs HP ---
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(4),
-                          child: kIsWeb
-                              ? Image.network(
-                                  _selectedImage!.path, // Kalau Web pakai network/blob URL
-                                  width: 40,
-                                  height: 40,
-                                  fit: BoxFit.cover,
-                                )
-                              : Image.file(
-                                  File(_selectedImage!.path), // Kalau HP pakai File
-                                  width: 40,
-                                  height: 40,
-                                  fit: BoxFit.cover,
-                                ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            _selectedImage!.name,
-                            style: const TextStyle(color: Colors.white),
-                            overflow: TextOverflow.ellipsis,
+                        // KONDISI 1: User baru saja memilih gambar baru dari galeri
+                        if (_selectedImage != null) ...[
+                         ClipRRect(
+                           borderRadius: BorderRadius.circular(4),
+                           child: kIsWeb
+                               ? Image.network(
+                                   _selectedImage!.path, 
+                                   width: 30,
+                                   height: 30,
+                                   fit: BoxFit.cover,
+                                 )
+                               : Image.file(
+                                   File(_selectedImage!.path), 
+                                   width: 30,
+                                   height: 30,
+                                   fit: BoxFit.cover,
+                                 ),
+                         ),
+                         const SizedBox(width: 12),
+                         Expanded(
+                           child: Text(
+                             _selectedImage!.name,
+                             style: const TextStyle(color: Colors.white),
+                             overflow: TextOverflow.ellipsis,
+                           ),
+                         ),
+                         const Icon(Icons.edit, color: Colors.blueAccent, size: 20),
+                        ] 
+                        // KONDISI 2: Mode Edit & User belum pilih gambar baru, tapi ada gambar lama
+                        else if (isEdit && widget.iklan?.banner != null && widget.iklan!.banner!.isNotEmpty) ...[
+                          ClipRRect(
+                           borderRadius: BorderRadius.circular(4),
+                           child: Image.network(
+                               widget.iklan!.banner!, 
+                               width: 30,
+                               height: 30,
+                               fit: BoxFit.cover,
+                               errorBuilder: (ctx, err, stack) => const Icon(Icons.broken_image, color: Colors.grey),
+                             ),
+                         ),
+                         const SizedBox(width: 12),
+                         const Expanded(
+                           child: Text(
+                             "Ganti Banner (Saat ini terpasang)",
+                             style: TextStyle(color: Colors.white),
+                             overflow: TextOverflow.ellipsis,
+                           ),
+                         ),
+                         const Icon(Icons.edit, color: Colors.blueAccent, size: 20),
+                        ]
+                        // KONDISI 3: Belum ada gambar sama sekali
+                        else ...[
+                          const Text(
+                            "Pilih Banner (Opsional)",
+                            style: TextStyle(color: Colors.white),
                           ),
-                        ),
-                        const Icon(Icons.edit, color: Colors.white, size: 20),
-                      ] else ...[
-                        // --- Tampilan jika belum ada gambar ---
-                        const Icon(Icons.image, color: Colors.white, size: 24),
-                        const SizedBox(width: 8),
-                        const Text(
-                          "No image chosen",
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ],
+                          const SizedBox(width: 8),
+                          const Icon(Icons.image, color: Colors.white, size: 20),
+                        ],
                     ],
                   ),
                 ),
               ),
 
-              const SizedBox(height: 40),
+              const SizedBox(height: 32),
 
-              // 5. TOMBOL AKSI (Batal & Simpan)
+              // 5. TOMBOL AKSI
               Row(
                 children: [
-                  // Tombol Batal
                   Expanded(
                     child: SizedBox(
-                      height: 48,
+                      height: 50,
                       child: ElevatedButton(
                         onPressed: () => Navigator.pop(context),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF6B7280),
+                          backgroundColor: Colors.transparent,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(12),
+                            side: const BorderSide(color: Colors.grey)
                           ),
                         ),
                         child: const Text("Batal", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
@@ -356,22 +414,20 @@ class _IklanFormScreenState extends State<IklanFormScreen> {
                     ),
                   ),
                   const SizedBox(width: 16),
-
-                  // Tombol Simpan
                   Expanded(
                     child: SizedBox(
-                      height: 48,
+                      height: 50,
                       child: ElevatedButton(
                         onPressed: _isLoading ? null : _submit,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF2563EB),
+                          backgroundColor: Colors.blueAccent,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(12),
                           ),
                         ),
                         child: _isLoading
                             ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                            : const Text("Simpan Iklan", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                            : const Text("Simpan", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
                       ),
                     ),
                   ),
@@ -380,45 +436,6 @@ class _IklanFormScreenState extends State<IklanFormScreen> {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  // ============================
-  // HELPER WIDGETS
-  // ============================
-  Widget _buildLabel(String text) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0),
-      child: Text(
-        text,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 16,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-    );
-  }
-
-  InputDecoration _inputDecoration(String hint) {
-    return InputDecoration(
-      hintText: hint,
-      hintStyle: const TextStyle(color: Colors.white),
-      filled: true,
-      fillColor: const Color(0xFF1E1E1E),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: Color(0xFF2563EB)),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: Color(0xFF2563EB)),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: Color(0xFF2563EB), width: 2),
       ),
     );
   }

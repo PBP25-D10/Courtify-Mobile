@@ -31,7 +31,7 @@ class IklanCard extends StatelessWidget {
       height: 280,
       child: Card(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24.0), // Radius lebih besar
+          borderRadius: BorderRadius.circular(24.0),
         ),
         elevation: 4,
         color: const Color(0xFF1F2937),

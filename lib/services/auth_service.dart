@@ -221,5 +221,5 @@ class AuthService {
     }
   }
 
-  Future postJson(String s, Map<String, dynamic> data) async {}
+  Future<dynamic> postJson(String url, Map<String, dynamic> data) async {}
 }
