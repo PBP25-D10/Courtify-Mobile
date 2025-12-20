@@ -16,30 +16,35 @@ class NewsListPage extends StatefulWidget {
 class _NewsListPageState extends State<NewsListPage> {
   final NewsApiService service = NewsApiService();
   late Future<List<News>> _futureNews;
-  bool _isProvider = false;
+  late bool _isProvider;
 
   @override
   void initState() {
     super.initState();
+    _isProvider = widget.isProvider;
+    _futureNews = _fetchForRole();
     _loadRole();
-    _loadNews();
   }
 
   Future<void> _loadRole() async {
     final auth = context.read<AuthService>();
     final role = await auth.getCurrentRole();
-    if (!mounted) return;
+    final nextIsProvider = widget.isProvider || role == 'penyedia';
+    if (!mounted || nextIsProvider == _isProvider) return;
     setState(() {
-      _isProvider = widget.isProvider || role == 'penyedia';
+      _isProvider = nextIsProvider;
+      _futureNews = _fetchForRole();
     });
   }
 
-  void _loadNews() {
+  Future<List<News>> _fetchForRole() {
     final auth = context.read<AuthService>();
+    return _isProvider ? service.fetchMyNews(auth) : service.fetchNews(auth);
+  }
+
+  void _loadNews() {
     setState(() {
-      _futureNews = _isProvider
-          ? service.fetchMyNews(auth)
-          : service.fetchNews(auth);
+      _futureNews = _fetchForRole();
     });
   }
 

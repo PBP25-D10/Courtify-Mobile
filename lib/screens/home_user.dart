@@ -11,6 +11,8 @@ import 'package:courtify_mobile/module/booking/services/booking_api_service.dart
 import 'package:courtify_mobile/module/booking/models/booking.dart';
 import 'package:courtify_mobile/module/booking/widgets/booking_card.dart';
 import 'package:courtify_mobile/module/lapangan/models/lapangan.dart';
+import 'package:courtify_mobile/module/iklan/models/iklan.dart';
+import 'package:courtify_mobile/module/iklan/services/iklan_api_services.dart';
 
 class HomeUserScreen extends StatefulWidget {
   const HomeUserScreen({super.key});
@@ -22,10 +24,12 @@ class HomeUserScreen extends StatefulWidget {
 class _HomeUserScreenState extends State<HomeUserScreen> {
   final AuthService _authService = AuthService();
   final BookingApiService _apiService = BookingApiService();
+  final IklanApiService _iklanApiService = IklanApiService();
   String _username = 'Loading...';
   int _selectedIndex = 0;
   late PageController _pageController;
   TextEditingController _searchController = TextEditingController();
+  late PageController _iklanPageController;
 
   static const Color backgroundColor = Color(0xFF111827);
   static const Color cardColor = Color(0xFF1F2937);
@@ -35,6 +39,7 @@ class _HomeUserScreenState extends State<HomeUserScreen> {
   void initState() {
     super.initState();
     _pageController = PageController();
+    _iklanPageController = PageController(viewportFraction: 0.88);
     _loadUserData();
     _loadLapangan();
     _loadBookings();
@@ -190,28 +195,41 @@ class _HomeUserScreenState extends State<HomeUserScreen> {
                     context: context,
                     builder: (context) => AlertDialog(
                       backgroundColor: cardColor,
-                      title: const Text(
-                        "Logout",
-                        style: TextStyle(color: Colors.white),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      title: Row(
+                        children: const [
+                          Icon(Icons.logout, color: Colors.redAccent),
+                          SizedBox(width: 8),
+                          Text(
+                            "Logout",
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ],
                       ),
                       content: const Text(
-                        "Are you sure you want to logout?",
+                        "Yakin ingin keluar dari akun?",
                         style: TextStyle(color: Colors.white70),
                       ),
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.pop(context),
-                          child: const Text("Cancel"),
+                          child: const Text("Batal"),
                         ),
-                        TextButton(
+                        ElevatedButton(
                           onPressed: () {
                             Navigator.pop(context);
                             _handleLogout();
                           },
-                          child: const Text(
-                            "Logout",
-                            style: TextStyle(color: Colors.redAccent),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.redAccent,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
                           ),
+                          child: const Text("Logout"),
                         ),
                       ],
                     ),
@@ -428,17 +446,18 @@ class _HomeUserScreenState extends State<HomeUserScreen> {
     _pageController.dispose();
     _searchController.dispose();
     super.dispose();
+    _iklanPageController.dispose();
   }
 
   Widget _buildHomePage() {
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            const Color(0xFF111827),
-            const Color(0xFF1a2f4f),
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              const Color(0xFF111827),
+              const Color(0xFF1a2f4f),
             const Color(0xFF0F1624),
             const Color(0xFF1a3a5a),
             const Color(0xFF1F2937),
@@ -514,7 +533,214 @@ class _HomeUserScreenState extends State<HomeUserScreen> {
               },
             ),
           ),
+          const SizedBox(height: 12),
+          _buildIklanSection(),
         ],
+      ),
+    );
+  }
+
+  Widget _buildIklanSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12),
+          child: Row(
+            children: const [
+              Icon(Icons.campaign, color: Colors.orangeAccent, size: 20),
+              SizedBox(width: 8),
+              Text(
+                'Iklan Menarik',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(
+          height: 210,
+          child: FutureBuilder<List<Iklan>>(
+            future: _iklanApiService.fetchTop10Iklan(context.read<AuthService>()),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (snapshot.hasError) {
+                return Center(
+                  child: Text(
+                    'Gagal memuat iklan: ${snapshot.error}',
+                    style: const TextStyle(color: Colors.white70),
+                  ),
+                );
+              }
+              final items = snapshot.data ?? [];
+              if (items.isEmpty) {
+                return const Center(
+                  child: Text(
+                    'Belum ada iklan',
+                    style: TextStyle(color: Colors.white70),
+                  ),
+                );
+              }
+
+              return PageView.builder(
+                controller: _iklanPageController,
+                itemCount: items.length,
+                padEnds: false,
+                itemBuilder: (context, index) {
+                  final iklan = items[index];
+                  return AnimatedBuilder(
+                    animation: _iklanPageController,
+                    builder: (context, child) {
+                      double value = 1.0;
+                      if (_iklanPageController.position.hasContentDimensions) {
+                        value = (_iklanPageController.page ?? 0) - index;
+                        value = (1 - (value.abs() * 0.15)).clamp(0.85, 1.0);
+                      }
+                      return Transform.scale(
+                        scale: value,
+                        child: child,
+                      );
+                    },
+                    child: _iklanCard(iklan),
+                  );
+                },
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _iklanCard(Iklan iklan) {
+    return GestureDetector(
+      onTap: () {
+        showModalBottomSheet(
+          context: context,
+          backgroundColor: cardColor,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          builder: (_) => Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        iklan.judul,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    Text(
+                      "${iklan.tanggal.day.toString().padLeft(2, '0')}/${iklan.tanggal.month.toString().padLeft(2, '0')}",
+                      style: const TextStyle(color: Colors.white54, fontSize: 12),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  iklan.deskripsi,
+                  style: const TextStyle(color: Colors.white70),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.close),
+                    label: const Text('Tutup'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: accent,
+                      foregroundColor: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.only(right: 14),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.25),
+              blurRadius: 12,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Image.network(
+                iklan.banner,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => Container(
+                  color: Colors.grey[900],
+                  child: const Center(
+                    child: Icon(Icons.broken_image, color: Colors.white54),
+                  ),
+                ),
+              ),
+              Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [Colors.transparent, Colors.black87],
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Text(
+                      iklan.judul,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      iklan.deskripsi,
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 12,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

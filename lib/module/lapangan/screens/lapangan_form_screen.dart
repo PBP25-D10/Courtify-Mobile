@@ -25,6 +25,7 @@ class _LapanganFormScreenState extends State<LapanganFormScreen> {
   final _hargaController = TextEditingController();
   final _jamBukaController = TextEditingController();
   final _jamTutupController = TextEditingController();
+  final _thumbnailController = TextEditingController();
 
   final _picker = ImagePicker();
   File? _pickedImage;
@@ -33,10 +34,6 @@ class _LapanganFormScreenState extends State<LapanganFormScreen> {
   bool _isEditing = false;
 
   String _normTime(String s) => s.length >= 5 ? s.substring(0, 5) : s;
-  String _withSeconds(String s) {
-    final base = _normTime(s);
-    return base.length == 5 ? "$base:00" : base;
-  }
 
   @override
   void initState() {
@@ -50,6 +47,7 @@ class _LapanganFormScreenState extends State<LapanganFormScreen> {
       _hargaController.text = widget.lapangan!.hargaPerJam.toString();
       _jamBukaController.text = _normTime(widget.lapangan!.jamBuka);
       _jamTutupController.text = _normTime(widget.lapangan!.jamTutup);
+      _thumbnailController.text = widget.lapangan!.fotoUrl;
     }
   }
 
@@ -61,6 +59,7 @@ class _LapanganFormScreenState extends State<LapanganFormScreen> {
     _hargaController.dispose();
     _jamBukaController.dispose();
     _jamTutupController.dispose();
+    _thumbnailController.dispose();
     super.dispose();
   }
 
@@ -127,15 +126,17 @@ class _LapanganFormScreenState extends State<LapanganFormScreen> {
                 validator: (v) => v == null ? "Kategori tidak boleh kosong" : null,
               ),
               const SizedBox(height: 16),
-              _buildTextField(_lokasiController, "Lokasi", Icons.location_on),
-              const SizedBox(height: 16),
-              _buildTextField(_hargaController, "Harga Per Jam", Icons.attach_money,
-                  keyboardType: TextInputType.number),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(child: _buildTimeField(_jamBukaController, "Jam Buka")),
-                  const SizedBox(width: 16),
+      _buildTextField(_lokasiController, "Lokasi", Icons.location_on),
+      const SizedBox(height: 16),
+      _buildTextField(_hargaController, "Harga Per Jam", Icons.attach_money,
+          keyboardType: TextInputType.number),
+      const SizedBox(height: 16),
+      _buildTextField(_thumbnailController, "URL Thumbnail (opsional)", Icons.image, isRequired: false),
+      const SizedBox(height: 16),
+      Row(
+        children: [
+          Expanded(child: _buildTimeField(_jamBukaController, "Jam Buka")),
+          const SizedBox(width: 16),
                   Expanded(child: _buildTimeField(_jamTutupController, "Jam Tutup")),
                 ],
               ),
@@ -250,10 +251,14 @@ class _LapanganFormScreenState extends State<LapanganFormScreen> {
       'kategori': _selectedKategori ?? '',
       'lokasi': _lokasiController.text,
       'harga_per_jam': harga,
-      'jam_buka': _withSeconds(_jamBukaController.text),
-      'jam_tutup': _withSeconds(_jamTutupController.text),
+      'jam_buka': _normTime(_jamBukaController.text),
+      'jam_tutup': _normTime(_jamTutupController.text),
       // jangan kirim "foto" di payload JSON; upload lewat multipart
     };
+
+    if (_thumbnailController.text.isNotEmpty) {
+      payload['url_thumbnail'] = _thumbnailController.text.trim();
+    }
 
     try {
       Map<String, dynamic> response;

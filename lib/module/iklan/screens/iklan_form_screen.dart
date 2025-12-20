@@ -28,6 +28,7 @@ class _IklanFormScreenState extends State<IklanFormScreen> {
   // Controllers
   final TextEditingController _judulController = TextEditingController();
   final TextEditingController _deskripsiController = TextEditingController();
+  final TextEditingController _urlThumbnailController = TextEditingController();
 
   // State Variables
   bool _isLoading = false;
@@ -43,6 +44,7 @@ class _IklanFormScreenState extends State<IklanFormScreen> {
     if (widget.iklan != null) {
       _judulController.text = widget.iklan!.judul;
       _deskripsiController.text = widget.iklan!.deskripsi;
+      _urlThumbnailController.text = widget.iklan!.banner;
     }
   }
 
@@ -50,6 +52,7 @@ class _IklanFormScreenState extends State<IklanFormScreen> {
   void dispose() {
     _judulController.dispose();
     _deskripsiController.dispose();
+    _urlThumbnailController.dispose();
     super.dispose();
   }
 
@@ -108,6 +111,10 @@ class _IklanFormScreenState extends State<IklanFormScreen> {
       'deskripsi': _deskripsiController.text,
       'lapangan': _selectedLapanganId,
     };
+
+    if (_urlThumbnailController.text.isNotEmpty) {
+      payload['url_thumbnail'] = _urlThumbnailController.text.trim();
+    }
 
     if (_selectedImage != null) {
       List<int> imageBytes = await _selectedImage!.readAsBytes();
@@ -274,6 +281,7 @@ class _IklanFormScreenState extends State<IklanFormScreen> {
 
               // 2. DESKRIPSI
               _buildTextField(_deskripsiController, "Deskripsi Iklan", maxLines: 4),
+              _buildTextField(_urlThumbnailController, "URL Thumbnail (opsional)"),
               const SizedBox(height: 16),
 
               // 3. DROPDOWN LAPANGAN

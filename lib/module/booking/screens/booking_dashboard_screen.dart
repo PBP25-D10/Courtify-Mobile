@@ -7,6 +7,7 @@ import 'package:courtify_mobile/module/booking/screens/booking_user_list_screen.
 import 'package:courtify_mobile/module/booking/services/booking_api_service.dart';
 import 'package:courtify_mobile/module/lapangan/models/lapangan.dart';
 import 'package:courtify_mobile/module/lapangan/services/api_services.dart';
+import 'package:courtify_mobile/module/wishlist/services/wishlist_api_service.dart';
 
 class BookingDashboardScreen extends StatefulWidget {
   const BookingDashboardScreen({super.key});
@@ -18,6 +19,7 @@ class BookingDashboardScreen extends StatefulWidget {
 class _BookingDashboardScreenState extends State<BookingDashboardScreen> {
   final BookingApiService _apiService = BookingApiService();
   final LapanganApiService _lapService = LapanganApiService();
+  final WishlistApiService _wishlistService = WishlistApiService();
 
   List<Lapangan> _lapangan = [];
   int _currentPage = 1;
@@ -25,6 +27,7 @@ class _BookingDashboardScreenState extends State<BookingDashboardScreen> {
   bool _isLoadingMore = false;
   bool _hasMore = true;
   late ScrollController _scrollController;
+  final Set<String> _wishlistLapanganIds = {};
 
   static const Color backgroundColor = Color(0xFF111827);
   static const Color cardColor = Color(0xFF1F2937);
@@ -36,6 +39,7 @@ class _BookingDashboardScreenState extends State<BookingDashboardScreen> {
     super.initState();
     _scrollController = ScrollController()..addListener(_onScroll);
     _refreshData();
+    _loadWishlist();
   }
 
   void _onScroll() {
@@ -55,6 +59,7 @@ class _BookingDashboardScreenState extends State<BookingDashboardScreen> {
       _hasMore = true;
     });
     _loadLapanganPage();
+    _loadWishlist();
   }
 
   Future<void> _loadLapanganPage() async {
@@ -76,6 +81,47 @@ class _BookingDashboardScreenState extends State<BookingDashboardScreen> {
       _hasMore = false;
     } finally {
       if (mounted) setState(() => _isLoadingMore = false);
+    }
+  }
+
+  Future<void> _loadWishlist() async {
+    final auth = context.read<AuthService>();
+    try {
+      final list = await _wishlistService.fetchWishlist(auth);
+      setState(() {
+        _wishlistLapanganIds
+          ..clear()
+          ..addAll(list.map((e) => e.lapangan.idLapangan));
+      });
+    } catch (_) {
+      // ignore wishlist load failure for dashboard display
+    }
+  }
+
+  Future<void> _toggleWishlist(Lapangan lap) async {
+    final auth = context.read<AuthService>();
+    try {
+      final added = await _wishlistService.toggle(auth, lap.idLapangan);
+      setState(() {
+        if (added) {
+          _wishlistLapanganIds.add(lap.idLapangan);
+        } else {
+          _wishlistLapanganIds.remove(lap.idLapangan);
+        }
+      });
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(added
+              ? "Ditambahkan ke wishlist"
+              : "Dihapus dari wishlist"),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Gagal mengubah wishlist: $e")),
+      );
     }
   }
 
@@ -272,22 +318,12 @@ class _BookingDashboardScreenState extends State<BookingDashboardScreen> {
             height: 150,
             width: double.infinity,
             color: Colors.grey[900],
-            child: lap.fotoUrl != null
-                ? Image.network(
-                    lap.fotoUrl!,
-                    fit: BoxFit.cover,
-                    errorBuilder: (ctx, err, stack) =>
-                        const Icon(Icons.broken_image, color: Colors.grey),
-                  )
-                : const Center(
-                    child: Text(
-                      "Tidak ada foto",
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontStyle: FontStyle.italic,
-                      ),
-                    ),
-                  ),
+            child: Image.network(
+              lap.fotoUrl,
+              fit: BoxFit.cover,
+              errorBuilder: (ctx, err, stack) =>
+                  const Icon(Icons.broken_image, color: Colors.grey),
+            ),
           ),
           Padding(
             padding: const EdgeInsets.all(16.0),
@@ -309,7 +345,17 @@ class _BookingDashboardScreenState extends State<BookingDashboardScreen> {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    const Icon(Icons.favorite_border, color: Colors.white24),
+                    GestureDetector(
+                      onTap: () => _toggleWishlist(lap),
+                      child: Icon(
+                        _wishlistLapanganIds.contains(lap.idLapangan)
+                            ? Icons.favorite
+                            : Icons.favorite_border,
+                        color: _wishlistLapanganIds.contains(lap.idLapangan)
+                            ? Colors.redAccent
+                            : Colors.white24,
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 4),
