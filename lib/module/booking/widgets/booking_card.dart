@@ -95,7 +95,7 @@ class BookingCard extends StatelessWidget {
                 const Icon(Icons.calendar_today, size: 14, color: Colors.grey),
                 const SizedBox(width: 4),
                 Text(
-                  "${booking.tanggal} • ${booking.jamMulai} - ${booking.jamSelesai}", 
+                  "${booking.tanggal} | ${booking.jamMulai} - ${booking.jamSelesai}", 
                   style: const TextStyle(fontSize: 13, color: Colors.black54)
                 ),
               ],

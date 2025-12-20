@@ -33,6 +33,10 @@ class _LapanganFormScreenState extends State<LapanganFormScreen> {
   bool _isEditing = false;
 
   String _normTime(String s) => s.length >= 5 ? s.substring(0, 5) : s;
+  String _withSeconds(String s) {
+    final base = _normTime(s);
+    return base.length == 5 ? "$base:00" : base;
+  }
 
   @override
   void initState() {
@@ -148,7 +152,7 @@ class _LapanganFormScreenState extends State<LapanganFormScreen> {
                   ),
                   const SizedBox(width: 12),
                   if (_pickedImage != null)
-                    const Text("✓ Dipilih", style: TextStyle(color: Colors.white70)),
+                    const Text("Foto sudah dipilih", style: TextStyle(color: Colors.white70)),
                 ],
               ),
               const SizedBox(height: 32),
@@ -230,6 +234,14 @@ class _LapanganFormScreenState extends State<LapanganFormScreen> {
       return;
     }
 
+    final harga = int.tryParse(_hargaController.text);
+    if (harga == null || harga <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Harga per jam harus berupa angka lebih dari 0")),
+      );
+      return;
+    }
+
     final request = context.read<AuthService>();
 
     final payload = {
@@ -237,10 +249,10 @@ class _LapanganFormScreenState extends State<LapanganFormScreen> {
       'deskripsi': _deskripsiController.text,
       'kategori': _selectedKategori ?? '',
       'lokasi': _lokasiController.text,
-      'harga_per_jam': _hargaController.text,
-      'jam_buka': _normTime(_jamBukaController.text),
-      'jam_tutup': _normTime(_jamTutupController.text),
-      // ❌ jangan kirim "foto" (ImageField harus multipart)
+      'harga_per_jam': harga,
+      'jam_buka': _withSeconds(_jamBukaController.text),
+      'jam_tutup': _withSeconds(_jamTutupController.text),
+      // jangan kirim "foto" di payload JSON; upload lewat multipart
     };
 
     try {

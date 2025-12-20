@@ -1,3 +1,5 @@
+import 'package:courtify_mobile/services/auth_service.dart';
+
 class Lapangan {
   final String idLapangan;
   final String nama;
@@ -30,8 +32,9 @@ class Lapangan {
     final id = (json['id_lapangan'] ?? json['id']).toString();
 
     final foto = json['foto'];
-    final fotoUrl = (foto != null && foto.toString().isNotEmpty)
-        ? "https://justin-timothy-courtify.pbp.cs.ui.ac.id${foto.toString()}"
+    final fotoPath = foto?.toString() ?? '';
+    final fotoUrl = fotoPath.isNotEmpty
+        ? (fotoPath.startsWith('http') ? fotoPath : "${AuthService.baseHost}$fotoPath")
         : null;
 
     return Lapangan(

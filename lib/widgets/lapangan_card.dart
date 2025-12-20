@@ -28,11 +28,11 @@ class LapanganCard extends StatelessWidget {
               children: [
                 Text(lapangan.nama, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 6),
-                Text('${lapangan.kategori} • ${lapangan.lokasi}', maxLines: 2, overflow: TextOverflow.ellipsis),
+                Text('${lapangan.kategori} - ${lapangan.lokasi}', maxLines: 2, overflow: TextOverflow.ellipsis),
                 const SizedBox(height: 8),
                 Text('Rp ${lapangan.hargaPerJam} / jam', style: const TextStyle(fontWeight: FontWeight.w600)),
                 const SizedBox(height: 8),
-                Text('⏰ ${lapangan.jamBuka} - ${lapangan.jamTutup}'),
+                Text('Jam buka ${lapangan.jamBuka} - ${lapangan.jamTutup}'),
                 const SizedBox(height: 12),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,

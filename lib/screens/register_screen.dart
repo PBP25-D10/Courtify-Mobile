@@ -13,6 +13,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _firstNameController = TextEditingController();
+  final TextEditingController _lastNameController = TextEditingController();
 
   // Instance AuthService
   final AuthService _authService = AuthService();
@@ -28,6 +30,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _usernameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _firstNameController.dispose();
+    _lastNameController.dispose();
     super.dispose();
   }
 
@@ -36,6 +40,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final username = _usernameController.text.trim();
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
+    final firstName = _firstNameController.text.trim();
+    final lastName = _lastNameController.text.trim();
 
     if (username.isEmpty || email.isEmpty || password.isEmpty) {
       _showSnackBar('Semua field harus diisi!', Colors.redAccent);
@@ -53,10 +59,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     // 3. Panggil API Register
     final responseData = await _authService.register(
-      username,
-      email,
-      password,
-      _selectedRole!, // Mengirim role yang dipilih
+      username: username,
+      email: email,
+      password: password,
+      role: _selectedRole!, // Mengirim role yang dipilih
+      firstName: firstName.isEmpty ? null : firstName,
+      lastName: lastName.isEmpty ? null : lastName,
     );
 
     // 4. Set loading selesai
@@ -138,6 +146,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
               // Email Input
               _buildTextField(_emailController, 'Email', Icons.email, inputType: TextInputType.emailAddress),
               const SizedBox(height: 16),
+              // First name (opsional)
+              _buildTextField(_firstNameController, 'Nama Depan (opsional)', Icons.badge, isRequired: false),
+              const SizedBox(height: 16),
+              // Last name (opsional)
+              _buildTextField(_lastNameController, 'Nama Belakang (opsional)', Icons.badge_outlined, isRequired: false),
+              const SizedBox(height: 16),
               // Password Input
               TextField(
                 controller: _passwordController,
@@ -215,7 +229,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   // Widget Helper untuk membuat TextField standar
-  Widget _buildTextField(TextEditingController controller, String label, IconData icon, {TextInputType inputType = TextInputType.text}) {
+  Widget _buildTextField(
+    TextEditingController controller,
+    String label,
+    IconData icon, {
+    TextInputType inputType = TextInputType.text,
+    bool isRequired = true,
+  }) {
     return TextField(
       controller: controller,
       keyboardType: inputType,
