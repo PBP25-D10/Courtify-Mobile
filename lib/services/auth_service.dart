@@ -6,7 +6,7 @@ import 'package:courtify_mobile/services/http_client_factory_stub.dart'
 // test rebuilt
 class AuthService {
   /// Ganti host ini sesuai environment (default: localhost Django)
-  static const String baseHost = 'http://127.0.0.1:8000';
+  static const String baseHost = 'https://justin-timothy-courtify.pbp.cs.ui.ac.id';
   static const String _authBase = '$baseHost/auth/api/flutter/auth';
   static const String _loginUrl = '$_authBase/login/';
   static const String _registerUrl = '$_authBase/register/';
