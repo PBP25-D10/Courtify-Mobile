@@ -18,6 +18,11 @@ class _BookingDashboardScreenState extends State<BookingDashboardScreen> {
   final BookingApiService _apiService = BookingApiService();
   late Future<Map<String, dynamic>> _futureDashboardData;
 
+  static const Color backgroundColor = Color(0xFF111827);
+  static const Color cardColor = Color(0xFF1F2937);
+  static const Color accent = Color(0xFF2563EB);
+  static const Color muted = Colors.white70;
+
   @override
   void initState() {
     super.initState();
@@ -39,13 +44,14 @@ class _BookingDashboardScreenState extends State<BookingDashboardScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("Batalkan Booking"),
-        content: const Text("Yakin ingin membatalkan booking ini?"),
+        backgroundColor: cardColor,
+        title: const Text("Batalkan Booking", style: TextStyle(color: Colors.white)),
+        content: const Text("Yakin ingin membatalkan booking ini?", style: TextStyle(color: Colors.white70)),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context, false), child: const Text("Batal")),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text("Ya, Batalkan", style: TextStyle(color: Colors.red)),
+            child: const Text("Ya, Batalkan", style: TextStyle(color: Colors.redAccent)),
           ),
         ],
       ),
@@ -81,15 +87,15 @@ class _BookingDashboardScreenState extends State<BookingDashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF3F4F6),
+      backgroundColor: backgroundColor,
       appBar: AppBar(
         title: const Text(
           "Dashboard Booking",
-          style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: backgroundColor,
+        foregroundColor: Colors.white,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black87),
         actions: [
           IconButton(
             onPressed: _openAllBookings,
@@ -105,7 +111,7 @@ class _BookingDashboardScreenState extends State<BookingDashboardScreen> {
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
-            return Center(child: Text("Error: ${snapshot.error}"));
+            return Center(child: Text("Error: ${snapshot.error}", style: const TextStyle(color: Colors.white)));
           }
           if (!snapshot.hasData) {
             return const SizedBox();
@@ -124,7 +130,7 @@ class _BookingDashboardScreenState extends State<BookingDashboardScreen> {
                 children: [
                   const Text(
                     "Booking Terbaru",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
                   ),
                   const SizedBox(height: 12),
 
@@ -137,17 +143,17 @@ class _BookingDashboardScreenState extends State<BookingDashboardScreen> {
                     alignment: Alignment.centerRight,
                     child: TextButton(
                       onPressed: _openAllBookings,
-                      child: const Text("Lihat semua booking"),
+                      child: const Text("Lihat semua booking", style: TextStyle(color: Colors.white)),
                     ),
                   ),
 
                   const SizedBox(height: 24),
-                  const Divider(),
+                  const Divider(color: Colors.white12),
                   const SizedBox(height: 24),
 
                   const Text(
                     "Lapangan Tersedia",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
                   ),
                   const SizedBox(height: 12),
 
@@ -167,7 +173,7 @@ class _BookingDashboardScreenState extends State<BookingDashboardScreen> {
         onPressed: _openAllBookings,
         label: const Text("Booking Saya"),
         icon: const Icon(Icons.calendar_month),
-        backgroundColor: Colors.green[600],
+        backgroundColor: accent,
       ),
     );
   }
@@ -177,14 +183,14 @@ class _BookingDashboardScreenState extends State<BookingDashboardScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cardColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: Colors.white10),
       ),
       child: Text(
         message,
         textAlign: TextAlign.center,
-        style: TextStyle(color: Colors.grey[600]),
+        style: const TextStyle(color: Colors.white70),
       ),
     );
   }
@@ -196,28 +202,28 @@ class _BookingDashboardScreenState extends State<BookingDashboardScreen> {
 
     switch (booking.status) {
       case 'confirmed':
-        statusColor = Colors.green[800]!;
-        statusBgColor = Colors.green[100]!;
+        statusColor = Colors.greenAccent.shade200;
+        statusBgColor = const Color.fromRGBO(0, 128, 0, 0.1);
         statusText = "Dikonfirmasi";
         break;
       case 'cancelled':
-        statusColor = Colors.red[800]!;
-        statusBgColor = Colors.red[100]!;
+        statusColor = Colors.redAccent.shade100;
+        statusBgColor = const Color.fromRGBO(244, 67, 54, 0.1);
         statusText = "Dibatalkan";
         break;
       default:
-        statusColor = Colors.orange[800]!;
-        statusBgColor = Colors.orange[100]!;
+        statusColor = Colors.orangeAccent.shade100;
+        statusBgColor = const Color.fromRGBO(255, 152, 0, 0.1);
         statusText = "Menunggu Konfirmasi";
     }
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cardColor,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
-          BoxShadow(color: Colors.grey.withOpacity(0.1), blurRadius: 5, offset: const Offset(0, 2)),
+          const BoxShadow(color: Color.fromRGBO(0, 0, 0, 0.1), blurRadius: 6, offset: Offset(0, 3)),
         ],
       ),
       child: Padding(
@@ -231,7 +237,7 @@ class _BookingDashboardScreenState extends State<BookingDashboardScreen> {
                 Expanded(
                   child: Text(
                     booking.lapangan?.nama ?? "Lapangan Tidak Dikenal",
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -251,11 +257,11 @@ class _BookingDashboardScreenState extends State<BookingDashboardScreen> {
             const SizedBox(height: 8),
             Row(
               children: [
-                const Icon(Icons.calendar_today, size: 14, color: Colors.grey),
+                const Icon(Icons.calendar_today, size: 14, color: Colors.white70),
                 const SizedBox(width: 4),
                 Text(
                   "${booking.tanggal} | ${booking.jamMulai} - ${booking.jamSelesai}",
-                  style: const TextStyle(fontSize: 13, color: Colors.black54),
+                  style: const TextStyle(fontSize: 13, color: Colors.white70),
                 ),
               ],
             ),
@@ -265,21 +271,18 @@ class _BookingDashboardScreenState extends State<BookingDashboardScreen> {
               children: [
                 Text(
                   _formatCurrency(booking.totalHarga),
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.black87),
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.white),
                 ),
                 if (booking.status != 'cancelled')
                   InkWell(
                     onTap: () => _handleCancelBooking(booking.id),
                     child: const Padding(
                       padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      child: Text(
-                        "Batalkan",
-                        style: TextStyle(color: Colors.red, fontWeight: FontWeight.w600, fontSize: 13),
-                      ),
+                      child: Text("Batalkan", style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.w600, fontSize: 13)),
                     ),
                   )
                 else
-                  const Text("-", style: TextStyle(color: Colors.grey)),
+                  const Text("-", style: TextStyle(color: Colors.white38)),
               ],
             ),
           ],
@@ -292,10 +295,10 @@ class _BookingDashboardScreenState extends State<BookingDashboardScreen> {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cardColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
-          BoxShadow(color: Colors.grey.withOpacity(0.15), blurRadius: 8, offset: const Offset(0, 4)),
+          const BoxShadow(color: Color.fromRGBO(0, 0, 0, 0.2), blurRadius: 8, offset: Offset(0, 4)),
         ],
       ),
       clipBehavior: Clip.antiAlias,
@@ -305,7 +308,7 @@ class _BookingDashboardScreenState extends State<BookingDashboardScreen> {
           Container(
             height: 150,
             width: double.infinity,
-            color: Colors.grey[200],
+            color: Colors.grey[900],
             child: lap.fotoUrl != null
                 ? Image.network(
                     lap.fotoUrl!,
@@ -315,7 +318,7 @@ class _BookingDashboardScreenState extends State<BookingDashboardScreen> {
                 : const Center(
                     child: Text(
                       "Tidak ada foto",
-                      style: TextStyle(color: Colors.grey, fontStyle: FontStyle.italic),
+                      style: TextStyle(color: Colors.white70, fontStyle: FontStyle.italic),
                     ),
                   ),
           ),
@@ -330,27 +333,27 @@ class _BookingDashboardScreenState extends State<BookingDashboardScreen> {
                     Expanded(
                       child: Text(
                         lap.nama,
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    const Icon(Icons.favorite_border, color: Colors.grey),
+                    const Icon(Icons.favorite_border, color: Colors.white24),
                   ],
                 ),
                 const SizedBox(height: 4),
                 Text(
                   "${lap.kategori} - ${lap.lokasi}",
-                  style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                  style: TextStyle(color: muted, fontSize: 12),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   "${_formatCurrency(lap.hargaPerJam)} / jam",
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.green),
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.greenAccent),
                 ),
                 Text(
                   "Jam buka ${lap.jamBuka} - ${lap.jamTutup}",
-                  style: TextStyle(color: Colors.grey[500], fontSize: 12),
+                  style: TextStyle(color: muted, fontSize: 12),
                 ),
                 const SizedBox(height: 16),
                 SizedBox(
@@ -369,7 +372,7 @@ class _BookingDashboardScreenState extends State<BookingDashboardScreen> {
                       });
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green[600],
+                      backgroundColor: accent,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       padding: const EdgeInsets.symmetric(vertical: 12),
                     ),

@@ -3,7 +3,7 @@ import 'package:courtify_mobile/module/booking/models/booking.dart';
 
 class BookingCard extends StatelessWidget {
   final Booking booking;
-  final Function(int) onCancel; // Callback function saat tombol batal ditekan
+  final Function(int) onCancel;
 
   const BookingCard({
     super.key,
@@ -11,7 +11,9 @@ class BookingCard extends StatelessWidget {
     required this.onCancel,
   });
 
-  // Helper format currency
+  static const Color cardColor = Color(0xFF1F2937);
+  static const Color muted = Colors.white70;
+
   String _formatCurrency(num price) {
     return "Rp ${price.toStringAsFixed(0).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}";
   }
@@ -22,34 +24,33 @@ class BookingCard extends StatelessWidget {
     Color statusBgColor;
     String statusText;
 
-    // Logika warna status
     switch (booking.status) {
       case 'confirmed':
-        statusColor = Colors.green[800]!;
-        statusBgColor = Colors.green[100]!;
+        statusColor = Colors.greenAccent.shade200;
+        statusBgColor = const Color.fromRGBO(0, 128, 0, 0.1);
         statusText = "Dikonfirmasi";
         break;
       case 'cancelled':
-        statusColor = Colors.red[800]!;
-        statusBgColor = Colors.red[100]!;
+        statusColor = Colors.redAccent.shade100;
+        statusBgColor = const Color.fromRGBO(244, 67, 54, 0.1);
         statusText = "Dibatalkan";
         break;
-      default: // pending
-        statusColor = Colors.orange[800]!;
-        statusBgColor = Colors.orange[100]!;
+      default:
+        statusColor = Colors.orangeAccent.shade100;
+        statusBgColor = const Color.fromRGBO(255, 152, 0, 0.1);
         statusText = "Menunggu Konfirmasi";
     }
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cardColor,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1), 
-            blurRadius: 5, 
-            offset: const Offset(0, 2)
+          const BoxShadow(
+            color: Color.fromRGBO(0, 0, 0, 0.1),
+            blurRadius: 5,
+            offset: Offset(0, 2),
           ),
         ],
       ),
@@ -58,14 +59,13 @@ class BookingCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Baris 1: Nama Lapangan & Status Badge
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
                   child: Text(
                     booking.lapangan?.nama ?? "Lapangan Tidak Dikenal",
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -78,44 +78,41 @@ class BookingCard extends StatelessWidget {
                   child: Text(
                     statusText,
                     style: TextStyle(
-                      color: statusColor, 
-                      fontSize: 11, 
-                      fontWeight: FontWeight.bold
+                      color: statusColor,
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 8),
-            
-            // Baris 2: Tanggal & Jam
+
             Row(
               children: [
-                const Icon(Icons.calendar_today, size: 14, color: Colors.grey),
+                const Icon(Icons.calendar_today, size: 14, color: Colors.white70),
                 const SizedBox(width: 4),
                 Text(
-                  "${booking.tanggal} | ${booking.jamMulai} - ${booking.jamSelesai}", 
-                  style: const TextStyle(fontSize: 13, color: Colors.black54)
+                  "${booking.tanggal} | ${booking.jamMulai} - ${booking.jamSelesai}",
+                  style: const TextStyle(fontSize: 13, color: Colors.white70),
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 12),
-            
-            // Baris 3: Harga & Tombol Batal
+
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
                   _formatCurrency(booking.totalHarga),
                   style: const TextStyle(
-                    fontWeight: FontWeight.bold, 
-                    fontSize: 15, 
-                    color: Colors.black87
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                    color: Colors.white,
                   ),
                 ),
-                // Tombol Cancel hanya muncul jika status bukan cancelled
                 if (booking.status != 'cancelled')
                   InkWell(
                     onTap: () => onCancel(booking.id),
@@ -123,17 +120,17 @@ class BookingCard extends StatelessWidget {
                     child: const Padding(
                       padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       child: Text(
-                        "Batalkan", 
+                        "Batalkan",
                         style: TextStyle(
-                          color: Colors.red, 
-                          fontWeight: FontWeight.w600, 
-                          fontSize: 13
-                        )
+                          color: Colors.redAccent,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                        ),
                       ),
                     ),
                   )
                 else
-                  const Text("-", style: TextStyle(color: Colors.grey)),
+                  const Text("-", style: TextStyle(color: Colors.white38)),
               ],
             ),
           ],

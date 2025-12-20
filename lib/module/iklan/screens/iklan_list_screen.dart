@@ -1,4 +1,3 @@
-import 'package:courtify_mobile/widgets/right_drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:courtify_mobile/services/auth_service.dart';
@@ -15,8 +14,6 @@ class IklanListScreen extends StatefulWidget {
 }
 
 class _IklanListScreenState extends State<IklanListScreen> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-
   final IklanApiService _apiService = IklanApiService();
   late Future<List<Iklan>> _futureIklan;
 
@@ -81,42 +78,25 @@ class _IklanListScreenState extends State<IklanListScreen> {
   Widget build(BuildContext context) {
     const backgroundColor = Color(0xFF111827);
     const primaryBlue = Color(0xFF2563EB); 
-    const borderColor = Color(0xFFFFFFFF);
 
     return Scaffold(
-      key: _scaffoldKey, 
       backgroundColor: backgroundColor,
-      endDrawer: RightDrawer(), 
+      appBar: AppBar(
+        backgroundColor: backgroundColor,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text(
+          "Kelola Iklan",
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+      ),
       body: SafeArea(
         child: Column(
           children: [
-            // --- FIXED HEADER (Tidak ikut discroll) ---
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-              decoration: const BoxDecoration(
-                border: Border(bottom: BorderSide(color: borderColor, width: 1)),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    "Courtify",
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.menu, color: Colors.white, size: 28),
-                    onPressed: () {
-                      _scaffoldKey.currentState?.openEndDrawer();
-                    },
-                  ),
-                ],
-              ),
-            ),
-
             // --- SCROLLABLE CONTENT ---
             Expanded(
               child: SingleChildScrollView(
@@ -497,7 +477,7 @@ class _IklanListScreenState extends State<IklanListScreen> {
                       child: Padding(
                         padding: const EdgeInsets.only(bottom: 20.0),
                         child: Text(
-                          "© 2025 Courtify. All rights reserved. | Kebijakan Privasi | Peta Situs",
+                          "(c) 2025 Courtify. All rights reserved. | Kebijakan Privasi | Peta Situs",
                           style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
                           textAlign: TextAlign.center,
                         ),

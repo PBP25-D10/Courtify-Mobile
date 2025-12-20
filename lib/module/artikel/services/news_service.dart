@@ -1,78 +1,45 @@
-// import 'package:pbp_django_auth/pbp_django_auth.dart';
-// import '../models/news.dart';
-
-// class NewsService {
-//   final String baseUrl = "http://localhost:8000"; // chrome
-
-//   Future<List<News>> fetchNews(CookieRequest request) async {
-//     final response = await request.get("$baseUrl/artikel/json/");
-
-//     final List<News> list = [];
-//     for (final d in response) {
-//       list.add(News.fromJson(Map<String, dynamic>.from(d)));
-//     }
-//     return list;
-//   }
-// }
-
-
-import 'package:courtify_mobile/services/auth_service.dart';
 import 'package:courtify_mobile/module/artikel/models/news.dart';
+import 'package:courtify_mobile/services/auth_service.dart';
 
 class NewsApiService {
-  // SAMAKAN dengan BookingApiService
-  final String baseUrl = "https://justin-timothy-courtify.pbp.cs.ui.ac.id";
+  final String baseUrl = "${AuthService.baseHost}/artikel/api";
 
-  // 1️⃣ Ambil semua berita (LIST)
-  Future<List<News>> fetchNews(AuthService request) async {
-    final response = await request.get("$baseUrl/artikel/json/");
-
-    // response di sini SUDAH berupa decoded JSON (List / Map)
-    final List data = response;
-
-    return data
-        .map((e) => News.fromJson(Map<String, dynamic>.from(e)))
-        .toList();
+  Future<List<News>> fetchNews(AuthService auth) async {
+    final response = await auth.get("$baseUrl/json/", requireAuth: false);
+    final List data = response is List ? response : [];
+    return data.map((e) => News.fromJson(Map<String, dynamic>.from(e))).toList();
   }
 
-  // 2️⃣ Tambah berita (OWNER)
-  Future<bool> createNews(
-    AuthService request,
-    Map<String, dynamic> data,
-  ) async {
-    final response = await request.postJson(
-      "$baseUrl/artikel/create-flutter/",
-      data,
-    );
-
-    return response['status'] == 'success';
+  Future<List<News>> fetchMyNews(AuthService auth) async {
+    final res = await auth.get("$baseUrl/flutter/my/");
+    if (res is Map && res['status'] == 'success') {
+      final List data = res['news'] ?? [];
+      return data.map((e) => News.fromJson(Map<String, dynamic>.from(e))).toList();
+    }
+    throw Exception(res is Map && res['message'] != null ? res['message'] : 'Gagal memuat artikel saya');
   }
 
-  // 3️⃣ Hapus berita (OWNER)
-  Future<bool> deleteNews(AuthService request, int idBerita) async {
-    final response = await request.postJson(
-      "$baseUrl/artikel/delete-flutter/$idBerita/",
-      {},
-    );
+  Future<News> createNews(AuthService auth, Map<String, dynamic> payload) async {
+    final res = await auth.postJson("$baseUrl/flutter/create/", payload);
+    if (res is Map && res['status'] == 'success') {
+      final newsData = Map<String, dynamic>.from(res['news'] ?? {});
+      return News.fromJson(newsData);
+    }
+    throw Exception(res['message'] ?? 'Gagal membuat artikel');
+  }
 
-    return response['status'] == 'success';
+  Future<News> updateNews(AuthService auth, int id, Map<String, dynamic> payload) async {
+    final res = await auth.postJson("$baseUrl/flutter/update/$id/", payload);
+    if (res is Map && res['status'] == 'success') {
+      final newsData = Map<String, dynamic>.from(res['news'] ?? {});
+      return News.fromJson(newsData);
+    }
+    throw Exception(res['message'] ?? 'Gagal memperbarui artikel');
+  }
+
+  Future<void> deleteNews(AuthService auth, int id) async {
+    final res = await auth.postJson("$baseUrl/flutter/delete/$id/", {});
+    if (res is Map && res['status'] == 'success') return;
+    throw Exception(res['message'] ?? 'Gagal menghapus artikel');
   }
 }
-
-// import 'dart:convert';
-// import 'package:http/http.dart' as http;
-// import '../models/news.dart';
-
-// class NewsService {
-//   final String baseUrl = "http://localhost:8000";
-
-//   Future<List<News>> fetchNews() async {
-//     final response = await http.get(Uri.parse("$baseUrl/artikel/json/"));
-//     final data = jsonDecode(response.body) as List;
-//     return data.map((e) => News.fromJson(e)).toList();
-//   }
-
-//   Future<void> deleteNews(int id) async {
-//     await http.post(Uri.parse("$baseUrl/artikel/delete-flutter/$id/"));
-//   }
-// }

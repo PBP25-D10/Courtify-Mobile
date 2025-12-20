@@ -3,7 +3,7 @@ class News {
   final String title;
   final String content;
   final String kategori;
-  final String thumbnail;
+  final String thumbnailUrl;
   final String author;
   final String createdAt;
 
@@ -12,7 +12,7 @@ class News {
     required this.title,
     required this.content,
     required this.kategori,
-    required this.thumbnail,
+    required this.thumbnailUrl,
     required this.author,
     required this.createdAt,
   });
@@ -23,7 +23,7 @@ class News {
       title: (json['title'] ?? '') as String,
       content: (json['content'] ?? '') as String,
       kategori: (json['kategori'] ?? '') as String,
-      thumbnail: (json['thumbnail'] ?? '') as String,
+      thumbnailUrl: (json['thumbnail_url'] ?? json['thumbnail'] ?? '') as String,
       createdAt: (json['created_at'] ?? '') as String,
       author: (json['author'] ?? '') as String,
     );
