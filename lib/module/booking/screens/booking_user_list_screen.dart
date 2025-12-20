@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:courtify_mobile/services/auth_service.dart';
 import 'package:courtify_mobile/module/booking/models/booking.dart';
 import 'package:courtify_mobile/module/booking/services/booking_api_service.dart';
-import 'package:courtify_mobile/module/booking/widgets/booking_card.dart'; // Import widget yang baru dibuat
+import 'package:courtify_mobile/module/booking/widgets/booking_card.dart';
 
 class BookingUserListScreen extends StatefulWidget {
   const BookingUserListScreen({super.key});
@@ -16,13 +16,15 @@ class _BookingUserListScreenState extends State<BookingUserListScreen> {
   final BookingApiService _apiService = BookingApiService();
   late Future<List<Booking>> _futureBookings;
 
+  static const Color backgroundColor = Color(0xFF111827);
+  static const Color cardColor = Color(0xFF1F2937);
+
   @override
   void initState() {
     super.initState();
     _loadBookings();
   }
 
-  // Fungsi untuk memuat data booking
   void _loadBookings() {
     final request = context.read<AuthService>();
     setState(() {
@@ -30,13 +32,13 @@ class _BookingUserListScreenState extends State<BookingUserListScreen> {
     });
   }
 
-  // Fungsi Cancel Booking (Sama logicnya dengan Dashboard)
   Future<void> _handleCancelBooking(int bookingId) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("Batalkan Booking"),
-        content: const Text("Yakin ingin membatalkan booking ini?"),
+        backgroundColor: cardColor,
+        title: const Text("Batalkan Booking", style: TextStyle(color: Colors.white)),
+        content: const Text("Yakin ingin membatalkan booking ini?", style: TextStyle(color: Colors.white70)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -44,10 +46,7 @@ class _BookingUserListScreenState extends State<BookingUserListScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text(
-              "Ya, Batalkan",
-              style: TextStyle(color: Colors.red),
-            ),
+            child: const Text("Ya, Batalkan", style: TextStyle(color: Colors.redAccent)),
           ),
         ],
       ),
@@ -65,7 +64,7 @@ class _BookingUserListScreenState extends State<BookingUserListScreen> {
               backgroundColor: Colors.green,
             ),
           );
-          _loadBookings(); // Refresh list setelah cancel berhasil
+          _loadBookings();
         }
       } catch (e) {
         if (!mounted) return;
@@ -82,25 +81,23 @@ class _BookingUserListScreenState extends State<BookingUserListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF3F4F6), // Background abu muda
+      backgroundColor: backgroundColor,
       appBar: AppBar(
         title: const Text(
           "Riwayat Booking",
-          style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: backgroundColor,
+        foregroundColor: Colors.white,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black87),
       ),
       body: FutureBuilder<List<Booking>>(
         future: _futureBookings,
         builder: (context, snapshot) {
-          // 1. Loading State
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          // 2. Error State
           if (snapshot.hasError) {
             return Center(
               child: Padding(
@@ -111,10 +108,12 @@ class _BookingUserListScreenState extends State<BookingUserListScreen> {
                     Text(
                       "Error: ${snapshot.error}",
                       textAlign: TextAlign.center,
+                      style: const TextStyle(color: Colors.white),
                     ),
                     const SizedBox(height: 10),
                     ElevatedButton(
                       onPressed: _loadBookings,
+                      style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
                       child: const Text("Coba Lagi"),
                     ),
                   ],
@@ -123,19 +122,17 @@ class _BookingUserListScreenState extends State<BookingUserListScreen> {
             );
           }
 
-          // 3. Empty State
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(
               child: Text(
                 "Belum ada riwayat booking.",
-                style: TextStyle(color: Colors.grey, fontSize: 16),
+                style: TextStyle(color: Colors.white70, fontSize: 16),
               ),
             );
           }
 
           final bookings = snapshot.data!;
 
-          // 4. Success State (List Data)
           return RefreshIndicator(
             onRefresh: () async => _loadBookings(),
             child: ListView.builder(
@@ -143,7 +140,6 @@ class _BookingUserListScreenState extends State<BookingUserListScreen> {
               itemCount: bookings.length,
               itemBuilder: (context, index) {
                 final booking = bookings[index];
-                // Menggunakan Widget BookingCard yang kita buat di nomor 1
                 return BookingCard(
                   booking: booking,
                   onCancel: _handleCancelBooking,

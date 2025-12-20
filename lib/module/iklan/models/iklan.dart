@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:courtify_mobile/services/auth_service.dart';
 
 List<Iklan> iklanFromJson(String str) {
   final jsonData = json.decode(str);
@@ -33,13 +34,13 @@ class Iklan {
 
   factory Iklan.fromJson(Map<String, dynamic> json) {
     String? fullBannerUrl;
-    if (json["banner"] != null && json["banner"].toString().isNotEmpty) {
-      String rawBanner = json["banner"].toString();
-      if (rawBanner.startsWith("http")) {
-        fullBannerUrl = rawBanner;
-      } else {
-        fullBannerUrl = "https://justin-timothy-courtify.pbp.cs.ui.ac.id$rawBanner";
-      }
+    final raw = json["banner"]?.toString() ?? "";
+    if (raw.isNotEmpty) {
+      fullBannerUrl = raw.startsWith("http")
+          ? raw
+          : "${AuthService.baseHost}$raw";
+    } else {
+      fullBannerUrl = "https://images.pexels.com/photos/17724042/pexels-photo-17724042.jpeg";
     }
 
     return Iklan(

@@ -1,14 +1,11 @@
-import 'dart:convert';
-import 'dart:io';
-import 'package:http/http.dart' as http;
 import 'package:courtify_mobile/services/auth_service.dart';
 import 'package:courtify_mobile/module/iklan/models/iklan.dart';
 
 class IklanApiService {
-  final String baseUrl = "https://justin-timothy-courtify.pbp.cs.ui.ac.id";
+  final String baseUrl = "${AuthService.baseHost}/api/iklan";
 
   Future<List<Iklan>> fetchIklan(AuthService request) async {
-    final response = await request.get("$baseUrl/api/iklan/list/");
+    final response = await request.get("$baseUrl/list/");
     
     if (response is Map && response['status'] == 'success') {
       final List data = response['iklan_list'] ?? [];
@@ -18,7 +15,7 @@ class IklanApiService {
   }
 
   Future<List<Iklan>> fetchTop10Iklan(AuthService request) async {
-    final response = await request.get("$baseUrl/api/iklan/landing/");
+    final response = await request.get("$baseUrl/landing/");
 
     if (response is Map && response['status'] == 'success') {
       final List data = response['iklan_list'] ?? [];
@@ -28,17 +25,17 @@ class IklanApiService {
   }
 
   Future<Map<String, dynamic>> createIklan(AuthService request, Map<String, dynamic> payload) async {
-    final res = await request.postForm("$baseUrl/api/iklan/create/", payload);
+    final res = await request.postJson("$baseUrl/create/", payload);
     return Map<String, dynamic>.from(res);
   }
 
   Future<Map<String, dynamic>> updateIklan(AuthService request, String id, Map<String, dynamic> payload) async {
-    final res = await request.postForm("$baseUrl/api/iklan/edit/$id/", payload);
+    final res = await request.postJson("$baseUrl/edit/$id/", payload);
     return Map<String, dynamic>.from(res);
   }
 
   Future<Map<String, dynamic>> deleteIklan(AuthService request, String id) async {
-    final res = await request.postForm("$baseUrl/api/iklan/delete/$id/", {});
+    final res = await request.postJson("$baseUrl/delete/$id/", {});
     return Map<String, dynamic>.from(res);
   }
 }
