@@ -2,14 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:courtify_mobile/services/auth_service.dart';
 import 'package:courtify_mobile/module/booking/models/booking.dart';
-import 'package:courtify_mobile/module/lapangan/models/lapangan.dart';
-import 'package:courtify_mobile/module/booking/services/booking_api_service.dart';
 import 'package:courtify_mobile/module/booking/screens/booking_create_screen.dart';
-
-// Ganti import ini sesuai lokasi file form booking/lapangan kamu
-import 'package:courtify_mobile/module/lapangan/screens/lapangan_form_screen.dart'; 
-
-// import 'package:courtify_mobile/module/booking/screens/booking_create_screen.dart'; // Buat nanti
+import 'package:courtify_mobile/module/booking/screens/booking_user_list_screen.dart';
+import 'package:courtify_mobile/module/booking/services/booking_api_service.dart';
+import 'package:courtify_mobile/module/lapangan/models/lapangan.dart';
 
 class BookingDashboardScreen extends StatefulWidget {
   const BookingDashboardScreen({super.key});
@@ -31,16 +27,14 @@ class _BookingDashboardScreenState extends State<BookingDashboardScreen> {
   void _refreshData() {
     final request = context.read<AuthService>();
     setState(() {
-      _futureDashboardData = _apiService.getBookingDashboard(request);
+      _futureDashboardData = _apiService.getDashboardData(request);
     });
   }
 
-  // Helper untuk format mata uang sederhana
-  String _formatCurrency(double price) {
+  String _formatCurrency(num price) {
     return "Rp ${price.toStringAsFixed(0).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}";
   }
 
-  // Fungsi Batalkan Booking
   Future<void> _handleCancelBooking(int bookingId) async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -50,8 +44,8 @@ class _BookingDashboardScreenState extends State<BookingDashboardScreen> {
         actions: [
           TextButton(onPressed: () => Navigator.pop(context, false), child: const Text("Batal")),
           TextButton(
-            onPressed: () => Navigator.pop(context, true), 
-            child: const Text("Ya, Batalkan", style: TextStyle(color: Colors.red))
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text("Ya, Batalkan", style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -62,12 +56,14 @@ class _BookingDashboardScreenState extends State<BookingDashboardScreen> {
       try {
         final success = await _apiService.cancelBooking(request, bookingId);
         if (success) {
+          if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text("Booking berhasil dibatalkan"), backgroundColor: Colors.green),
           );
-          _refreshData(); // Refresh tampilan
+          _refreshData();
         }
       } catch (e) {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Gagal membatalkan: $e"), backgroundColor: Colors.red),
         );
@@ -75,15 +71,32 @@ class _BookingDashboardScreenState extends State<BookingDashboardScreen> {
     }
   }
 
+  void _openAllBookings() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const BookingUserListScreen()),
+    ).then((_) => _refreshData());
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF3F4F6), // Background abu muda seperti HTML
+      backgroundColor: const Color(0xFFF3F4F6),
       appBar: AppBar(
-        title: const Text("Dashboard Booking", style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold)),
+        title: const Text(
+          "Dashboard Booking",
+          style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
+        ),
         backgroundColor: Colors.white,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black87),
+        actions: [
+          IconButton(
+            onPressed: _openAllBookings,
+            icon: const Icon(Icons.list_alt),
+            tooltip: 'Lihat semua booking',
+          )
+        ],
       ),
       body: FutureBuilder<Map<String, dynamic>>(
         future: _futureDashboardData,
@@ -93,6 +106,9 @@ class _BookingDashboardScreenState extends State<BookingDashboardScreen> {
           }
           if (snapshot.hasError) {
             return Center(child: Text("Error: ${snapshot.error}"));
+          }
+          if (!snapshot.hasData) {
+            return const SizedBox();
           }
 
           final bookings = snapshot.data!['bookings'] as List<Booking>;
@@ -106,38 +122,31 @@ class _BookingDashboardScreenState extends State<BookingDashboardScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // --- HEADER SECTION ---
                   const Text(
-                    "📅 5 Booking Terbaru",
+                    "Booking Terbaru",
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
                   ),
                   const SizedBox(height: 12),
 
-                  // --- BOOKING LIST SECTION ---
                   if (bookings.isEmpty)
                     _buildEmptyState("Belum ada booking yang dibuat.")
                   else
                     ...bookings.map((booking) => _buildBookingCard(booking)),
 
-                  // Link "Lihat Semua"
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
-                      onPressed: () {
-                         // Navigasi ke List Semua Booking
-                         // Navigator.pushNamed(context, '/my-bookings');
-                      },
-                      child: const Text("Lihat semua booking →"),
+                      onPressed: _openAllBookings,
+                      child: const Text("Lihat semua booking"),
                     ),
                   ),
-                  
+
                   const SizedBox(height: 24),
                   const Divider(),
                   const SizedBox(height: 24),
 
-                  // --- LAPANGAN SECTION ---
                   const Text(
-                    "🏟️ Lapangan Tersedia",
+                    "Lapangan Tersedia",
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
                   ),
                   const SizedBox(height: 12),
@@ -147,19 +156,7 @@ class _BookingDashboardScreenState extends State<BookingDashboardScreen> {
                   else
                     ...lapanganList.map((lap) => _buildLapanganCard(lap)),
 
-                   // Link "Lihat Semua Lapangan"
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton(
-                      onPressed: () {
-                         // Navigasi ke List Semua Lapangan (Sesuai kode kamu sebelumnya)
-                         // Navigator.push(context, MaterialPageRoute(builder: (_) => LapanganListScreen()));
-                      },
-                      child: const Text("Lihat semua lapangan →"),
-                    ),
-                  ),
-                  
-                  const SizedBox(height: 60), // Space untuk FAB
+                  const SizedBox(height: 60),
                 ],
               ),
             ),
@@ -167,18 +164,13 @@ class _BookingDashboardScreenState extends State<BookingDashboardScreen> {
         },
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-           // Navigasi ke Form Booking atau List Lapangan untuk booking
-           // Navigator.pushNamed(context, '/booking-list');
-        },
-        label: const Text("Buat Booking"),
-        icon: const Icon(Icons.add),
+        onPressed: _openAllBookings,
+        label: const Text("Booking Saya"),
+        icon: const Icon(Icons.calendar_month),
         backgroundColor: Colors.green[600],
       ),
     );
   }
-
-  // --- WIDGET COMPONENTS ---
 
   Widget _buildEmptyState(String message) {
     return Container(
@@ -202,7 +194,6 @@ class _BookingDashboardScreenState extends State<BookingDashboardScreen> {
     Color statusBgColor;
     String statusText;
 
-    // Logic Status warna (mirip HTML)
     switch (booking.status) {
       case 'confirmed':
         statusColor = Colors.green[800]!;
@@ -214,7 +205,7 @@ class _BookingDashboardScreenState extends State<BookingDashboardScreen> {
         statusBgColor = Colors.red[100]!;
         statusText = "Dibatalkan";
         break;
-      default: // pending
+      default:
         statusColor = Colors.orange[800]!;
         statusBgColor = Colors.orange[100]!;
         statusText = "Menunggu Konfirmasi";
@@ -262,8 +253,10 @@ class _BookingDashboardScreenState extends State<BookingDashboardScreen> {
               children: [
                 const Icon(Icons.calendar_today, size: 14, color: Colors.grey),
                 const SizedBox(width: 4),
-                Text("${booking.tanggal} • ${booking.jamMulai} - ${booking.jamSelesai}", 
-                  style: const TextStyle(fontSize: 13, color: Colors.black54)),
+                Text(
+                  "${booking.tanggal} | ${booking.jamMulai} - ${booking.jamSelesai}",
+                  style: const TextStyle(fontSize: 13, color: Colors.black54),
+                ),
               ],
             ),
             const SizedBox(height: 12),
@@ -279,7 +272,10 @@ class _BookingDashboardScreenState extends State<BookingDashboardScreen> {
                     onTap: () => _handleCancelBooking(booking.id),
                     child: const Padding(
                       padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      child: Text("Batalkan", style: TextStyle(color: Colors.red, fontWeight: FontWeight.w600, fontSize: 13)),
+                      child: Text(
+                        "Batalkan",
+                        style: TextStyle(color: Colors.red, fontWeight: FontWeight.w600, fontSize: 13),
+                      ),
                     ),
                   )
                 else
@@ -306,24 +302,23 @@ class _BookingDashboardScreenState extends State<BookingDashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Gambar Lapangan
           Container(
             height: 150,
             width: double.infinity,
             color: Colors.grey[200],
             child: lap.fotoUrl != null
                 ? Image.network(
-                    // Sesuaikan base URL jika fotoUrl dari API belum absolut
-                    // Jika URL sudah full path (https://...), langsung pakai lap.fotoUrl!
-                    lap.fotoUrl!.startsWith('http') 
-                        ? lap.fotoUrl! 
-                        : "https://justin-timothy-courtify.pbp.cs.ui.ac.id${lap.fotoUrl}", 
+                    lap.fotoUrl!,
                     fit: BoxFit.cover,
                     errorBuilder: (ctx, err, stack) => const Icon(Icons.broken_image, color: Colors.grey),
                   )
-                : const Center(child: Text("Tidak ada foto", style: TextStyle(color: Colors.grey, fontStyle: FontStyle.italic))),
+                : const Center(
+                    child: Text(
+                      "Tidak ada foto",
+                      style: TextStyle(color: Colors.grey, fontStyle: FontStyle.italic),
+                    ),
+                  ),
           ),
-          
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -340,52 +335,50 @@ class _BookingDashboardScreenState extends State<BookingDashboardScreen> {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    // Tombol Wishlist (Hanya UI, logika backend terpisah)
-                    const Icon(Icons.favorite_border, color: Colors.grey), 
+                    const Icon(Icons.favorite_border, color: Colors.grey),
                   ],
                 ),
                 const SizedBox(height: 4),
-                Text("${lap.kategori} • ${lap.lokasi}", style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+                Text(
+                  "${lap.kategori} - ${lap.lokasi}",
+                  style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                ),
                 const SizedBox(height: 8),
                 Text(
-                  "${_formatCurrency(lap.hargaPerJam.toDouble())} / jam",
+                  "${_formatCurrency(lap.hargaPerJam)} / jam",
                   style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.green),
                 ),
                 Text(
-                  "⏰ ${lap.jamBuka.toString().substring(0,5)} - ${lap.jamTutup.toString().substring(0,5)}",
+                  "Jam buka ${lap.jamBuka} - ${lap.jamTutup}",
                   style: TextStyle(color: Colors.grey[500], fontSize: 12),
                 ),
                 const SizedBox(height: 16),
-                
-                // Tombol Pesan
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () {
-                      // Navigasi ke halaman create booking
-                      // --- UPDATE BAGIAN INI ---
                       Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (_) => BookingCreateScreen(lapangan: lap),
                         ),
                       ).then((result) {
-                        // Jika booking berhasil (result == true), refresh dashboard
                         if (result == true) {
                           _refreshData();
                         }
                       });
-                      // -------------------------
-                      // Navigator.push(context, MaterialPageRoute(builder: (_) => BookingCreateScreen(lapangan: lap)));
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green[600],
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       padding: const EdgeInsets.symmetric(vertical: 12),
                     ),
-                    child: const Text("Pesan Sekarang", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                    child: const Text(
+                      "Pesan Sekarang",
+                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                    ),
                   ),
-                )
+                ),
               ],
             ),
           ),
