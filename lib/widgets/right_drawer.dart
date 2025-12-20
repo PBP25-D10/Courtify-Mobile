@@ -4,7 +4,6 @@ import 'package:courtify_mobile/screens/login_screen.dart';
 
 // Import Menu User
 import 'package:courtify_mobile/screens/user/wishlist_user.dart';
-import 'package:courtify_mobile/screens/user/artikel_user.dart';
 
 // Import Menu Penyedia
 import 'package:courtify_mobile/screens/penyedia/dashboard_penyedia.dart';
@@ -131,9 +130,7 @@ class _RightDrawerState extends State<RightDrawer> {
               title: "Artikel",
               onTap: () => Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => const NewsListPage(),
-                ),
+                MaterialPageRoute(builder: (context) => const NewsListPage()),
               ),
             ),
           ],

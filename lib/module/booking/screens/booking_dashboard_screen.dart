@@ -19,7 +19,6 @@ class _BookingDashboardScreenState extends State<BookingDashboardScreen> {
   final BookingApiService _apiService = BookingApiService();
   final LapanganApiService _lapService = LapanganApiService();
 
-  late Future<List<Booking>> _futureBookings;
   List<Lapangan> _lapangan = [];
   int _currentPage = 1;
   final int _perPage = 10;
@@ -51,7 +50,6 @@ class _BookingDashboardScreenState extends State<BookingDashboardScreen> {
   void _refreshData() {
     final request = context.read<AuthService>();
     setState(() {
-      _futureBookings = _apiService.getUserBookings(request);
       _lapangan = [];
       _currentPage = 1;
       _hasMore = true;
@@ -162,9 +160,10 @@ class _BookingDashboardScreenState extends State<BookingDashboardScreen> {
           "Dashboard Booking",
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
-        backgroundColor: backgroundColor,
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
         elevation: 0,
+        scrolledUnderElevation: 0,
+        foregroundColor: Colors.white,
         actions: [
           IconButton(
             onPressed: _openAllBookings,
@@ -176,17 +175,10 @@ class _BookingDashboardScreenState extends State<BookingDashboardScreen> {
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              const Color(0xFF111827),
-              const Color(0xFF1a2f4f),
-              const Color(0xFF0F1624),
-              const Color(0xFF1a3a5a),
-              const Color(0xFF1F2937),
-              const Color(0xFF2a1f3f),
-            ],
-            stops: const [0.0, 0.25, 0.5, 0.65, 0.85, 1.0],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [backgroundColor, const Color(0xFF1a2332)],
+            stops: const [0.0, 1.0],
           ),
         ),
         child: RefreshIndicator(
@@ -202,9 +194,9 @@ class _BookingDashboardScreenState extends State<BookingDashboardScreen> {
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
-                  ),
                 ),
-                const SizedBox(height: 12),
+              ),
+              const SizedBox(height: 12),
 
               if (_lapangan.isEmpty && !_isLoadingMore)
                 _buildEmptyState("Belum ada lapangan tersedia.")
@@ -244,142 +236,6 @@ class _BookingDashboardScreenState extends State<BookingDashboardScreen> {
         message,
         textAlign: TextAlign.center,
         style: const TextStyle(color: Colors.white70),
-      ),
-    );
-  }
-
-  Widget _buildBookingCard(Booking booking) {
-    Color statusColor;
-    Color statusBgColor;
-    String statusText;
-
-    switch (booking.status) {
-      case 'confirmed':
-        statusColor = Colors.greenAccent.shade200;
-        statusBgColor = const Color.fromRGBO(0, 128, 0, 0.1);
-        statusText = "Dikonfirmasi";
-        break;
-      case 'cancelled':
-        statusColor = Colors.redAccent.shade100;
-        statusBgColor = const Color.fromRGBO(244, 67, 54, 0.1);
-        statusText = "Dibatalkan";
-        break;
-      default:
-        statusColor = Colors.orangeAccent.shade100;
-        statusBgColor = const Color.fromRGBO(255, 152, 0, 0.1);
-        statusText = "Menunggu Konfirmasi";
-    }
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [cardColor, const Color(0xFF2d3f52)],
-        ),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withOpacity(0.1), width: 1),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.blue.withOpacity(0.15),
-            blurRadius: 12,
-            offset: const Offset(0, 6),
-          ),
-          BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Text(
-                    booking.lapangan?.nama ?? "Lapangan Tidak Dikenal",
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      color: Colors.white,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: statusBgColor,
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    statusText,
-                    style: TextStyle(
-                      color: statusColor,
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                const Icon(
-                  Icons.calendar_today,
-                  size: 14,
-                  color: Colors.white70,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  "${booking.tanggal} | ${booking.jamMulai} - ${booking.jamSelesai}",
-                  style: const TextStyle(fontSize: 13, color: Colors.white70),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  _formatCurrency(booking.totalHarga),
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15,
-                    color: Colors.white,
-                  ),
-                ),
-                if (booking.status != 'cancelled')
-                  InkWell(
-                    onTap: () => _handleCancelBooking(booking.id),
-                    child: const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      child: Text(
-                        "Batalkan",
-                        style: TextStyle(
-                          color: Colors.redAccent,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 13,
-                        ),
-                      ),
-                    ),
-                  )
-                else
-                  const Text("-", style: TextStyle(color: Colors.white38)),
-              ],
-            ),
-          ],
-        ),
       ),
     );
   }

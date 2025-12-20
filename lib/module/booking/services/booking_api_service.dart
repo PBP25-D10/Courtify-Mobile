@@ -1,6 +1,5 @@
 import 'package:courtify_mobile/services/auth_service.dart';
 import 'package:courtify_mobile/module/booking/models/booking.dart';
-import 'package:courtify_mobile/module/lapangan/models/lapangan.dart';
 import 'package:courtify_mobile/module/lapangan/services/api_services.dart';
 
 class BookingApiService {
@@ -9,17 +8,16 @@ class BookingApiService {
   Future<Map<String, dynamic>> getDashboardData(AuthService request) async {
     final bookings = await getUserBookings(request);
     final lapanganList = await LapanganApiService().getPublicLapangan();
-    return {
-      'bookings': bookings,
-      'lapangan_list': lapanganList,
-    };
+    return {'bookings': bookings, 'lapangan_list': lapanganList};
   }
 
   Future<List<Booking>> getUserBookings(AuthService request) async {
     final response = await request.get("$baseUrl/flutter/bookings/");
     if (response is Map && response['success'] == true) {
       final List data = response['bookings'] ?? [];
-      return data.map((e) => Booking.fromJson(Map<String, dynamic>.from(e))).toList();
+      return data
+          .map((e) => Booking.fromJson(Map<String, dynamic>.from(e)))
+          .toList();
     }
     throw Exception("Gagal memuat booking user");
   }

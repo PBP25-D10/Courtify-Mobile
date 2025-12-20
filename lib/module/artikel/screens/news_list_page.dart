@@ -18,10 +18,6 @@ class _NewsListPageState extends State<NewsListPage> {
   late Future<List<News>> _futureNews;
   bool _isProvider = false;
 
-  static const Color backgroundColor = Color(0xFF111827);
-  static const Color cardColor = Color(0xFF1F2937);
-  static const Color accent = Color(0xFF2563EB);
-
   @override
   void initState() {
     super.initState();
@@ -41,7 +37,9 @@ class _NewsListPageState extends State<NewsListPage> {
   void _loadNews() {
     final auth = context.read<AuthService>();
     setState(() {
-      _futureNews = _isProvider ? service.fetchMyNews(auth) : service.fetchNews(auth);
+      _futureNews = _isProvider
+          ? service.fetchMyNews(auth)
+          : service.fetchNews(auth);
     });
   }
 
@@ -51,13 +49,19 @@ class _NewsListPageState extends State<NewsListPage> {
       await service.deleteNews(auth, id);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Artikel dihapus'), backgroundColor: Colors.green),
+        const SnackBar(
+          content: Text('Artikel dihapus'),
+          backgroundColor: Colors.green,
+        ),
       );
       _loadNews();
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Gagal menghapus: $e'), backgroundColor: Colors.red),
+        SnackBar(
+          content: Text('Gagal menghapus: $e'),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }
@@ -75,15 +79,19 @@ class _NewsListPageState extends State<NewsListPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: backgroundColor,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         title: Text(
           _isProvider ? 'Kelola Artikel' : 'Artikel Olahraga',
-          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
         ),
-        backgroundColor: backgroundColor,
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
         elevation: 0,
+        scrolledUnderElevation: 0,
+        foregroundColor: Colors.white,
       ),
       body: FutureBuilder<List<News>>(
         future: _futureNews,
@@ -94,13 +102,19 @@ class _NewsListPageState extends State<NewsListPage> {
 
           if (snapshot.hasError) {
             return Center(
-              child: Text('Error: ${snapshot.error}', style: const TextStyle(color: Colors.white)),
+              child: Text(
+                'Error: ${snapshot.error}',
+                style: const TextStyle(color: Colors.white),
+              ),
             );
           }
 
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(
-              child: Text('Belum ada berita', style: TextStyle(color: Colors.white70)),
+              child: Text(
+                'Belum ada berita',
+                style: TextStyle(color: Colors.white70),
+              ),
             );
           }
 
@@ -122,7 +136,7 @@ class _NewsListPageState extends State<NewsListPage> {
       floatingActionButton: _isProvider
           ? FloatingActionButton(
               onPressed: () => _openForm(),
-              backgroundColor: accent,
+              backgroundColor: const Color(0xFF2563EB),
               child: const Icon(Icons.add),
             )
           : null,
@@ -133,10 +147,14 @@ class _NewsListPageState extends State<NewsListPage> {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: cardColor,
+        color: const Color(0xFF1F2937),
         borderRadius: BorderRadius.circular(12),
         boxShadow: const [
-          BoxShadow(color: Color.fromRGBO(0, 0, 0, 0.2), blurRadius: 6, offset: Offset(0, 3)),
+          BoxShadow(
+            color: Color.fromRGBO(0, 0, 0, 0.2),
+            blurRadius: 6,
+            offset: Offset(0, 3),
+          ),
         ],
       ),
       child: InkWell(
@@ -149,7 +167,9 @@ class _NewsListPageState extends State<NewsListPage> {
           children: [
             if (news.thumbnailUrl.isNotEmpty)
               ClipRRect(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(12),
+                ),
                 child: Image.network(
                   news.thumbnailUrl,
                   height: 160,
@@ -159,7 +179,10 @@ class _NewsListPageState extends State<NewsListPage> {
                     height: 160,
                     color: Colors.grey[900],
                     alignment: Alignment.center,
-                    child: const Icon(Icons.broken_image, color: Colors.white38),
+                    child: const Icon(
+                      Icons.broken_image,
+                      color: Colors.white38,
+                    ),
                   ),
                 ),
               ),
@@ -174,7 +197,11 @@ class _NewsListPageState extends State<NewsListPage> {
                       Expanded(
                         child: Text(
                           news.title,
-                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
                         ),
                       ),
                       if (_isProvider)
@@ -186,17 +213,39 @@ class _NewsListPageState extends State<NewsListPage> {
                               onPressed: () => _openForm(news: news),
                             ),
                             IconButton(
-                              icon: const Icon(Icons.delete, color: Colors.redAccent),
+                              icon: const Icon(
+                                Icons.delete,
+                                color: Colors.redAccent,
+                              ),
                               onPressed: () async {
                                 final confirm = await showDialog<bool>(
                                   context: context,
                                   builder: (_) => AlertDialog(
-                                    backgroundColor: cardColor,
-                                    title: const Text('Hapus artikel?', style: TextStyle(color: Colors.white)),
-                                    content: const Text('Tindakan ini tidak dapat dibatalkan.', style: TextStyle(color: Colors.white70)),
+                                    backgroundColor: const Color(0xFF1F2937),
+                                    title: const Text(
+                                      'Hapus artikel?',
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                    content: const Text(
+                                      'Tindakan ini tidak dapat dibatalkan.',
+                                      style: TextStyle(color: Colors.white70),
+                                    ),
                                     actions: [
-                                      TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Batal')),
-                                      TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Hapus', style: TextStyle(color: Colors.redAccent))),
+                                      TextButton(
+                                        onPressed: () =>
+                                            Navigator.pop(context, false),
+                                        child: const Text('Batal'),
+                                      ),
+                                      TextButton(
+                                        onPressed: () =>
+                                            Navigator.pop(context, true),
+                                        child: const Text(
+                                          'Hapus',
+                                          style: TextStyle(
+                                            color: Colors.redAccent,
+                                          ),
+                                        ),
+                                      ),
                                     ],
                                   ),
                                 );
@@ -210,7 +259,10 @@ class _NewsListPageState extends State<NewsListPage> {
                     ],
                   ),
                   const SizedBox(height: 6),
-                  Text(news.kategori, style: const TextStyle(color: Colors.white70, fontSize: 12)),
+                  Text(
+                    news.kategori,
+                    style: const TextStyle(color: Colors.white70, fontSize: 12),
+                  ),
                   const SizedBox(height: 8),
                   Text(
                     news.content,
@@ -273,21 +325,37 @@ class NewsDetailPage extends StatelessWidget {
                       height: 200,
                       color: Colors.grey[900],
                       alignment: Alignment.center,
-                      child: const Icon(Icons.broken_image, color: Colors.white38),
+                      child: const Icon(
+                        Icons.broken_image,
+                        color: Colors.white38,
+                      ),
                     ),
                   ),
                 ),
               const SizedBox(height: 12),
-              Text(news.kategori, style: const TextStyle(color: Colors.white70, fontSize: 12)),
+              Text(
+                news.kategori,
+                style: const TextStyle(color: Colors.white70, fontSize: 12),
+              ),
               const SizedBox(height: 6),
               Text(
                 news.title,
-                style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 6),
-              Text('By ${news.author} ? ${news.createdAt}', style: const TextStyle(color: Colors.white38, fontSize: 12)),
+              Text(
+                'By ${news.author} ? ${news.createdAt}',
+                style: const TextStyle(color: Colors.white38, fontSize: 12),
+              ),
               const SizedBox(height: 12),
-              Text(news.content, style: const TextStyle(color: Colors.white70, height: 1.4)),
+              Text(
+                news.content,
+                style: const TextStyle(color: Colors.white70, height: 1.4),
+              ),
             ],
           ),
         ),

@@ -32,12 +32,13 @@ class _LapanganListScreenState extends State<LapanganListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final request = context.watch<AuthService>();
-    
     return Scaffold(
       backgroundColor: const Color(0xFF111827),
       appBar: AppBar(
-        title: const Text("Daftar Lapangan", style: TextStyle(color: Colors.white)),
+        title: const Text(
+          "Daftar Lapangan",
+          style: TextStyle(color: Colors.white),
+        ),
         backgroundColor: const Color(0xFF111827),
         actions: [
           IconButton(
@@ -104,9 +105,7 @@ class _LapanganListScreenState extends State<LapanganListScreen> {
   void _navigateToForm(Lapangan? lapangan) {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (_) => LapanganFormScreen(lapangan: lapangan),
-      ),
+      MaterialPageRoute(builder: (_) => LapanganFormScreen(lapangan: lapangan)),
     ).then((_) => _loadLapangan());
   }
 
@@ -125,11 +124,14 @@ class _LapanganListScreenState extends State<LapanganListScreen> {
             onPressed: () async {
               final request = context.read<AuthService>();
               try {
-                final response = await _apiService.deleteLapangan(request, lap.idLapangan);
-                
+                final response = await _apiService.deleteLapangan(
+                  request,
+                  lap.idLapangan,
+                );
+
                 if (!mounted) return;
                 Navigator.pop(context);
-                
+
                 if (response['status'] == 'success') {
                   _loadLapangan();
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -137,15 +139,19 @@ class _LapanganListScreenState extends State<LapanganListScreen> {
                   );
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(response['message'] ?? "Gagal menghapus lapangan")),
+                    SnackBar(
+                      content: Text(
+                        response['message'] ?? "Gagal menghapus lapangan",
+                      ),
+                    ),
                   );
                 }
               } catch (e) {
                 if (!mounted) return;
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text("Error: $e")),
-                );
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text("Error: $e")));
               }
             },
             child: const Text("Hapus", style: TextStyle(color: Colors.red)),

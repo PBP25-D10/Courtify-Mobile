@@ -24,8 +24,6 @@ class _HomeUserScreenState extends State<HomeUserScreen> {
   final BookingApiService _apiService = BookingApiService();
   String _username = 'Loading...';
   int _selectedIndex = 0;
-  late Future<List<Lapangan>> _futureLapangan;
-  late Future<List<Booking>> _futureBookings;
   late PageController _pageController;
   TextEditingController _searchController = TextEditingController();
 
@@ -43,9 +41,8 @@ class _HomeUserScreenState extends State<HomeUserScreen> {
   }
 
   void _loadBookings() {
-    final request = context.read<AuthService>();
     setState(() {
-      _futureBookings = _apiService.getUserBookings(request);
+      // _futureBookings is managed in _buildHomePage
     });
   }
 
@@ -112,12 +109,7 @@ class _HomeUserScreenState extends State<HomeUserScreen> {
   }
 
   void _loadLapangan() {
-    final request = context.read<AuthService>();
-    setState(() {
-      _futureLapangan = _apiService.getDashboardData(request).then((data) {
-        return (data['lapangan_list'] as List).cast<Lapangan>();
-      });
-    });
+    // Not needed for current implementation
   }
 
   void _handleLogout() async {
@@ -158,148 +150,167 @@ class _HomeUserScreenState extends State<HomeUserScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: backgroundColor,
-      appBar: AppBar(
-        backgroundColor: backgroundColor,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              "Hello,",
-              style: TextStyle(fontSize: 14, color: Colors.white70),
-            ),
-            Text(
-              _username,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                  backgroundColor: cardColor,
-                  title: const Text(
-                    "Logout",
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  content: const Text(
-                    "Are you sure you want to logout?",
-                    style: TextStyle(color: Colors.white70),
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text("Cancel"),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        _handleLogout();
-                      },
-                      child: const Text(
-                        "Logout",
-                        style: TextStyle(color: Colors.redAccent),
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
-            icon: const Icon(Icons.logout),
-            tooltip: 'Logout',
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [backgroundColor, const Color(0xFF1a2332)],
+            stops: const [0.0, 1.0],
           ),
-        ],
-      ),
-      body: PageView(
-        controller: _pageController,
-        onPageChanged: _onPageChanged,
-        children: [
-          // Home/Browse Courts
-          _buildHomePage(),
-          // Booking
-          const BookingDashboardScreen(),
-          // Articles
-          const ArtikelUserScreen(),
-          // Wishlist
-          const WishlistUserScreen(),
-        ],
-      ),
-      bottomNavigationBar: SizedBox(
-        height: 72,
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            // Background bar
-            Positioned.fill(
-              top: 0,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: cardColor,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(18),
-                    topRight: Radius.circular(18),
+        ),
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            scrolledUnderElevation: 0,
+            foregroundColor: Colors.white,
+            title: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  "Hello,",
+                  style: TextStyle(fontSize: 14, color: Colors.white70),
+                ),
+                Text(
+                  _username,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.35),
-                      blurRadius: 14,
-                      offset: const Offset(0, -6),
-                    ),
-                  ],
                 ),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 10,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: List.generate(4, (index) {
-                    final icons = [
-                      Icons.home,
-                      Icons.calendar_today,
-                      Icons.article,
-                      Icons.favorite,
-                    ];
-                    final labels = ["Home", "Booking", "Artikel", "Wishlist"];
-                    final isSelected = _selectedIndex == index;
-                    return GestureDetector(
-                      onTap: () => _onNavItemTapped(index),
-                      behavior: HitTestBehavior.opaque,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            icons[index],
-                            size: 22,
-                            color: isSelected ? accent : Colors.white54,
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            labels[index],
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: isSelected ? accent : Colors.white54,
-                              fontWeight: isSelected
-                                  ? FontWeight.w600
-                                  : FontWeight.normal,
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }),
-                ),
-              ),
+              ],
             ),
-          ],
+            actions: [
+              IconButton(
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      backgroundColor: cardColor,
+                      title: const Text(
+                        "Logout",
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      content: const Text(
+                        "Are you sure you want to logout?",
+                        style: TextStyle(color: Colors.white70),
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text("Cancel"),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            _handleLogout();
+                          },
+                          child: const Text(
+                            "Logout",
+                            style: TextStyle(color: Colors.redAccent),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.logout),
+                tooltip: 'Logout',
+              ),
+            ],
+          ),
+          body: PageView(
+            controller: _pageController,
+            onPageChanged: _onPageChanged,
+            children: [
+              // Home/Browse Courts
+              _buildHomePage(),
+              // Booking
+              const BookingDashboardScreen(),
+              // Articles
+              const ArtikelUserScreen(),
+              // Wishlist
+              const WishlistUserScreen(),
+            ],
+          ),
+          bottomNavigationBar: SizedBox(
+            height: 72,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                // Background bar
+                Positioned.fill(
+                  top: 0,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: cardColor,
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(18),
+                        topRight: Radius.circular(18),
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.35),
+                          blurRadius: 14,
+                          offset: const Offset(0, -6),
+                        ),
+                      ],
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: List.generate(4, (index) {
+                        final icons = [
+                          Icons.home,
+                          Icons.calendar_today,
+                          Icons.article,
+                          Icons.favorite,
+                        ];
+                        final labels = [
+                          "Home",
+                          "Booking",
+                          "Artikel",
+                          "Wishlist",
+                        ];
+                        final isSelected = _selectedIndex == index;
+                        return GestureDetector(
+                          onTap: () => _onNavItemTapped(index),
+                          behavior: HitTestBehavior.opaque,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                icons[index],
+                                size: 22,
+                                color: isSelected ? accent : Colors.white54,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                labels[index],
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: isSelected ? accent : Colors.white54,
+                                  fontWeight: isSelected
+                                      ? FontWeight.w600
+                                      : FontWeight.normal,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -311,7 +322,9 @@ class _HomeUserScreenState extends State<HomeUserScreen> {
         // Navigate to booking create screen
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => BookingDashboardScreen()),
+          MaterialPageRoute(
+            builder: (context) => const BookingDashboardScreen(),
+          ),
         );
       },
       child: Container(
@@ -460,7 +473,7 @@ class _HomeUserScreenState extends State<HomeUserScreen> {
 
           Expanded(
             child: FutureBuilder<List<Booking>>(
-              future: _futureBookings,
+              future: _apiService.getUserBookings(context.read<AuthService>()),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
@@ -502,32 +515,6 @@ class _HomeUserScreenState extends State<HomeUserScreen> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildCommunityPage() {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            const Color(0xFF111827),
-            const Color(0xFF1a2f4f),
-            const Color(0xFF0F1624),
-            const Color(0xFF1a3a5a),
-            const Color(0xFF1F2937),
-            const Color(0xFF2a1f3f),
-          ],
-          stops: const [0.0, 0.25, 0.5, 0.65, 0.85, 1.0],
-        ),
-      ),
-      child: const Center(
-        child: Text(
-          "Community feature coming soon",
-          style: TextStyle(color: Colors.white70, fontSize: 16),
-        ),
       ),
     );
   }
