@@ -7,8 +7,24 @@ import 'package:courtify_mobile/module/lapangan/models/lapangan.dart';
 class LapanganApiService {
   final String baseUrl = "${AuthService.baseHost}/manajemen/api";
 
-  Future<List<Lapangan>> getPenyediaLapangan(AuthService request) async {
-    final response = await request.get("$baseUrl/list/");
+  Future<List<Lapangan>> getPenyediaLapangan(
+    AuthService request, {
+    String? kategori,
+    String? lokasi,
+    String? hargaMin,
+    String? hargaMax,
+  }) async {
+    final query = <String, String>{};
+    if (kategori != null && kategori.isNotEmpty) query['kategori'] = kategori;
+    if (lokasi != null && lokasi.isNotEmpty) query['lokasi'] = lokasi;
+    if (hargaMin != null && hargaMin.isNotEmpty) query['harga_min'] = hargaMin;
+    if (hargaMax != null && hargaMax.isNotEmpty) query['harga_max'] = hargaMax;
+
+    final uri = Uri.parse("$baseUrl/list/").replace(
+      queryParameters: query.isEmpty ? null : query,
+    );
+
+    final response = await request.get(uri.toString());
     if (response is Map && response['status'] == 'success') {
       final List data = response['lapangan_list'] ?? [];
       return data

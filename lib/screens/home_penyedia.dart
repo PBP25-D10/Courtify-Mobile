@@ -48,10 +48,12 @@ class _HomePenyediaScreenState extends State<HomePenyediaScreen> {
   Future<void> _handleLogout() async {
     final request = context.read<AuthService>();
 
-    showDialog(
+    final nav = Navigator.of(context, rootNavigator: true);
+
+    final confirm = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         backgroundColor: cardColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         title: Row(
@@ -70,25 +72,11 @@ class _HomePenyediaScreenState extends State<HomePenyediaScreen> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.of(dialogContext).pop(false),
             child: const Text("Batal"),
           ),
           ElevatedButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              showDialog(
-                context: context,
-                barrierDismissible: false,
-                builder: (_) => const Center(child: CircularProgressIndicator()),
-              );
-              await request.logout();
-              if (!mounted) return;
-              Navigator.pop(context); // tutup loading
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (_) => const LoginScreen()),
-              );
-            },
+            onPressed: () => Navigator.of(dialogContext).pop(true),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.redAccent,
               foregroundColor: Colors.white,
@@ -98,6 +86,23 @@ class _HomePenyediaScreenState extends State<HomePenyediaScreen> {
           ),
         ],
       ),
+    );
+
+    if (confirm != true || !mounted) return;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+
+    await request.logout();
+    if (!mounted) return;
+
+    nav.pop(); // close loading
+    nav.pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
+      (_) => false,
     );
   }
 

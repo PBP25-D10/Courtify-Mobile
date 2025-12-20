@@ -92,10 +92,6 @@ class _IklanListScreenState extends State<IklanListScreen> {
         backgroundColor: backgroundColor,
         foregroundColor: Colors.white,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
         title: const Text(
           "Kelola Iklan",
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),

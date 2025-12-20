@@ -22,6 +22,21 @@ class BookingApiService {
     throw Exception("Gagal memuat booking user");
   }
 
+  Future<List<Booking>> getOwnerBookings(
+    AuthService request, {
+    String? status,
+  }) async {
+    final query = status != null && status.isNotEmpty ? "?status=$status" : "";
+    final response = await request.get("$baseUrl/owner-bookings/$query");
+    if (response is Map && response['status'] == 'success') {
+      final List data = response['bookings'] ?? [];
+      return data
+          .map((e) => Booking.fromJson(Map<String, dynamic>.from(e)))
+          .toList();
+    }
+    throw Exception(response is Map ? response['message'] ?? 'Gagal memuat booking' : 'Gagal memuat booking');
+  }
+
   Future<Booking?> createBooking(
     AuthService request,
     String idLapangan,
