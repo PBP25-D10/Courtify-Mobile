@@ -2,7 +2,7 @@ import 'package:courtify_mobile/module/lapangan/models/lapangan.dart';
 
 class Booking {
   final int id;
-  final Lapangan? lapangan; // Menggunakan model Lapangan yang sudah ada
+  final Lapangan? lapangan;
   final String tanggal;
   final String jamMulai;
   final String jamSelesai;
@@ -21,16 +21,17 @@ class Booking {
 
   factory Booking.fromJson(Map<String, dynamic> json) {
     return Booking(
-      id: json['id'],
-      // Handle jika lapangan null atau objek
-      lapangan: json['lapangan'] != null 
-          ? Lapangan.fromJson(json['lapangan']) // Pastikan Lapangan.fromJson kamu support format ini
+      id: json['id'] as int,
+
+      lapangan: json['lapangan'] != null
+          ? Lapangan.fromJson(Map<String, dynamic>.from(json['lapangan']))
           : null,
-      tanggal: json['tanggal'],
-      jamMulai: json['jam_mulai'],
-      jamSelesai: json['jam_selesai'],
-      totalHarga: (json['total_harga'] as num).toDouble(),
-      status: json['status'],
+
+      tanggal: json['tanggal']?.toString() ?? '',
+      jamMulai: json['jam_mulai']?.toString() ?? '',
+      jamSelesai: json['jam_selesai']?.toString() ?? '',
+      totalHarga: (json['total_harga'] as num?)?.toDouble() ?? 0.0,
+      status: json['status']?.toString() ?? '',
     );
   }
 }

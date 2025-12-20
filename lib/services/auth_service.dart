@@ -1,15 +1,17 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:courtify_mobile/services/http_client_factory_stub.dart'
     if (dart.library.html) 'package:courtify_mobile/services/http_client_factory_web.dart';
 
 class AuthService {
-  static const String _baseUrl = 'https://justin-timothy-courtify.pbp.cs.ui.ac.id';
-  static const String _loginUrl = '$_baseUrl/auth/api/flutter/login/';
-  static const String _registerUrl = '$_baseUrl/auth/api/flutter/register/';
-  static const String _logoutUrl = '$_baseUrl/auth/api/flutter/logout/';
+  /// Ganti host ini sesuai environment (default: localhost Django)
+  static const String baseHost = 'http://127.0.0.1:8000';
+  static const String _authBase = '$baseHost/auth/api/flutter/auth';
+  static const String _loginUrl = '$_authBase/login/';
+  static const String _registerUrl = '$_authBase/register/';
+  static const String _logoutUrl = '$_authBase/logout/';
+  static const String _meUrl = '$_authBase/me/';
 
   static const String _keyCookies = 'all_cookies';
   static const String _keyRole = 'user_role';
@@ -25,7 +27,29 @@ class AuthService {
     return prefs.getString(key);
   }
 
-  Future<Map<String, dynamic>> login(String username, String password) async {
+  Map<String, String> _parseCookies(String? setCookieHeader) {
+    if (setCookieHeader == null || setCookieHeader.isEmpty) return {};
+    final cookies = <String, String>{};
+    final parts = setCookieHeader.split(',');
+    for (final raw in parts) {
+      final segment = raw.trim();
+      final cookiePair = segment.split(';').first;
+      final idx = cookiePair.indexOf('=');
+      if (idx > 0) {
+        final name = cookiePair.substring(0, idx).trim();
+        final value = cookiePair.substring(idx + 1).trim();
+        if (name.isNotEmpty && !cookies.containsKey(name)) {
+          cookies[name] = value;
+        }
+      }
+    }
+    return cookies;
+  }
+
+  Future<Map<String, dynamic>> login(
+    String username,
+    String password,
+  ) async {
     try {
       final client = createHttpClient();
       try {
@@ -34,42 +58,27 @@ class AuthService {
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode({'username': username, 'password': password}),
         );
-        final responseData = jsonDecode(response.body);
 
+        final responseData = Map<String, dynamic>.from(jsonDecode(response.body));
         if (response.statusCode == 200 && responseData['status'] == true) {
-          if (!kIsWeb) {
-            final String? setCookieHeader = response.headers['set-cookie'];
-            if (setCookieHeader == null || setCookieHeader.isEmpty) {
-              return {'status': false, 'message': 'Login berhasil tapi Set-Cookie tidak ada.'};
-            }
-
-            final Map<String, String> cookies = {};
-            final reg = RegExp(r'(^|,)\s*([^=;\s]+)=([^;]+)');
-            for (final m in reg.allMatches(setCookieHeader)) {
-              final name = m.group(2)!;
-              final value = m.group(3)!;
-              final lower = name.toLowerCase();
-
-              if (lower == 'expires' ||
-                  lower == 'max-age' ||
-                  lower == 'path' ||
-                  lower == 'domain' ||
-                  lower == 'samesite' ||
-                  lower == 'secure' ||
-                  lower == 'httponly') {
-                continue;
-              }
-              cookies[name] = value;
-            }
-
+          final cookies = _parseCookies(response.headers['set-cookie']);
+          final sessionFromBody = responseData['sessionid']?.toString();
+          if (sessionFromBody != null && sessionFromBody.isNotEmpty) {
+            cookies['sessionid'] = sessionFromBody;
+          }
+          if (!kIsWeb && cookies.isNotEmpty) {
             await _saveToLocal(_keyCookies, jsonEncode(cookies));
-          } else {
+          } else if (kIsWeb) {
             await _saveToLocal(_keyCookies, jsonEncode({'web_session': '1'}));
           }
-          await _saveToLocal(_keyRole, responseData['role']?.toString() ?? '');
-          await _saveToLocal(_keyUsername, responseData['username']?.toString() ?? '');
+
+          final user = Map<String, dynamic>.from(responseData['user'] ?? {});
+          await _saveToLocal(_keyRole, user['role']?.toString() ?? '');
+          await _saveToLocal(_keyUsername, user['username']?.toString() ?? username);
+          responseData['role'] = user['role'];
+          responseData['username'] = user['username'] ?? username;
         }
-        return Map<String, dynamic>.from(responseData);
+        return responseData;
       } finally {
         client.close();
       }
@@ -78,14 +87,30 @@ class AuthService {
     }
   }
 
-  Future<Map<String, dynamic>> register(String username, String email, String password, String role) async {
+  Future<Map<String, dynamic>> register({
+    required String username,
+    required String email,
+    required String password,
+    required String role,
+    String? firstName,
+    String? lastName,
+  }) async {
     try {
       final client = createHttpClient();
       try {
+        final body = {
+          'username': username,
+          'email': email,
+          'password': password,
+          'role': role,
+        };
+        if (firstName != null && firstName.isNotEmpty) body['first_name'] = firstName;
+        if (lastName != null && lastName.isNotEmpty) body['last_name'] = lastName;
+
         final response = await client.post(
           Uri.parse(_registerUrl),
           headers: {'Content-Type': 'application/json'},
-          body: jsonEncode({'username': username, 'email': email, 'password': password, 'role': role}),
+          body: jsonEncode(body),
         );
         return Map<String, dynamic>.from(jsonDecode(response.body));
       } finally {
@@ -96,27 +121,31 @@ class AuthService {
     }
   }
 
+  Future<Map<String, dynamic>> fetchCurrentSession() async {
+    try {
+      final data = await get(_meUrl);
+      final user = Map<String, dynamic>.from(data['user'] ?? {});
+      if (user.isNotEmpty) {
+        await _saveToLocal(_keyRole, user['role']?.toString() ?? '');
+        await _saveToLocal(_keyUsername, user['username']?.toString() ?? '');
+      }
+      return Map<String, dynamic>.from(data);
+    } catch (e) {
+      return {'status': false, 'message': 'Gagal cek sesi: $e'};
+    }
+  }
+
   Future<void> logout() async {
     final client = createHttpClient();
     try {
-      if (kIsWeb) {
-        try {
-          await client.post(
-            Uri.parse(_logoutUrl),
-            headers: {'Content-Type': 'application/json'},
-          );
-        } catch (_) {}
-      } else {
-        final cookiesHeader = await getCookiesHeader();
-        if (cookiesHeader.isNotEmpty) {
-          try {
-            await client.post(
-              Uri.parse(_logoutUrl),
-              headers: {'Content-Type': 'application/json', 'Cookie': cookiesHeader},
-            );
-          } catch (_) {}
-        }
+      final headers = {'Content-Type': 'application/json'};
+      final cookiesHeader = await getCookiesHeader();
+      if (cookiesHeader.isNotEmpty) {
+        headers['Cookie'] = cookiesHeader;
       }
+      try {
+        await client.post(Uri.parse(_logoutUrl), headers: headers);
+      } catch (_) {}
     } finally {
       client.close();
     }
@@ -133,7 +162,7 @@ class AuthService {
     if (cookiesJson == null || cookiesJson.isEmpty) return false;
     try {
       final Map<String, dynamic> cookies = jsonDecode(cookiesJson);
-      return cookies.isNotEmpty;
+      return cookies['sessionid'] != null && cookies['sessionid'].toString().isNotEmpty;
     } catch (_) {
       return false;
     }
@@ -157,11 +186,11 @@ class AuthService {
     return cookies.entries.map((e) => "${e.key}=${e.value}").join("; ");
   }
 
-  Future<dynamic> get(String url) async {
+  Future<dynamic> get(String url, {bool requireAuth = true}) async {
     final client = createHttpClient();
     try {
       final headers = {'Content-Type': 'application/json'};
-      if (!kIsWeb) {
+      if (!kIsWeb && requireAuth) {
         final cookiesHeader = await getCookiesHeader();
         if (cookiesHeader.isEmpty) {
           throw Exception('No cookies found. User not logged in.');
@@ -187,11 +216,15 @@ class AuthService {
     }
   }
 
-  Future<dynamic> postForm(String url, Map<String, dynamic> data) async {
+  Future<dynamic> postForm(
+    String url,
+    Map<String, dynamic> data, {
+    bool requireAuth = true,
+  }) async {
     final client = createHttpClient();
     try {
       final headers = {'Content-Type': 'application/x-www-form-urlencoded'};
-      if (!kIsWeb) {
+      if (!kIsWeb && requireAuth) {
         final cookiesHeader = await getCookiesHeader();
         if (cookiesHeader.isEmpty) {
           throw Exception('No cookies found. User not logged in.');
@@ -221,5 +254,35 @@ class AuthService {
     }
   }
 
-  Future postJson(String s, Map<String, dynamic> data) async {}
+  Future<dynamic> postJson(
+    String url,
+    Map<String, dynamic> data, {
+    bool requireAuth = true,
+  }) async {
+    final client = createHttpClient();
+    try {
+      final headers = {'Content-Type': 'application/json'};
+      if (!kIsWeb && requireAuth) {
+        final cookiesHeader = await getCookiesHeader();
+        if (cookiesHeader.isEmpty) {
+          throw Exception('No cookies found. User not logged in.');
+        }
+        headers['Cookie'] = cookiesHeader;
+      }
+
+      final response = await client.post(
+        Uri.parse(url),
+        headers: headers,
+        body: jsonEncode(data),
+      );
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        if (response.body.isEmpty) return {};
+        return jsonDecode(response.body);
+      }
+      throw Exception('POST JSON request failed: ${response.statusCode} - ${response.body}');
+    } finally {
+      client.close();
+    }
+  }
 }

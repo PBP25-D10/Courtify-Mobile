@@ -14,6 +14,7 @@ import 'package:courtify_mobile/screens/penyedia/iklan_penyedia.dart';
 import 'package:courtify_mobile/screens/penyedia/artikel_penyedia.dart';
 
 import 'package:courtify_mobile/module/booking/screens/booking_dashboard_screen.dart';
+import 'package:courtify_mobile/module/artikel/screens/news_list_page.dart';
 
 class RightDrawer extends StatefulWidget {
   const RightDrawer({super.key});
@@ -120,7 +121,9 @@ class _RightDrawerState extends State<RightDrawer> {
               title: "Booking Saya",
               onTap: () => Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const BookingDashboardScreen()),
+                MaterialPageRoute(
+                  builder: (context) => const BookingDashboardScreen(),
+                ),
               ),
             ),
             _buildListTile(
@@ -129,7 +132,7 @@ class _RightDrawerState extends State<RightDrawer> {
               onTap: () => Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const ArtikelUserScreen(),
+                  builder: (context) => const NewsListPage(),
                 ),
               ),
             ),
