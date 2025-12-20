@@ -6,7 +6,6 @@ import 'package:courtify_mobile/module/booking/screens/booking_create_screen.dar
 import 'package:courtify_mobile/module/booking/screens/booking_user_list_screen.dart';
 import 'package:courtify_mobile/module/booking/services/booking_api_service.dart';
 import 'package:courtify_mobile/module/lapangan/models/lapangan.dart';
-import 'package:courtify_mobile/module/lapangan/services/api_services.dart';
 
 class BookingDashboardScreen extends StatefulWidget {
   const BookingDashboardScreen({super.key});
@@ -17,15 +16,13 @@ class BookingDashboardScreen extends StatefulWidget {
 
 class _BookingDashboardScreenState extends State<BookingDashboardScreen> {
   final BookingApiService _apiService = BookingApiService();
-  final LapanganApiService _lapService = LapanganApiService();
-
-  late Future<List<Booking>> _futureBookings;
-  List<Lapangan> _lapangan = [];
-  int _currentPage = 1;
-  final int _perPage = 10;
-  bool _isLoadingMore = false;
-  bool _hasMore = true;
+  late Future<Map<String, dynamic>> _futureDashboardData;
   late ScrollController _scrollController;
+
+  List<Lapangan> _displayedLapangan = [];
+  List<Lapangan> _allLapangan = [];
+  int _itemsPerPage = 4;
+  bool _isLoadingMore = false;
 
   static const Color backgroundColor = Color(0xFF111827);
   static const Color cardColor = Color(0xFF1F2937);
@@ -35,56 +32,51 @@ class _BookingDashboardScreenState extends State<BookingDashboardScreen> {
   @override
   void initState() {
     super.initState();
-    _scrollController = ScrollController()..addListener(_onScroll);
+    _scrollController = ScrollController();
+    _scrollController.addListener(_onScroll);
     _refreshData();
   }
 
   void _onScroll() {
-    if (!_isLoadingMore &&
-        _hasMore &&
-        _scrollController.position.pixels >=
-            _scrollController.position.maxScrollExtent - 200) {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
       _loadMoreLapangan();
+    }
+  }
+
+  void _loadMoreLapangan() {
+    if (!_isLoadingMore && _displayedLapangan.length < _allLapangan.length) {
+      setState(() {
+        _isLoadingMore = true;
+      });
+
+      Future.delayed(const Duration(milliseconds: 300), () {
+        if (mounted) {
+          setState(() {
+            int endIndex = (_displayedLapangan.length + _itemsPerPage).clamp(
+              0,
+              _allLapangan.length,
+            );
+            _displayedLapangan = _allLapangan.sublist(0, endIndex);
+            _isLoadingMore = false;
+          });
+        }
+      });
     }
   }
 
   void _refreshData() {
     final request = context.read<AuthService>();
     setState(() {
-      _futureBookings = _apiService.getUserBookings(request);
-      _lapangan = [];
-      _currentPage = 1;
-      _hasMore = true;
-    });
-    _loadLapanganPage();
-  }
-
-  Future<void> _loadLapanganPage() async {
-    if (!_hasMore) return;
-    setState(() => _isLoadingMore = true);
-    try {
-      final page = _currentPage;
-      final fetched = await _lapService.getPublicLapangan(
-        page: page,
-        limit: _perPage,
-      );
-      setState(() {
-        _lapangan.addAll(fetched);
-        if (fetched.length < _perPage) _hasMore = false;
-        _currentPage++;
+      _displayedLapangan = [];
+      _allLapangan = [];
+      _futureDashboardData = _apiService.getDashboardData(request).then((data) {
+        final lapanganList = data['lapangan_list'] as List<Lapangan>;
+        _allLapangan = lapanganList;
+        _displayedLapangan = lapanganList.take(_itemsPerPage).toList();
+        return data;
       });
-    } catch (e) {
-      // ignore errors for incremental load, show nothing
-      _hasMore = false;
-    } finally {
-      if (mounted) setState(() => _isLoadingMore = false);
-    }
-  }
-
-  void _loadMoreLapangan() {
-    if (!_isLoadingMore && _hasMore) {
-      _loadLapanganPage();
-    }
+    });
   }
 
   String _formatCurrency(num price) {
@@ -189,37 +181,109 @@ class _BookingDashboardScreenState extends State<BookingDashboardScreen> {
             stops: const [0.0, 0.25, 0.5, 0.65, 0.85, 1.0],
           ),
         ),
-        child: RefreshIndicator(
-          onRefresh: () async => _refreshData(),
-          child: ListView(
-            controller: _scrollController,
-            physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.all(16.0),
-            children: [
-              const Text(
-                "Lapangan Tersedia",
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
+        child: FutureBuilder<Map<String, dynamic>>(
+          future: _futureDashboardData,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (snapshot.hasError) {
+              return Center(
+                child: Text(
+                  "Error: ${snapshot.error}",
+                  style: const TextStyle(color: Colors.white),
+                ),
+              );
+            }
+            if (!snapshot.hasData) {
+              return const SizedBox();
+            }
+
+            final bookings = snapshot.data!['bookings'] as List<Booking>;
+
+            return RefreshIndicator(
+              onRefresh: () async => _refreshData(),
+              child: ListView(
+                controller: _scrollController,
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(16.0),
+                children: [
+                  const Text(
+                    "Booking Terbaru",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 12),
+                  const SizedBox(height: 12),
 
-              if (_lapangan.isEmpty && !_isLoadingMore)
-                _buildEmptyState("Belum ada lapangan tersedia.")
-              else
-                ..._lapangan.map((lap) => _buildLapanganCard(lap)),
+                  if (bookings.isEmpty)
+                    _buildEmptyState("Belum ada booking yang dibuat.")
+                  else
+                    ...bookings.map((booking) => _buildBookingCard(booking)),
 
-              if (_isLoadingMore)
-                const Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Center(child: CircularProgressIndicator()),
-                ),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: _openAllBookings,
+                      child: const Text(
+                        "Lihat semua booking",
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ),
 
-              const SizedBox(height: 60),
-            ],
-          ),
+                  const SizedBox(height: 24),
+                  const Divider(color: Colors.white12),
+                  const SizedBox(height: 24),
+
+                  const Text(
+                    "Lapangan Tersedia",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  if (_displayedLapangan.isEmpty)
+                    _buildEmptyState("Belum ada lapangan tersedia.")
+                  else
+                    ..._displayedLapangan.map((lap) => _buildLapanganCard(lap)),
+
+                  if (_isLoadingMore)
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Colors.blue[400]!,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                  if (_displayedLapangan.length < _allLapangan.length)
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Center(
+                        child: Text(
+                          "Scroll untuk memuat lebih banyak (${_displayedLapangan.length}/${_allLapangan.length})",
+                          style: const TextStyle(
+                            color: Colors.white54,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                  const SizedBox(height: 60),
+                ],
+              ),
+            );
+          },
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
@@ -516,7 +580,6 @@ class _BookingDashboardScreenState extends State<BookingDashboardScreen> {
 
   @override
   void dispose() {
-    _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     super.dispose();
   }

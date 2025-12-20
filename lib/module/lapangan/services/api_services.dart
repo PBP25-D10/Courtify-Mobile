@@ -11,7 +11,9 @@ class LapanganApiService {
     final response = await request.get("$baseUrl/list/");
     if (response is Map && response['status'] == 'success') {
       final List data = response['lapangan_list'] ?? [];
-      return data.map((e) => Lapangan.fromJson(Map<String, dynamic>.from(e))).toList();
+      return data
+          .map((e) => Lapangan.fromJson(Map<String, dynamic>.from(e)))
+          .toList();
     }
     throw Exception("Failed to fetch lapangan: $response");
   }
@@ -21,27 +23,43 @@ class LapanganApiService {
     String? lokasi,
     String? hargaMin,
     String? hargaMax,
+    int? page,
+    int? limit,
   }) async {
     final query = <String, String>{};
     if (kategori != null && kategori.isNotEmpty) query['kategori'] = kategori;
     if (lokasi != null && lokasi.isNotEmpty) query['lokasi'] = lokasi;
     if (hargaMin != null && hargaMin.isNotEmpty) query['harga_min'] = hargaMin;
     if (hargaMax != null && hargaMax.isNotEmpty) query['harga_max'] = hargaMax;
+    if (page != null) query['page'] = page.toString();
+    if (limit != null) query['limit'] = limit.toString();
 
-    final uri = Uri.parse("$baseUrl/public/").replace(queryParameters: query.isEmpty ? null : query);
-    final res = await http.get(uri, headers: {'Content-Type': 'application/json'});
+    final uri = Uri.parse(
+      "$baseUrl/public/",
+    ).replace(queryParameters: query.isEmpty ? null : query);
+    final res = await http.get(
+      uri,
+      headers: {'Content-Type': 'application/json'},
+    );
 
     if (res.statusCode == 200) {
       final body = Map<String, dynamic>.from(jsonDecode(res.body));
       final List data = body['lapangan_list'] ?? body['lapangan'] ?? [];
-      return data.map((e) => Lapangan.fromJson(Map<String, dynamic>.from(e))).toList();
+      return data
+          .map((e) => Lapangan.fromJson(Map<String, dynamic>.from(e)))
+          .toList();
     }
-    throw Exception("Failed to fetch public lapangan: ${res.statusCode} ${res.body}");
+    throw Exception(
+      "Failed to fetch public lapangan: ${res.statusCode} ${res.body}",
+    );
   }
 
   Future<Lapangan> getLapanganDetail(String idLapangan) async {
     final uri = Uri.parse("$baseUrl/detail/$idLapangan/");
-    final res = await http.get(uri, headers: {'Content-Type': 'application/json'});
+    final res = await http.get(
+      uri,
+      headers: {'Content-Type': 'application/json'},
+    );
     if (res.statusCode == 200) {
       final body = Map<String, dynamic>.from(jsonDecode(res.body));
       final data = Map<String, dynamic>.from(body['lapangan'] ?? {});
@@ -52,25 +70,40 @@ class LapanganApiService {
 
   Future<List<Lapangan>> getLapanganByPenyedia(String penyediaId) async {
     final uri = Uri.parse("$baseUrl/penyedia/$penyediaId/");
-    final res = await http.get(uri, headers: {'Content-Type': 'application/json'});
+    final res = await http.get(
+      uri,
+      headers: {'Content-Type': 'application/json'},
+    );
     if (res.statusCode == 200) {
       final List data = jsonDecode(res.body);
-      return data.map((e) => Lapangan.fromJson(Map<String, dynamic>.from(e))).toList();
+      return data
+          .map((e) => Lapangan.fromJson(Map<String, dynamic>.from(e)))
+          .toList();
     }
     throw Exception("Failed to fetch lapangan by penyedia: ${res.statusCode}");
   }
 
-  Future<Map<String, dynamic>> createLapangan(AuthService request, Map<String, dynamic> payload) async {
+  Future<Map<String, dynamic>> createLapangan(
+    AuthService request,
+    Map<String, dynamic> payload,
+  ) async {
     final res = await request.postJson("$baseUrl/create/", payload);
     return Map<String, dynamic>.from(res);
   }
 
-  Future<Map<String, dynamic>> updateLapangan(AuthService request, String lapanganId, Map<String, dynamic> payload) async {
+  Future<Map<String, dynamic>> updateLapangan(
+    AuthService request,
+    String lapanganId,
+    Map<String, dynamic> payload,
+  ) async {
     final res = await request.postJson("$baseUrl/update/$lapanganId/", payload);
     return Map<String, dynamic>.from(res);
   }
 
-  Future<Map<String, dynamic>> deleteLapangan(AuthService request, String lapanganId) async {
+  Future<Map<String, dynamic>> deleteLapangan(
+    AuthService request,
+    String lapanganId,
+  ) async {
     final res = await request.postJson("$baseUrl/delete/$lapanganId/", {});
     return Map<String, dynamic>.from(res);
   }
