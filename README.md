@@ -155,8 +155,8 @@ Aplikasi Flutter terhubung sepenuhnya dengan web service Django yang sudah dibua
 [![Build Status](https://app.bitrise.io/app/dbf26df0-21fe-41aa-bdeb-6cc6340c9228/status.svg?token=8hHZI9mnDYovnQL1uT8uUw&branch=main)](https://app.bitrise.io/app/dbf26df0-21fe-41aa-bdeb-6cc6340c9228)
 
 ## Download
-Download aplikasi versi terbaru: [Download APK](https://github.com/PBP25-D10/Courtify-Mobile/releases/tag/v1.0.0%2B1-20251221105700)
-Video promosi aplikasi : [Link Video](https://drive.google.com/drive/folders/193UGzBvTWuXXb8AW8irWhL95fjrV9tEu?usp=drive_link)
+* Download aplikasi versi terbaru: [Download APK](https://github.com/PBP25-D10/Courtify-Mobile/releases/tag/v1.0.0%2B1-20251221105700)
+* Video promosi aplikasi : [Link Video](https://drive.google.com/drive/folders/193UGzBvTWuXXb8AW8irWhL95fjrV9tEu?usp=drive_link)
 
 ## **Tautan Deployment & Desain**
 
