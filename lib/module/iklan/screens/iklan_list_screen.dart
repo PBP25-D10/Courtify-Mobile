@@ -115,19 +115,18 @@ class _IklanListScreenState extends State<IklanListScreen> {
                       margin: const EdgeInsets.symmetric(horizontal: 16.0),
                       padding: const EdgeInsets.all(16.0),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF2563EB).withOpacity(0.5),
+                        color: const Color(0xFF1F2937),
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.transparent),
+                        border: Border.all(color: Colors.white10),
                       ),
                       child: Column(
                         children: [
-                          // Dropdown
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 12),
                             decoration: BoxDecoration(
                               color: const Color(0xFF111827),
                               borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: Colors.transparent),
+                              border: Border.all(color: Colors.white10),
                             ),
                             child: DropdownButtonHideUnderline(
                               child: DropdownButton<String>(
@@ -155,13 +154,12 @@ class _IklanListScreenState extends State<IklanListScreen> {
                             ),
                           ),
                           const SizedBox(height: 12),
-                          // Search
                           TextField(
                             controller: _searchController,
                             style: const TextStyle(color: Colors.white),
                             decoration: InputDecoration(
                               hintText: "Cari judul atau nama lapangan",
-                              hintStyle: TextStyle(color: Colors.grey.shade400),
+                              hintStyle: const TextStyle(color: Colors.white60),
                               filled: true,
                               fillColor: const Color(0xFF111827),
                               contentPadding: const EdgeInsets.symmetric(
@@ -175,7 +173,6 @@ class _IklanListScreenState extends State<IklanListScreen> {
                             ),
                           ),
                           const SizedBox(height: 12),
-                          // Buttons
                           Row(
                             children: [
                               Expanded(

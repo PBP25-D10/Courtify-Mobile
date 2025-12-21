@@ -61,16 +61,21 @@ class _LapanganListScreenState extends State<LapanganListScreen> {
       appBar: AppBar(
         title: const Text(
           "Daftar Lapangan",
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         backgroundColor: const Color(0xFF111827),
+        foregroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
+        scrolledUnderElevation: 0,
       ),
-      body: FutureBuilder<List<Lapangan>>(
-        future: _futureLapangan,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
+      body: Container(
+        color: const Color(0xFF111827),
+        child: FutureBuilder<List<Lapangan>>(
+          future: _futureLapangan,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
           if (snapshot.hasError) {
             return Center(
@@ -112,137 +117,138 @@ class _LapanganListScreenState extends State<LapanganListScreen> {
           final RangeValues effectiveRange = _priceRange ?? baseRange;
           final filteredList = _applyFilters(lapanganList, effectiveRange);
 
-          return ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1F2937),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.white10),
+            return ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1F2937),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.white10),
+                  ),
+                  child: Column(
+                    children: [
+                      TextField(
+                        controller: _searchController,
+                        style: const TextStyle(color: Colors.white),
+                        decoration: InputDecoration(
+                          hintText: "Cari nama, lokasi, atau kategori",
+                          hintStyle: const TextStyle(color: Colors.white60),
+                          filled: true,
+                          fillColor: const Color(0xFF111827),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: BorderSide.none,
+                          ),
+                          prefixIcon: const Icon(Icons.search, color: Colors.white70),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      DropdownButtonFormField<String>(
+                        value: categories.contains(_selectedKategori) ? _selectedKategori : "Semua",
+                        dropdownColor: const Color(0xFF111827),
+                        style: const TextStyle(color: Colors.white),
+                        decoration: InputDecoration(
+                          labelText: "Kategori",
+                          labelStyle: const TextStyle(color: Colors.white70),
+                          filled: true,
+                          fillColor: const Color(0xFF111827),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                        items: categories
+                            .map((k) => DropdownMenuItem(value: k, child: Text(k, overflow: TextOverflow.ellipsis)))
+                            .toList(),
+                        onChanged: (v) => setState(() => _selectedKategori = v ?? "Semua"),
+                      ),
+                      const SizedBox(height: 12),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          "Rentang harga: Rp ${effectiveRange.start.toStringAsFixed(0)} - Rp ${effectiveRange.end.toStringAsFixed(0)}",
+                          style: const TextStyle(color: Colors.white70),
+                        ),
+                      ),
+                      RangeSlider(
+                        values: effectiveRange,
+                        min: minPrice,
+                        max: maxPrice == minPrice ? minPrice + 1 : maxPrice,
+                        divisions: (maxPrice - minPrice).abs() > 0 ? 10 : null,
+                        activeColor: const Color(0xFF2563EB),
+                        inactiveColor: Colors.white24,
+                        labels: RangeLabels(
+                          effectiveRange.start.toStringAsFixed(0),
+                          effectiveRange.end.toStringAsFixed(0),
+                        ),
+                        onChanged: (values) {
+                          setState(() => _priceRange = values);
+                        },
+                      ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () => setState(() {}),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF2563EB),
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                              ),
+                              child: const Text("Filter", style: TextStyle(color: Colors.white)),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () {
+                                setState(() {
+                                  _searchController.clear();
+                                  _selectedKategori = "Semua";
+                                  _priceRange = null;
+                                });
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.grey.shade600,
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                              ),
+                              child: const Text("Reset", style: TextStyle(color: Colors.white)),
+                            ),
+                          ),
+                        ],
+                      )
+                    ],
+                  ),
                 ),
-                child: Column(
-                  children: [
-                    TextField(
-                      controller: _searchController,
-                      style: const TextStyle(color: Colors.white),
-                      decoration: InputDecoration(
-                        hintText: "Cari nama, lokasi, atau kategori",
-                        hintStyle: const TextStyle(color: Colors.white60),
-                        filled: true,
-                        fillColor: const Color(0xFF111827),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide.none,
-                        ),
-                        prefixIcon: const Icon(Icons.search, color: Colors.white70),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    DropdownButtonFormField<String>(
-                      value: categories.contains(_selectedKategori) ? _selectedKategori : "Semua",
-                      dropdownColor: const Color(0xFF111827),
-                      style: const TextStyle(color: Colors.white),
-                      decoration: InputDecoration(
-                        labelText: "Kategori",
-                        labelStyle: const TextStyle(color: Colors.white70),
-                        filled: true,
-                        fillColor: const Color(0xFF111827),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide.none,
-                        ),
-                      ),
-                      items: categories
-                          .map((k) => DropdownMenuItem(value: k, child: Text(k, overflow: TextOverflow.ellipsis)))
-                          .toList(),
-                      onChanged: (v) => setState(() => _selectedKategori = v ?? "Semua"),
-                    ),
-                    const SizedBox(height: 12),
-                    Align(
-                      alignment: Alignment.centerLeft,
+                const SizedBox(height: 16),
+                if (filteredList.isEmpty)
+                  const Center(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 40),
                       child: Text(
-                        "Rentang harga: Rp ${effectiveRange.start.toStringAsFixed(0)} - Rp ${effectiveRange.end.toStringAsFixed(0)}",
-                        style: const TextStyle(color: Colors.white70),
+                        "Tidak ada lapangan yang cocok dengan filter",
+                        style: TextStyle(color: Colors.white70),
                       ),
                     ),
-                    RangeSlider(
-                      values: effectiveRange,
-                      min: minPrice,
-                      max: maxPrice == minPrice ? minPrice + 1 : maxPrice,
-                      divisions: (maxPrice - minPrice).abs() > 0 ? 10 : null,
-                      activeColor: const Color(0xFF2563EB),
-                      inactiveColor: Colors.white24,
-                      labels: RangeLabels(
-                        effectiveRange.start.toStringAsFixed(0),
-                        effectiveRange.end.toStringAsFixed(0),
+                  )
+                else
+                  ...filteredList.map(
+                    (lap) => Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: LapanganCard(
+                        lapangan: lap,
+                        onEdit: () => _navigateToForm(lap),
+                        onDelete: () => _deleteLapangan(lap),
                       ),
-                      onChanged: (values) {
-                        setState(() => _priceRange = values);
-                      },
-                    ),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed: () => setState(() {}),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF2563EB),
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                            ),
-                            child: const Text("Filter", style: TextStyle(color: Colors.white)),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed: () {
-                              setState(() {
-                                _searchController.clear();
-                                _selectedKategori = "Semua";
-                                _priceRange = null;
-                              });
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.grey.shade600,
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                            ),
-                            child: const Text("Reset", style: TextStyle(color: Colors.white)),
-                          ),
-                        ),
-                      ],
-                    )
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-              if (filteredList.isEmpty)
-                const Center(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(vertical: 40),
-                    child: Text(
-                      "Tidak ada lapangan yang cocok dengan filter",
-                      style: TextStyle(color: Colors.white70),
                     ),
                   ),
-                )
-              else
-                ...filteredList.map(
-                  (lap) => Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: LapanganCard(
-                      lapangan: lap,
-                      onEdit: () => _navigateToForm(lap),
-                      onDelete: () => _deleteLapangan(lap),
-                    ),
-                  ),
-                ),
-            ],
-          );
-        },
+              ],
+            );
+          },
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _navigateToForm(null),

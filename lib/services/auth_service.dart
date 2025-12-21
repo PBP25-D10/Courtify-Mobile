@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:courtify_mobile/services/http_client_factory_stub.dart'
     if (dart.library.html) 'package:courtify_mobile/services/http_client_factory_web.dart';
@@ -16,6 +17,10 @@ class AuthService {
   static const String _keyCookies = 'all_cookies';
   static const String _keyRole = 'user_role';
   static const String _keyUsername = 'user_username';
+
+  final http.Client Function() _clientFactory;
+
+  AuthService({http.Client Function()? clientFactory}) : _clientFactory = clientFactory ?? createHttpClient;
 
   Future<void> _saveToLocal(String key, String value) async {
     final prefs = await SharedPreferences.getInstance();
@@ -51,7 +56,7 @@ class AuthService {
     String password,
   ) async {
     try {
-      final client = createHttpClient();
+      final client = _clientFactory();
       try {
         final response = await client.post(
           Uri.parse(_loginUrl),
@@ -96,7 +101,7 @@ class AuthService {
     String? lastName,
   }) async {
     try {
-      final client = createHttpClient();
+      final client = _clientFactory();
       try {
         final body = {
           'username': username,
@@ -136,7 +141,7 @@ class AuthService {
   }
 
   Future<void> logout() async {
-    final client = createHttpClient();
+    final client = _clientFactory();
     try {
       final headers = {'Content-Type': 'application/json'};
       final cookiesHeader = await getCookiesHeader();
@@ -192,7 +197,7 @@ class AuthService {
   }
 
   Future<dynamic> get(String url, {bool requireAuth = true}) async {
-    final client = createHttpClient();
+    final client = _clientFactory();
     try {
       final headers = {'Content-Type': 'application/json'};
       if (!kIsWeb && requireAuth) {
@@ -226,7 +231,7 @@ class AuthService {
     Map<String, dynamic> data, {
     bool requireAuth = true,
   }) async {
-    final client = createHttpClient();
+    final client = _clientFactory();
     try {
       final headers = {'Content-Type': 'application/x-www-form-urlencoded'};
       if (!kIsWeb && requireAuth) {
@@ -264,7 +269,7 @@ class AuthService {
     Map<String, dynamic> data, {
     bool requireAuth = true,
   }) async {
-    final client = createHttpClient();
+    final client = _clientFactory();
     try {
       final headers = {'Content-Type': 'application/json'};
       if (!kIsWeb && requireAuth) {

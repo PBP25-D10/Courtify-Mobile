@@ -158,14 +158,7 @@ class _HomeUserScreenState extends State<HomeUserScreen> {
     return Scaffold(
       backgroundColor: backgroundColor,
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [backgroundColor, const Color(0xFF1a2332)],
-            stops: const [0.0, 1.0],
-          ),
-        ),
+        color: backgroundColor,
         child: Scaffold(
           backgroundColor: Colors.transparent,
           appBar: AppBar(
@@ -259,69 +252,62 @@ class _HomeUserScreenState extends State<HomeUserScreen> {
           bottomNavigationBar: SafeArea(
             top: false,
             child: Padding(
-              padding: EdgeInsets.only(bottom: navBottomPadding),
-              child: Container(
-                height: 72,
-                decoration: BoxDecoration(
-                  color: cardColor,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(18),
-                    topRight: Radius.circular(18),
+              padding: EdgeInsets.fromLTRB(16, 0, 16, navBottomPadding),
+              child: Material(
+                elevation: 12,
+                shadowColor: Colors.black.withOpacity(0.35),
+                color: Colors.transparent,
+                borderRadius: BorderRadius.circular(18),
+                child: Container(
+                  height: 74,
+                  decoration: BoxDecoration(
+                    color: cardColor.withOpacity(0.95),
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(color: Colors.white12),
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.35),
-                      blurRadius: 14,
-                      offset: const Offset(0, -6),
-                    ),
-                  ],
-                ),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 12,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: List.generate(4, (index) {
-                    final icons = [
-                      Icons.home,
-                      Icons.calendar_today,
-                      Icons.article,
-                      Icons.favorite,
-                    ];
-                    final labels = [
-                      "Home",
-                      "Booking",
-                      "Artikel",
-                      "Wishlist",
-                    ];
-                    final isSelected = _selectedIndex == index;
-                    return GestureDetector(
-                      onTap: () => _onNavItemTapped(index),
-                      behavior: HitTestBehavior.opaque,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            icons[index],
-                            size: 24,
-                            color: isSelected ? accent : Colors.white54,
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            labels[index],
-                            style: TextStyle(
-                              fontSize: 12,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: List.generate(4, (index) {
+                      final icons = [
+                        Icons.home,
+                        Icons.calendar_today,
+                        Icons.article,
+                        Icons.favorite,
+                      ];
+                      final labels = [
+                        "Home",
+                        "Booking",
+                        "Artikel",
+                        "Wishlist",
+                      ];
+                      final isSelected = _selectedIndex == index;
+                      return GestureDetector(
+                        onTap: () => _onNavItemTapped(index),
+                        behavior: HitTestBehavior.opaque,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              icons[index],
+                              size: 24,
                               color: isSelected ? accent : Colors.white54,
-                              fontWeight: isSelected
-                                  ? FontWeight.w600
-                                  : FontWeight.normal,
                             ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }),
+                            const SizedBox(height: 6),
+                            Text(
+                              labels[index],
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: isSelected ? accent : Colors.white54,
+                                fontWeight:
+                                    isSelected ? FontWeight.w700 : FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
+                  ),
                 ),
               ),
             ),
