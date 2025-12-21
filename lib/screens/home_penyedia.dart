@@ -147,21 +147,7 @@ class _HomePenyediaScreenState extends State<HomePenyediaScreen> {
     return Scaffold(
       backgroundColor: backgroundColor,
       body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF111827),
-              Color(0xFF1a2f4f),
-              Color(0xFF0F1624),
-              Color(0xFF1a3a5a),
-              Color(0xFF1F2937),
-              Color(0xFF2a1f3f),
-            ],
-            stops: [0.0, 0.25, 0.5, 0.65, 0.85, 1.0],
-          ),
-        ),
+        color: backgroundColor,
         child: Scaffold(
           backgroundColor: Colors.transparent,
           appBar: AppBar(
@@ -206,69 +192,62 @@ class _HomePenyediaScreenState extends State<HomePenyediaScreen> {
           bottomNavigationBar: SafeArea(
             top: false,
             child: Padding(
-              padding: EdgeInsets.only(bottom: navBottomPadding),
-              child: Container(
-                height: 72,
-                decoration: BoxDecoration(
-                  color: cardColor,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(18),
-                    topRight: Radius.circular(18),
+              padding: EdgeInsets.fromLTRB(16, 0, 16, navBottomPadding),
+              child: Material(
+                elevation: 12,
+                shadowColor: Colors.black.withOpacity(0.35),
+                color: Colors.transparent,
+                borderRadius: BorderRadius.circular(18),
+                child: Container(
+                  height: 74,
+                  decoration: BoxDecoration(
+                    color: cardColor.withOpacity(0.95),
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(color: Colors.white12),
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.35),
-                      blurRadius: 14,
-                      offset: const Offset(0, -6),
-                    ),
-                  ],
-                ),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 12,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: List.generate(4, (index) {
-                    final icons = [
-                      Icons.campaign,
-                      Icons.dashboard,
-                      Icons.stadium,
-                      Icons.article,
-                    ];
-                    final labels = [
-                      "Iklan",
-                      "Dashboard",
-                      "Lapangan",
-                      "Artikel",
-                    ];
-                    final isSelected = _selectedIndex == index;
-                    return GestureDetector(
-                      onTap: () => _onNavItemTapped(index),
-                      behavior: HitTestBehavior.opaque,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            icons[index],
-                            size: 24,
-                            color: isSelected ? accent : Colors.white54,
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            labels[index],
-                            style: TextStyle(
-                              fontSize: 12,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: List.generate(4, (index) {
+                      final icons = [
+                        Icons.campaign,
+                        Icons.dashboard,
+                        Icons.stadium,
+                        Icons.article,
+                      ];
+                      final labels = [
+                        "Iklan",
+                        "Dashboard",
+                        "Lapangan",
+                        "Artikel",
+                      ];
+                      final isSelected = _selectedIndex == index;
+                      return GestureDetector(
+                        onTap: () => _onNavItemTapped(index),
+                        behavior: HitTestBehavior.opaque,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              icons[index],
+                              size: 24,
                               color: isSelected ? accent : Colors.white54,
-                              fontWeight: isSelected
-                                  ? FontWeight.w600
-                                  : FontWeight.normal,
                             ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }),
+                            const SizedBox(height: 6),
+                            Text(
+                              labels[index],
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: isSelected ? accent : Colors.white54,
+                                fontWeight:
+                                    isSelected ? FontWeight.w700 : FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
+                  ),
                 ),
               ),
             ),

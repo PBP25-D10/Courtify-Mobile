@@ -1,7 +1,3 @@
-import 'dart:convert';
-import 'dart:io';
-import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:courtify_mobile/services/auth_service.dart';
@@ -38,7 +34,6 @@ class _IklanFormScreenState extends State<IklanFormScreen> {
   bool _isLoading = false;
   List<Lapangan> _lapanganList = [];
   String? _selectedLapanganId;
-  XFile? _selectedImage;
 
   @override
   void initState() {
@@ -86,20 +81,6 @@ class _IklanFormScreenState extends State<IklanFormScreen> {
   }
 
   // ============================
-  // PICK IMAGE
-  // ============================
-  Future<void> _pickImage() async {
-    final ImagePicker picker = ImagePicker();
-    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
-
-    if (image != null) {
-      setState(() {
-        _selectedImage = image; 
-      });
-    }
-  }
-
-  // ============================
   // SUBMIT FORM
   // ============================
   Future<void> _submit() async {
@@ -118,13 +99,6 @@ class _IklanFormScreenState extends State<IklanFormScreen> {
 
     if (_urlThumbnailController.text.isNotEmpty) {
       payload['url_thumbnail'] = _urlThumbnailController.text.trim();
-    }
-
-    if (_selectedImage != null) {
-      List<int> imageBytes = await _selectedImage!.readAsBytes();
-      String base64Image = base64Encode(imageBytes);
-      
-      payload['banner'] = "data:image/jpeg;base64,$base64Image";
     }
 
     try {
@@ -318,59 +292,6 @@ class _IklanFormScreenState extends State<IklanFormScreen> {
                   },
                   validator: (val) => val == null ? "Pilih lapangan" : null,
                 ),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: _pickImage,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black26,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.image),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: _selectedImage != null
-                            ? Text(
-                                _selectedImage!.name,
-                                overflow: TextOverflow.ellipsis,
-                              )
-                            : Text(
-                                isEdit && widget.iklan?.banner != null && widget.iklan!.banner!.isNotEmpty
-                                    ? "Ganti Banner (Saat ini terpasang)"
-                                    : "Pilih Banner (Opsional)",
-                              ),
-                      ),
-                      const Icon(Icons.edit, color: Colors.white70, size: 18),
-                    ],
-                  ),
-                ),
-                if (_selectedImage != null || (isEdit && widget.iklan?.banner != null && widget.iklan!.banner!.isNotEmpty))
-                  Padding(
-                    padding: const EdgeInsets.only(top: 12),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: _selectedImage != null
-                          ? (kIsWeb
-                              ? Image.network(_selectedImage!.path, height: 140, fit: BoxFit.cover)
-                              : Image.file(File(_selectedImage!.path), height: 140, fit: BoxFit.cover))
-                          : Image.network(
-                              widget.iklan!.banner!,
-                              height: 140,
-                              fit: BoxFit.cover,
-                              errorBuilder: (ctx, err, stack) => Container(
-                                height: 140,
-                                color: Colors.black45,
-                                alignment: Alignment.center,
-                                child: const Icon(Icons.broken_image, color: Colors.white38),
-                              ),
-                            ),
-                    ),
-                  ),
                 const SizedBox(height: 24),
                 SizedBox(
                   width: double.infinity,

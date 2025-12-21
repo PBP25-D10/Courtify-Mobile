@@ -1,7 +1,5 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:image_picker/image_picker.dart';
 
 import 'package:courtify_mobile/services/auth_service.dart';
 import 'package:courtify_mobile/module/lapangan/services/api_services.dart';
@@ -30,9 +28,6 @@ class _LapanganFormScreenState extends State<LapanganFormScreen> {
   final _jamBukaController = TextEditingController();
   final _jamTutupController = TextEditingController();
   final _thumbnailController = TextEditingController();
-
-  final _picker = ImagePicker();
-  File? _pickedImage;
 
   String? _selectedKategori;
   bool _isEditing = false;
@@ -65,12 +60,6 @@ class _LapanganFormScreenState extends State<LapanganFormScreen> {
     _jamTutupController.dispose();
     _thumbnailController.dispose();
     super.dispose();
-  }
-
-  Future<void> _pickImage() async {
-    final XFile? file = await _picker.pickImage(source: ImageSource.gallery);
-    if (file == null) return;
-    setState(() => _pickedImage = File(file.path));
   }
 
   Future<void> _selectTime(BuildContext context, TextEditingController controller) async {
@@ -142,26 +131,6 @@ class _LapanganFormScreenState extends State<LapanganFormScreen> {
                     Expanded(child: _buildTimeField(_jamTutupController, "Jam Tutup")),
                   ],
                 ),
-                const SizedBox(height: 16),
-                ElevatedButton.icon(
-                  onPressed: _pickImage,
-                  icon: const Icon(Icons.image),
-                  label: Text(_pickedImage == null ? "Pilih Foto (Opsional)" : "Ganti Foto"),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black26,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                ),
-                if (_pickedImage != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 12),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Image.file(_pickedImage!, height: 140, fit: BoxFit.cover),
-                    ),
-                  ),
                 const SizedBox(height: 24),
                 SizedBox(
                   width: double.infinity,
@@ -283,16 +252,6 @@ class _LapanganFormScreenState extends State<LapanganFormScreen> {
       if (!mounted) return;
 
       if (response['status'] == 'success') {
-        final lapanganId = _isEditing
-            ? widget.lapangan!.idLapangan
-            : (response['lapangan']?['id']?.toString() ?? '');
-
-        // optional upload foto
-        if (_pickedImage != null && lapanganId.isNotEmpty) {
-          await _api.uploadFotoLapangan(request, lapanganId: lapanganId, imageFile: _pickedImage!);
-        }
-
-        if (!mounted) return;
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(_isEditing ? "Lapangan berhasil diupdate" : "Lapangan berhasil ditambahkan")),
