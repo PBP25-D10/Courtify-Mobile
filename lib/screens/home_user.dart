@@ -30,6 +30,7 @@ class _HomeUserScreenState extends State<HomeUserScreen> {
   late PageController _pageController;
   TextEditingController _searchController = TextEditingController();
   late PageController _iklanPageController;
+  late ScrollController _bookingScrollController;
 
   static const Color backgroundColor = Color(0xFF111827);
   static const Color cardColor = Color(0xFF1F2937);
@@ -40,6 +41,7 @@ class _HomeUserScreenState extends State<HomeUserScreen> {
     super.initState();
     _pageController = PageController();
     _iklanPageController = PageController(viewportFraction: 0.88);
+    _bookingScrollController = ScrollController();
     _loadUserData();
     _loadLapangan();
     _loadBookings();
@@ -197,10 +199,7 @@ class _HomeUserScreenState extends State<HomeUserScreen> {
                         children: const [
                           Icon(Icons.logout, color: Colors.redAccent),
                           SizedBox(width: 8),
-                          Text(
-                            "Logout",
-                            style: TextStyle(color: Colors.white),
-                          ),
+                          Text("Logout", style: TextStyle(color: Colors.white)),
                         ],
                       ),
                       content: const Text(
@@ -265,7 +264,10 @@ class _HomeUserScreenState extends State<HomeUserScreen> {
                     borderRadius: BorderRadius.circular(18),
                     border: Border.all(color: Colors.white12),
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 10,
+                  ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: List.generate(4, (index) {
@@ -275,12 +277,7 @@ class _HomeUserScreenState extends State<HomeUserScreen> {
                         Icons.article,
                         Icons.favorite,
                       ];
-                      final labels = [
-                        "Home",
-                        "Booking",
-                        "Artikel",
-                        "Wishlist",
-                      ];
+                      final labels = ["Home", "Booking", "Artikel", "Wishlist"];
                       final isSelected = _selectedIndex == index;
                       return GestureDetector(
                         onTap: () => _onNavItemTapped(index),
@@ -299,8 +296,9 @@ class _HomeUserScreenState extends State<HomeUserScreen> {
                               style: TextStyle(
                                 fontSize: 12,
                                 color: isSelected ? accent : Colors.white54,
-                                fontWeight:
-                                    isSelected ? FontWeight.w700 : FontWeight.w500,
+                                fontWeight: isSelected
+                                    ? FontWeight.w700
+                                    : FontWeight.w500,
                               ),
                             ),
                           ],
@@ -427,20 +425,21 @@ class _HomeUserScreenState extends State<HomeUserScreen> {
   @override
   void dispose() {
     _pageController.dispose();
-    _searchController.dispose();
-    super.dispose();
     _iklanPageController.dispose();
+    _searchController.dispose();
+    _bookingScrollController.dispose();
+    super.dispose();
   }
 
   Widget _buildHomePage() {
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              const Color(0xFF111827),
-              const Color(0xFF1a2f4f),
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            const Color(0xFF111827),
+            const Color(0xFF1a2f4f),
             const Color(0xFF0F1624),
             const Color(0xFF1a3a5a),
             const Color(0xFF1F2937),
@@ -451,69 +450,103 @@ class _HomeUserScreenState extends State<HomeUserScreen> {
       ),
       child: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    'Booking Terbaru',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.refresh, color: Colors.white70),
-                  onPressed: () => _loadBookings(),
-                ),
-              ],
-            ),
-          ),
-
           Expanded(
-            child: FutureBuilder<List<Booking>>(
-              future: _apiService.getUserBookings(context.read<AuthService>()),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (snapshot.hasError) {
-                  return Center(
-                    child: Text(
-                      "Error: ${snapshot.error}",
-                      style: const TextStyle(color: Colors.white),
+            child: Container(
+              margin: const EdgeInsets.symmetric(
+                horizontal: 16.0,
+                vertical: 12,
+              ),
+              decoration: BoxDecoration(
+                color: cardColor.withOpacity(0.03),
+                border: Border.all(color: Colors.white12),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12.0,
+                      vertical: 8,
                     ),
-                  );
-                }
-                final items = snapshot.data ?? [];
-                if (items.isEmpty) {
-                  return const Center(
-                    child: Text(
-                      'Belum ada riwayat booking',
-                      style: TextStyle(color: Colors.white70),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'Booking Terbaru',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(
+                            Icons.refresh,
+                            color: Colors.white70,
+                          ),
+                          onPressed: () => _loadBookings(),
+                        ),
+                      ],
                     ),
-                  );
-                }
-
-                return RefreshIndicator(
-                  onRefresh: () async => _loadBookings(),
-                  child: ListView.separated(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: items.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 12),
-                    itemBuilder: (context, index) {
-                      final b = items[index];
-                      return BookingCard(
-                        booking: b,
-                        onCancel: (id) => _handleCancelBookingHome(id),
-                      );
-                    },
                   ),
-                );
-              },
+                  Expanded(
+                    child: FutureBuilder<List<Booking>>(
+                      future: _apiService.getUserBookings(
+                        context.read<AuthService>(),
+                      ),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        }
+                        if (snapshot.hasError) {
+                          return Center(
+                            child: Text(
+                              "Error: ${snapshot.error}",
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                          );
+                        }
+                        final items = snapshot.data ?? [];
+                        if (items.isEmpty) {
+                          return const Center(
+                            child: Text(
+                              'Belum ada riwayat booking',
+                              style: TextStyle(color: Colors.white70),
+                            ),
+                          );
+                        }
+
+                        return RefreshIndicator(
+                          onRefresh: () async => _loadBookings(),
+                          child: Scrollbar(
+                            controller: _bookingScrollController,
+                            thumbVisibility: true,
+                            child: ListView.separated(
+                              controller: _bookingScrollController,
+                              padding: const EdgeInsets.all(16),
+                              itemCount: items.length,
+                              separatorBuilder: (_, __) =>
+                                  const SizedBox(height: 12),
+                              itemBuilder: (context, index) {
+                                final b = items[index];
+                                return BookingCard(
+                                  booking: b,
+                                  onCancel: (id) =>
+                                      _handleCancelBookingHome(id),
+                                );
+                              },
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           const SizedBox(height: 12),
@@ -529,25 +562,30 @@ class _HomeUserScreenState extends State<HomeUserScreen> {
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12),
-          child: Row(
-            children: const [
-              Icon(Icons.campaign, color: Colors.orangeAccent, size: 20),
-              SizedBox(width: 8),
-              Text(
-                'Iklan Menarik',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+          child: Center(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: const [
+                Icon(Icons.campaign, color: Colors.orangeAccent, size: 20),
+                SizedBox(width: 8),
+                Text(
+                  'Iklan Menarik',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
         SizedBox(
           height: 210,
           child: FutureBuilder<List<Iklan>>(
-            future: _iklanApiService.fetchTop10Iklan(context.read<AuthService>()),
+            future: _iklanApiService.fetchTop10Iklan(
+              context.read<AuthService>(),
+            ),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
@@ -573,7 +611,7 @@ class _HomeUserScreenState extends State<HomeUserScreen> {
               return PageView.builder(
                 controller: _iklanPageController,
                 itemCount: items.length,
-                padEnds: false,
+                padEnds: true,
                 itemBuilder: (context, index) {
                   final iklan = items[index];
                   return AnimatedBuilder(
@@ -584,10 +622,7 @@ class _HomeUserScreenState extends State<HomeUserScreen> {
                         value = (_iklanPageController.page ?? 0) - index;
                         value = (1 - (value.abs() * 0.15)).clamp(0.85, 1.0);
                       }
-                      return Transform.scale(
-                        scale: value,
-                        child: child,
-                      );
+                      return Transform.scale(scale: value, child: child);
                     },
                     child: _iklanCard(iklan),
                   );
@@ -629,7 +664,10 @@ class _HomeUserScreenState extends State<HomeUserScreen> {
                     ),
                     Text(
                       "${iklan.tanggal.day.toString().padLeft(2, '0')}/${iklan.tanggal.month.toString().padLeft(2, '0')}",
-                      style: const TextStyle(color: Colors.white54, fontSize: 12),
+                      style: const TextStyle(
+                        color: Colors.white54,
+                        fontSize: 12,
+                      ),
                     ),
                   ],
                 ),
@@ -657,7 +695,7 @@ class _HomeUserScreenState extends State<HomeUserScreen> {
         );
       },
       child: Container(
-        margin: const EdgeInsets.only(right: 14),
+        margin: const EdgeInsets.symmetric(horizontal: 12),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
