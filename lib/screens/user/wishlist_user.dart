@@ -133,22 +133,6 @@ class _WishlistUserScreenState extends State<WishlistUserScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
-                  child: Image.network(
-                    lap.fotoUrl,
-                    height: 150,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(
-                      height: 150,
-                      color: Colors.grey[900],
-                      child: const Center(
-                        child: Icon(Icons.broken_image, color: Colors.white54),
-                      ),
-                    ),
-                  ),
-                ),
                 Padding(
                   padding: const EdgeInsets.all(14),
                   child: Column(

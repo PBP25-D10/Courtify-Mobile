@@ -143,14 +143,19 @@ class AuthService {
       if (cookiesHeader.isNotEmpty) {
         headers['Cookie'] = cookiesHeader;
       }
-      try {
-        await client.post(Uri.parse(_logoutUrl), headers: headers);
-      } catch (_) {}
+
+      final response = await client
+          .post(Uri.parse(_logoutUrl), headers: headers)
+          .timeout(const Duration(seconds: 10));
+
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        throw Exception('Logout failed: ${response.statusCode} ${response.body}');
+      }
     } finally {
       client.close();
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.clear();
     }
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
   }
 
   Future<bool> isLoggedIn() async {

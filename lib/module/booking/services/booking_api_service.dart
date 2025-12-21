@@ -41,6 +41,20 @@ class BookingApiService {
     throw Exception(response['message'] ?? 'Gagal membuat booking');
   }
 
+  Future<List<Booking>> getOwnerBookings(AuthService request, {String? status}) async {
+    final query = (status != null && status.isNotEmpty && status != 'all')
+        ? "?status=$status"
+        : "";
+    final response = await request.get("$baseUrl/flutter/bookings/owner/$query");
+    if (response is Map && response['success'] == true) {
+      final List data = response['bookings'] ?? [];
+      return data
+          .map((e) => Booking.fromJson(Map<String, dynamic>.from(e)))
+          .toList();
+    }
+    throw Exception(response['message'] ?? 'Gagal memuat booking penyedia');
+  }
+
   Future<bool> cancelBooking(AuthService request, int bookingId) async {
     final response = await request.postJson(
       "$baseUrl/flutter/bookings/cancel/$bookingId/",
@@ -58,6 +72,16 @@ class BookingApiService {
     );
     if (response is Map && response['success'] == true) return true;
     throw Exception(response['message'] ?? 'Gagal konfirmasi booking');
+  }
+
+  Future<bool> ownerCancelBooking(AuthService request, int bookingId) async {
+    final response = await request.postJson(
+      "$baseUrl/flutter/bookings/owner/cancel/$bookingId/",
+      {},
+    );
+
+    if (response is Map && response['success'] == true) return true;
+    throw Exception(response['message'] ?? 'Gagal membatalkan booking');
   }
 
   Future<List<int>> getBookedHours(

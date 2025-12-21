@@ -16,6 +16,10 @@ class LapanganFormScreen extends StatefulWidget {
 }
 
 class _LapanganFormScreenState extends State<LapanganFormScreen> {
+  static const Color _backgroundColor = Color(0xFF111827);
+  static const Color _cardColor = Color(0xFF1F2937);
+  static const Color _accent = Color(0xFF2563EB);
+
   final _formKey = GlobalKey<FormState>();
   final LapanganApiService _api = LapanganApiService();
 
@@ -83,94 +87,99 @@ class _LapanganFormScreenState extends State<LapanganFormScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF111827),
+      backgroundColor: _backgroundColor,
       appBar: AppBar(
         title: Text(_isEditing ? "Edit Lapangan" : "Tambah Lapangan",
             style: const TextStyle(color: Colors.white)),
-        backgroundColor: const Color(0xFF111827),
-        iconTheme: const IconThemeData(color: Colors.white),
+        backgroundColor: _backgroundColor,
+        foregroundColor: Colors.white,
+        elevation: 0,
       ),
-      body: SingleChildScrollView(
+      body: Padding(
         padding: const EdgeInsets.all(16),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildTextField(_namaController, "Nama Lapangan", Icons.sports_soccer),
-              const SizedBox(height: 16),
-              _buildTextField(_deskripsiController, "Deskripsi", Icons.description, maxLines: 3),
-              const SizedBox(height: 16),
-              DropdownButtonFormField<String>(
-                initialValue: _selectedKategori,
-                decoration: InputDecoration(
-                  labelText: "Kategori",
-                  labelStyle: const TextStyle(color: Colors.grey),
-                  prefixIcon: const Icon(Icons.category, color: Colors.blueAccent),
-                  filled: true,
-                  fillColor: const Color(0xFF374151),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                  focusedBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.blueAccent)),
+        child: Container(
+          decoration: BoxDecoration(
+            color: _cardColor,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.white10),
+          ),
+          padding: const EdgeInsets.all(16),
+          child: Form(
+            key: _formKey,
+            child: ListView(
+              children: [
+                _buildTextField(_namaController, "Nama Lapangan", Icons.sports_soccer),
+                const SizedBox(height: 16),
+                _buildTextField(_deskripsiController, "Deskripsi", Icons.description, maxLines: 3),
+                const SizedBox(height: 16),
+                DropdownButtonFormField<String>(
+                  initialValue: _selectedKategori,
+                  decoration: _inputDecoration("Kategori", icon: Icons.category),
+                  dropdownColor: _cardColor,
+                  style: const TextStyle(color: Colors.white),
+                  items: const [
+                    DropdownMenuItem(value: 'futsal', child: Text('Futsal')),
+                    DropdownMenuItem(value: 'basket', child: Text('Basket')),
+                    DropdownMenuItem(value: 'badminton', child: Text('Badminton')),
+                    DropdownMenuItem(value: 'tenis', child: Text('Tenis')),
+                    DropdownMenuItem(value: 'voli', child: Text('Voli')),
+                    DropdownMenuItem(value: 'lainnya', child: Text('Lainnya')),
+                  ],
+                  onChanged: (v) => setState(() => _selectedKategori = v),
+                  validator: (v) => v == null ? "Kategori tidak boleh kosong" : null,
                 ),
-                dropdownColor: const Color(0xFF374151),
-                style: const TextStyle(color: Colors.white),
-                items: const [
-                  DropdownMenuItem(value: 'futsal', child: Text('Futsal')),
-                  DropdownMenuItem(value: 'basket', child: Text('Basket')),
-                  DropdownMenuItem(value: 'badminton', child: Text('Badminton')),
-                  DropdownMenuItem(value: 'tenis', child: Text('Tenis')),
-                  DropdownMenuItem(value: 'voli', child: Text('Voli')),
-                  DropdownMenuItem(value: 'lainnya', child: Text('Lainnya')),
-                ],
-                onChanged: (v) => setState(() => _selectedKategori = v),
-                validator: (v) => v == null ? "Kategori tidak boleh kosong" : null,
-              ),
-              const SizedBox(height: 16),
-      _buildTextField(_lokasiController, "Lokasi", Icons.location_on),
-      const SizedBox(height: 16),
-      _buildTextField(_hargaController, "Harga Per Jam", Icons.attach_money,
-          keyboardType: TextInputType.number),
-      const SizedBox(height: 16),
-      _buildTextField(_thumbnailController, "URL Thumbnail (opsional)", Icons.image, isRequired: false),
-      const SizedBox(height: 16),
-      Row(
-        children: [
-          Expanded(child: _buildTimeField(_jamBukaController, "Jam Buka")),
-          const SizedBox(width: 16),
-                  Expanded(child: _buildTimeField(_jamTutupController, "Jam Tutup")),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: _pickImage,
-                      icon: const Icon(Icons.image),
-                      label: Text(_pickedImage == null ? "Pilih Foto (Opsional)" : "Ganti Foto"),
-                      style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF374151)),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  if (_pickedImage != null)
-                    const Text("Foto sudah dipilih", style: TextStyle(color: Colors.white70)),
-                ],
-              ),
-              const SizedBox(height: 32),
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: _submitForm,
+                const SizedBox(height: 16),
+                _buildTextField(_lokasiController, "Lokasi", Icons.location_on),
+                const SizedBox(height: 16),
+                _buildTextField(_hargaController, "Harga Per Jam", Icons.attach_money, keyboardType: TextInputType.number),
+                const SizedBox(height: 16),
+                _buildTextField(_thumbnailController, "URL Thumbnail (opsional)", Icons.image, isRequired: false),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(child: _buildTimeField(_jamBukaController, "Jam Buka")),
+                    const SizedBox(width: 16),
+                    Expanded(child: _buildTimeField(_jamTutupController, "Jam Tutup")),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton.icon(
+                  onPressed: _pickImage,
+                  icon: const Icon(Icons.image),
+                  label: Text(_pickedImage == null ? "Pilih Foto (Opsional)" : "Ganti Foto"),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blueAccent,
+                    backgroundColor: Colors.black26,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
-                  child: Text(_isEditing ? "Update" : "Simpan",
-                      style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
                 ),
-              )
-            ],
+                if (_pickedImage != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 12),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.file(_pickedImage!, height: 140, fit: BoxFit.cover),
+                    ),
+                  ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: _submitForm,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _accent,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    child: Text(
+                      _isEditing ? "Update" : "Simpan",
+                      style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                )
+              ],
+            ),
           ),
         ),
       ),
@@ -189,17 +198,27 @@ class _LapanganFormScreenState extends State<LapanganFormScreen> {
       controller: controller,
       maxLines: maxLines,
       keyboardType: keyboardType,
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: const TextStyle(color: Colors.grey),
-        prefixIcon: Icon(icon, color: Colors.blueAccent),
-        filled: true,
-        fillColor: const Color(0xFF374151),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-        focusedBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.blueAccent)),
-      ),
+      decoration: _inputDecoration(label, icon: icon),
       style: const TextStyle(color: Colors.white),
       validator: isRequired ? (v) => (v == null || v.isEmpty) ? "$label tidak boleh kosong" : null : null,
+    );
+  }
+
+  InputDecoration _inputDecoration(String label, {IconData? icon}) {
+    return InputDecoration(
+      labelText: label,
+      labelStyle: const TextStyle(color: Colors.white70),
+      prefixIcon: icon != null ? Icon(icon, color: _accent) : null,
+      filled: true,
+      fillColor: Colors.black26,
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Colors.white24),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Colors.white70),
+      ),
     );
   }
 
@@ -207,15 +226,7 @@ class _LapanganFormScreenState extends State<LapanganFormScreen> {
     return TextFormField(
       controller: controller,
       readOnly: true,
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: const TextStyle(color: Colors.grey),
-        prefixIcon: const Icon(Icons.access_time, color: Colors.blueAccent),
-        filled: true,
-        fillColor: const Color(0xFF374151),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-        focusedBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.blueAccent)),
-      ),
+      decoration: _inputDecoration(label, icon: Icons.access_time),
       style: const TextStyle(color: Colors.white),
       validator: (v) => (v == null || v.isEmpty) ? "$label tidak boleh kosong" : null,
       onTap: () => _selectTime(context, controller),

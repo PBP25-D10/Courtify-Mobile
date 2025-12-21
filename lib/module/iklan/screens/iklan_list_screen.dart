@@ -88,19 +88,6 @@ class _IklanListScreenState extends State<IklanListScreen> {
 
     return Scaffold(
       backgroundColor: backgroundColor,
-      appBar: AppBar(
-        backgroundColor: backgroundColor,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text(
-          "Kelola Iklan",
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-      ),
       body: SafeArea(
         child: Column(
           children: [
@@ -113,45 +100,13 @@ class _IklanListScreenState extends State<IklanListScreen> {
                     // --- TITLE & ADD BUTTON ---
                     Padding(
                       padding: const EdgeInsets.all(16.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            "Iklan",
-                            style: TextStyle(
-                              fontSize: 28,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                          ElevatedButton.icon(
-                            onPressed: () => _navigateToForm(null),
-                            icon: const Icon(
-                              Icons.add,
-                              size: 18,
-                              color: Colors.white,
-                            ),
-                            label: const Text(
-                              "Iklan",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(
-                                0xFF2563EB,
-                              ).withOpacity(0.5),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 20,
-                                vertical: 10,
-                              ),
-                            ),
-                          ),
-                        ],
+                      child: const Text(
+                        "Iklan",
+                        style: TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
 
@@ -635,6 +590,11 @@ class _IklanListScreenState extends State<IklanListScreen> {
             ),
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _navigateToForm(null),
+        backgroundColor: primaryBlue,
+        child: const Icon(Icons.add),
       ),
     );
   }
