@@ -155,10 +155,18 @@ Aplikasi Flutter terhubung sepenuhnya dengan web service Django yang sudah dibua
 [![Build Status](https://app.bitrise.io/app/dbf26df0-21fe-41aa-bdeb-6cc6340c9228/status.svg?token=8hHZI9mnDYovnQL1uT8uUw&branch=main)](https://app.bitrise.io/app/dbf26df0-21fe-41aa-bdeb-6cc6340c9228)
 
 ## Download
-Download aplikasi versi terbaru: [Download APK](https://github.com/PBP25-D10/Courtify-Mobile/releases/tag/v1.0.0%2B1-20251221044145)
+* Download aplikasi versi terbaru: [Download APK](https://github.com/PBP25-D10/Courtify-Mobile/releases/tag/v1.0.0%2B1-20251221105700)
+* Video promosi aplikasi : [Link Video](https://drive.google.com/drive/folders/193UGzBvTWuXXb8AW8irWhL95fjrV9tEu?usp=drive_link)
 
 ## **Tautan Deployment & Desain**
 
 * **Tautan Deployment (PWS):** [link pws](https://justin-timothy-courtify.pbp.cs.ui.ac.id/)
 * **Link Desain (Figma):** [link figma](https://www.figma.com/design/WFXPpXYAMJKiQBmJfbklMn/PBP-COURTIFY?node-id=0-1&t=oJticVyhsjIw0hyG-1)
+
+## **Bonus Individu :**
+**Rafa Rally Soelistiono - 2406344675**
+* **Tautan Blog (Penerapan advanced widget : TweenAnimationBuilder):** [link linkedin post](https://www.linkedin.com/pulse/meningkatkan-perceived-quality-dengan-melakukan-pada-soelistiono-coxpc?utm_source=share&utm_medium=member_android&utm_campaign=share_via)
+
+* Khayra Tazkiya - 2406428876
+* https://www.linkedin.com/posts/khayra-tazkiya-2111b130a_flutter-pemrogramanberbasisplatform-courtifymobile-activity-7408550793122963457-Ho7q?utm_source=share&utm_medium=member_desktop&rcm=ACoAAE6x7u0BdpADqH1SrCIB4KGlC8jNIbM48wM
 
