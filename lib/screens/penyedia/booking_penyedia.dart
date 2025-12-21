@@ -12,6 +12,7 @@ class BookingPenyediaScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: backgroundColor,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: const Text("Pesanan Masuk"),
         backgroundColor: backgroundColor,
         foregroundColor: Colors.white,

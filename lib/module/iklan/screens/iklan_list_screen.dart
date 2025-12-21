@@ -5,6 +5,7 @@ import 'package:courtify_mobile/module/iklan/services/iklan_api_services.dart';
 import 'package:courtify_mobile/module/iklan/models/iklan.dart';
 import 'package:courtify_mobile/module/iklan/widgets/iklan_card.dart';
 import 'package:courtify_mobile/module/iklan/screens/iklan_form_screen.dart';
+import 'package:courtify_mobile/theme/app_colors.dart';
 
 class IklanListScreen extends StatefulWidget {
   const IklanListScreen({super.key});
@@ -83,11 +84,8 @@ class _IklanListScreenState extends State<IklanListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const backgroundColor = Color(0xFF111827);
-    const primaryBlue = Color(0xFF2563EB);
-
     return Scaffold(
-      backgroundColor: backgroundColor,
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: Column(
           children: [
@@ -115,7 +113,7 @@ class _IklanListScreenState extends State<IklanListScreen> {
                       margin: const EdgeInsets.symmetric(horizontal: 16.0),
                       padding: const EdgeInsets.all(16.0),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF1F2937),
+                        color: AppColors.card,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(color: Colors.white10),
                       ),
@@ -124,14 +122,14 @@ class _IklanListScreenState extends State<IklanListScreen> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 12),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF111827),
+                              color: AppColors.input,
                               borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: Colors.white10),
+                              border: Border.all(color: AppColors.border.withOpacity(0.6)),
                             ),
                             child: DropdownButtonHideUnderline(
                               child: DropdownButton<String>(
                                 value: _selectedTimeFilter,
-                                dropdownColor: const Color(0xFF111827),
+                                dropdownColor: AppColors.input,
                                 isExpanded: true,
                                 icon: const Icon(
                                   Icons.keyboard_arrow_down,
@@ -159,16 +157,9 @@ class _IklanListScreenState extends State<IklanListScreen> {
                             style: const TextStyle(color: Colors.white),
                             decoration: InputDecoration(
                               hintText: "Cari judul atau nama lapangan",
-                              hintStyle: const TextStyle(color: Colors.white60),
-                              filled: true,
-                              fillColor: const Color(0xFF111827),
                               contentPadding: const EdgeInsets.symmetric(
                                 horizontal: 12,
                                 vertical: 14,
-                              ),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                                borderSide: BorderSide.none,
                               ),
                             ),
                           ),
@@ -184,7 +175,7 @@ class _IklanListScreenState extends State<IklanListScreen> {
                                     });
                                   },
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: primaryBlue,
+                                    backgroundColor: AppColors.primary,
                                     padding: const EdgeInsets.symmetric(
                                       vertical: 12,
                                     ),
@@ -203,7 +194,7 @@ class _IklanListScreenState extends State<IklanListScreen> {
                                 child: ElevatedButton(
                                   onPressed: _resetFilters,
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.grey.shade600,
+                                    backgroundColor: AppColors.reset,
                                     padding: const EdgeInsets.symmetric(
                                       vertical: 12,
                                     ),
@@ -590,7 +581,7 @@ class _IklanListScreenState extends State<IklanListScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _navigateToForm(null),
-        backgroundColor: primaryBlue,
+        backgroundColor: AppColors.primary,
         child: const Icon(Icons.add),
       ),
     );

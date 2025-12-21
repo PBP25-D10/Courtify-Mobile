@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:courtify_mobile/services/auth_service.dart';
-import 'package:courtify_mobile/screens/login_screen.dart';
+import 'package:courtify_mobile/screens/landing_screen.dart';
 import 'package:courtify_mobile/screens/user/wishlist_user.dart';
 import 'package:courtify_mobile/screens/user/artikel_user.dart';
 import 'package:courtify_mobile/module/booking/screens/booking_dashboard_screen.dart';
@@ -123,16 +123,23 @@ class _HomeUserScreenState extends State<HomeUserScreen> {
     showDialog(
       context: context,
       barrierDismissible: false,
+      useRootNavigator: true,
       builder: (context) => const Center(child: CircularProgressIndicator()),
     );
-    await _authService.logout();
-    if (!mounted) return;
-    Navigator.of(context).pop();
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (context) => const LoginScreen()),
-      (Route<dynamic> route) => false,
-    );
+    try {
+      await _authService.logout();
+    } catch (_) {
+      // even on error, proceed to clear local session and navigate
+    } finally {
+      if (!mounted) return;
+      if (Navigator.of(context, rootNavigator: true).canPop()) {
+        Navigator.of(context, rootNavigator: true).pop();
+      }
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => const LandingScreen()),
+        (Route<dynamic> route) => false,
+      );
+    }
   }
 
   void _onNavItemTapped(int index) {

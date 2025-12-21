@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:courtify_mobile/services/auth_service.dart';
 import 'package:courtify_mobile/module/lapangan/models/lapangan.dart';
 import 'package:courtify_mobile/module/booking/services/booking_api_service.dart';
+import 'package:courtify_mobile/theme/app_colors.dart';
 
 class BookingCreateScreen extends StatefulWidget {
   final Lapangan lapangan;
@@ -16,9 +17,9 @@ class BookingCreateScreen extends StatefulWidget {
 
 class _BookingCreateScreenState extends State<BookingCreateScreen> {
   final BookingApiService _apiService = BookingApiService();
-  static const Color backgroundColor = Color(0xFF111827);
-  static const Color cardColor = Color(0xFF1F2937);
-  static const Color accent = Color(0xFF2563EB);
+  static const Color backgroundColor = AppColors.background;
+  static const Color cardColor = AppColors.card;
+  static const Color accent = AppColors.primary;
 
   DateTime _selectedDate = DateTime.now();
   List<int> _bookedHours = [];

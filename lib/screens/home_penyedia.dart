@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:courtify_mobile/services/auth_service.dart';
 
-import 'package:courtify_mobile/screens/login_screen.dart';
+import 'package:courtify_mobile/screens/landing_screen.dart';
 
 // --- IMPORT HALAMAN MENU PENYEDIA ---
 import 'package:courtify_mobile/screens/penyedia/dashboard_penyedia.dart';
@@ -84,27 +84,17 @@ class _HomePenyediaScreenState extends State<HomePenyediaScreen> {
               );
               try {
                 await request.logout();
-                if (!mounted) return;
-                Navigator.of(context, rootNavigator: true).pop(); // tutup loader
-                Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(builder: (_) => const LoginScreen()),
-                  (route) => false,
-                );
               } catch (e) {
-                if (mounted) {
-                  Navigator.of(context, rootNavigator: true).pop(); // tutup loader
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text("Gagal logout: $e"),
-                      backgroundColor: Colors.redAccent,
-                    ),
-                  );
-                }
+                // ignore error, continue clearing session & navigation
               } finally {
-                // Pastikan dialog loader tertutup jika masih ada
+                if (!mounted) return;
                 if (Navigator.of(context, rootNavigator: true).canPop()) {
                   Navigator.of(context, rootNavigator: true).pop();
                 }
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (_) => const LandingScreen()),
+                  (route) => false,
+                );
               }
             },
             style: ElevatedButton.styleFrom(

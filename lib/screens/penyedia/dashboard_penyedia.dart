@@ -3,13 +3,14 @@ import 'package:provider/provider.dart';
 import 'package:courtify_mobile/services/auth_service.dart';
 import 'package:courtify_mobile/module/booking/models/booking.dart';
 import 'package:courtify_mobile/module/booking/services/booking_api_service.dart';
+import 'package:courtify_mobile/theme/app_colors.dart';
 
 class DashboardPenyediaScreen extends StatefulWidget {
   const DashboardPenyediaScreen({super.key});
 
-  static const Color backgroundColor = Color(0xFF111827);
-  static const Color cardColor = Color(0xFF1F2937);
-  static const Color accent = Color(0xFF2563EB);
+  static const Color backgroundColor = AppColors.background;
+  static const Color cardColor = AppColors.card;
+  static const Color accent = AppColors.primary;
   static const Color muted = Colors.white70;
 
   @override
@@ -76,6 +77,7 @@ class _DashboardPenyediaScreenState extends State<DashboardPenyediaScreen> {
     return Scaffold(
       backgroundColor: DashboardPenyediaScreen.backgroundColor,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: const Text(
           "Dashboard Booking Penyedia",
           style: TextStyle(fontWeight: FontWeight.w600),
@@ -138,14 +140,14 @@ class _DashboardPenyediaScreenState extends State<DashboardPenyediaScreen> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               decoration: BoxDecoration(
-                color: DashboardPenyediaScreen.cardColor,
+                color: AppColors.input,
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: Colors.white10),
+                border: Border.all(color: AppColors.border.withOpacity(0.6)),
               ),
               child: DropdownButtonHideUnderline(
                 child: DropdownButton<String>(
                   value: _statusFilter,
-                  dropdownColor: DashboardPenyediaScreen.cardColor,
+                  dropdownColor: AppColors.input,
                   style: const TextStyle(color: Colors.white),
                   items: items,
                   onChanged: (v) {

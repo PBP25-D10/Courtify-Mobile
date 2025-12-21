@@ -4,6 +4,7 @@ import 'package:courtify_mobile/module/artikel/models/news.dart';
 import 'package:courtify_mobile/module/artikel/screens/article_form_page.dart';
 import 'package:courtify_mobile/module/artikel/services/news_service.dart';
 import 'package:courtify_mobile/services/auth_service.dart';
+import 'package:courtify_mobile/theme/app_colors.dart';
 
 class NewsListPage extends StatefulWidget {
   final bool isProvider;
@@ -107,6 +108,7 @@ class _NewsListPageState extends State<NewsListPage> {
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: Text(
           _isProvider ? 'Kelola Artikel' : 'Artikel Olahraga',
           style: const TextStyle(
@@ -181,7 +183,7 @@ class _NewsListPageState extends State<NewsListPage> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFF1F2937),
+        color: AppColors.card,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.white10),
       ),
@@ -190,12 +192,9 @@ class _NewsListPageState extends State<NewsListPage> {
         style: const TextStyle(color: Colors.white),
         decoration: InputDecoration(
           hintText: "Cari judul artikel",
-          hintStyle: const TextStyle(color: Colors.white70),
-          filled: true,
-          fillColor: const Color(0xFF111827),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide.none,
+            borderSide: const BorderSide(color: AppColors.border),
           ),
           prefixIcon: const Icon(Icons.search, color: Colors.white70),
           suffixIcon: _searchController.text.isNotEmpty
@@ -219,13 +218,13 @@ class _NewsListPageState extends State<NewsListPage> {
 
     return RefreshIndicator(
       onRefresh: () async => _loadNews(),
-      child: ListView(
+          child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: const Color(0xFF1F2937),
+              color: AppColors.card,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: Colors.white10),
             ),
@@ -236,12 +235,9 @@ class _NewsListPageState extends State<NewsListPage> {
                   style: const TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: "Cari judul, isi, atau penulis",
-                    hintStyle: const TextStyle(color: Colors.white60),
-                    filled: true,
-                    fillColor: const Color(0xFF111827),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide.none,
+                      borderSide: const BorderSide(color: AppColors.border),
                     ),
                     prefixIcon: const Icon(Icons.search, color: Colors.white70),
                   ),
@@ -249,17 +245,10 @@ class _NewsListPageState extends State<NewsListPage> {
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String>(
                   value: categories.contains(_selectedKategori) ? _selectedKategori : 'Semua',
-                  dropdownColor: const Color(0xFF111827),
+                  dropdownColor: AppColors.input,
                   style: const TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: "Kategori",
-                    labelStyle: const TextStyle(color: Colors.white70),
-                    filled: true,
-                    fillColor: const Color(0xFF111827),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide.none,
-                    ),
                   ),
                   items: categories
                       .map((k) => DropdownMenuItem(value: k, child: Text(k, overflow: TextOverflow.ellipsis)))
@@ -273,7 +262,7 @@ class _NewsListPageState extends State<NewsListPage> {
                       child: ElevatedButton(
                         onPressed: () => setState(() {}),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF2563EB),
+                          backgroundColor: AppColors.primary,
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                         ),
@@ -290,7 +279,7 @@ class _NewsListPageState extends State<NewsListPage> {
                           });
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.grey.shade600,
+                          backgroundColor: AppColors.reset,
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                         ),
@@ -466,16 +455,13 @@ class NewsDetailPage extends StatelessWidget {
   final News news;
   const NewsDetailPage({super.key, required this.news});
 
-  static const Color backgroundColor = Color(0xFF111827);
-  static const Color cardColor = Color(0xFF1F2937);
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: backgroundColor,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Text(news.title, style: const TextStyle(color: Colors.white)),
-        backgroundColor: backgroundColor,
+        backgroundColor: AppColors.background,
         foregroundColor: Colors.white,
         elevation: 0,
       ),
@@ -483,7 +469,7 @@ class NewsDetailPage extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Container(
           decoration: BoxDecoration(
-            color: cardColor,
+            color: AppColors.card,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: Colors.white10),
           ),
