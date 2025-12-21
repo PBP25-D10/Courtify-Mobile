@@ -28,6 +28,9 @@ class _BookingDashboardScreenState extends State<BookingDashboardScreen> {
   bool _hasMore = true;
   late ScrollController _scrollController;
   final Set<String> _wishlistLapanganIds = {};
+  final TextEditingController _searchController = TextEditingController();
+  final TextEditingController _jamController = TextEditingController();
+  RangeValues? _priceRange;
 
   static const Color backgroundColor = Color(0xFF111827);
   static const Color cardColor = Color(0xFF1F2937);
@@ -197,6 +200,178 @@ class _BookingDashboardScreenState extends State<BookingDashboardScreen> {
     ).then((_) => _refreshData());
   }
 
+  List<Widget> _buildLapanganSection() {
+    final filtered = _filteredLapangan();
+    if (filtered.isEmpty && !_isLoadingMore) {
+      return [_buildEmptyState("Belum ada lapangan tersedia.")];
+    }
+    return filtered.map((lap) => _buildLapanganCard(lap)).toList();
+  }
+
+  List<Lapangan> _filteredLapangan() {
+    final q = _searchController.text.toLowerCase();
+    final base = _lapangan;
+    if (base.isEmpty) return base;
+
+    final prices = base.map((e) => e.hargaPerJam).toList();
+    final minPrice = prices.reduce((a, b) => a < b ? a : b).toDouble();
+    final maxPrice = prices.reduce((a, b) => a > b ? a : b).toDouble();
+    final range = _priceRange ??
+        RangeValues(
+          minPrice,
+          maxPrice == minPrice ? minPrice + 1 : maxPrice,
+        );
+
+    return base.where((lap) {
+      final matchesSearch = q.isEmpty ||
+          lap.nama.toLowerCase().contains(q) ||
+          lap.lokasi.toLowerCase().contains(q);
+      final matchesJam = _jamController.text.isEmpty ||
+          lap.jamBuka.toLowerCase().contains(_jamController.text.toLowerCase()) ||
+          lap.jamTutup.toLowerCase().contains(_jamController.text.toLowerCase());
+      final matchesPrice =
+          lap.hargaPerJam >= range.start && lap.hargaPerJam <= range.end;
+      return matchesSearch && matchesJam && matchesPrice;
+    }).toList();
+  }
+
+  Widget _filterPanel() {
+    final list = _lapangan;
+    if (list.isEmpty) return const SizedBox.shrink();
+    final prices = list.map((e) => e.hargaPerJam).toList();
+    final minPrice = prices.reduce((a, b) => a < b ? a : b).toDouble();
+    final maxPrice = prices.reduce((a, b) => a > b ? a : b).toDouble();
+    final baseRange = RangeValues(
+      minPrice,
+      maxPrice == minPrice ? minPrice + 1 : maxPrice,
+    );
+    final range = _priceRange ?? baseRange;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white10),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextField(
+            controller: _searchController,
+            style: const TextStyle(color: Colors.white),
+            decoration: InputDecoration(
+              hintText: "Cari nama atau alamat",
+              hintStyle: const TextStyle(color: Colors.white70),
+              filled: true,
+              fillColor: const Color(0xFF111827),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide.none,
+              ),
+              prefixIcon: const Icon(Icons.search, color: Colors.white70),
+              suffixIcon: _searchController.text.isNotEmpty
+                  ? IconButton(
+                      icon: const Icon(Icons.clear, color: Colors.white70),
+                      onPressed: () {
+                        _searchController.clear();
+                        setState(() {});
+                      },
+                    )
+                  : null,
+            ),
+            onChanged: (_) => setState(() {}),
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _jamController,
+            style: const TextStyle(color: Colors.white),
+            decoration: InputDecoration(
+              hintText: "Filter jam buka/tutup (mis. 07:00)",
+              hintStyle: const TextStyle(color: Colors.white70),
+              filled: true,
+              fillColor: const Color(0xFF111827),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide.none,
+              ),
+              prefixIcon: const Icon(Icons.access_time, color: Colors.white70),
+              suffixIcon: _jamController.text.isNotEmpty
+                  ? IconButton(
+                      icon: const Icon(Icons.clear, color: Colors.white70),
+                      onPressed: () {
+                        _jamController.clear();
+                        setState(() {});
+                      },
+                    )
+                  : null,
+            ),
+            onChanged: (_) => setState(() {}),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            "Rentang harga: Rp ${range.start.toStringAsFixed(0)} - Rp ${range.end.toStringAsFixed(0)}",
+            style: const TextStyle(color: muted, fontSize: 12),
+          ),
+          RangeSlider(
+            values: range,
+            min: baseRange.start,
+            max: baseRange.end,
+            divisions: (baseRange.end - baseRange.start).abs() > 0 ? 10 : null,
+            activeColor: accent,
+            inactiveColor: Colors.white24,
+            labels: RangeLabels(
+              range.start.toStringAsFixed(0),
+              range.end.toStringAsFixed(0),
+            ),
+            onChanged: (val) {
+              setState(() => _priceRange = val);
+            },
+          ),
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () => setState(() {}),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: accent,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Text("Filter", style: TextStyle(color: Colors.white)),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () {
+                    _searchController.clear();
+                    _jamController.clear();
+                    setState(() {
+                      _priceRange = null;
+                    });
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey.shade700,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Text("Reset"),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -234,6 +409,7 @@ class _BookingDashboardScreenState extends State<BookingDashboardScreen> {
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.all(16.0),
             children: [
+              if (_lapangan.isNotEmpty) _filterPanel(),
               const Text(
                 "Lapangan Tersedia",
                 style: TextStyle(
@@ -244,10 +420,7 @@ class _BookingDashboardScreenState extends State<BookingDashboardScreen> {
               ),
               const SizedBox(height: 12),
 
-              if (_lapangan.isEmpty && !_isLoadingMore)
-                _buildEmptyState("Belum ada lapangan tersedia.")
-              else
-                ..._lapangan.map((lap) => _buildLapanganCard(lap)),
+              ..._buildLapanganSection(),
 
               if (_isLoadingMore)
                 const Padding(

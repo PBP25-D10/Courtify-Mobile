@@ -21,6 +21,10 @@ class IklanFormScreen extends StatefulWidget {
 }
 
 class _IklanFormScreenState extends State<IklanFormScreen> {
+  static const Color _backgroundColor = Color(0xFF111827);
+  static const Color _cardColor = Color(0xFF1F2937);
+  static const Color _accentColor = Color(0xFF2563EB);
+
   final _formKey = GlobalKey<FormState>();
   final IklanApiService _iklanApi = IklanApiService();
   final LapanganApiService _lapanganApi = LapanganApiService();
@@ -99,7 +103,7 @@ class _IklanFormScreenState extends State<IklanFormScreen> {
   // SUBMIT FORM
   // ============================
   Future<void> _submit() async {
-    if (!_formKey.currentState!.validate()) {};
+    if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);
 
@@ -232,21 +236,26 @@ class _IklanFormScreenState extends State<IklanFormScreen> {
       controller: controller,
       maxLines: maxLines,
       keyboardType: keyboardType,
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: const TextStyle(color: Colors.grey),
-        filled: true,
-        fillColor: const Color(0xFF374151),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none
-        ),
-        focusedBorder: const OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.blueAccent)
-        ),
-      ),
+      decoration: _inputDecoration(label),
       style: const TextStyle(color: Colors.white),
       validator: (val) => val!.isEmpty ? "$label tidak boleh kosong" : null,
+    );
+  }
+
+  InputDecoration _inputDecoration(String label) {
+    return InputDecoration(
+      labelText: label,
+      labelStyle: const TextStyle(color: Colors.white70),
+      filled: true,
+      fillColor: Colors.black26,
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Colors.white24),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.white.withOpacity(0.7)),
+      ),
     );
   }
 
@@ -258,190 +267,139 @@ class _IklanFormScreenState extends State<IklanFormScreen> {
     final isEdit = widget.iklan != null;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF111827),
+      backgroundColor: _backgroundColor,
       appBar: AppBar(
         title: Text(
           isEdit ? "Edit Iklan" : "Buat Iklan",
           style: const TextStyle(color: Colors.white),
         ),
-        backgroundColor: const Color(0xFF111827),
-        iconTheme: const IconThemeData(color: Colors.white),
+        backgroundColor: _backgroundColor,
+        foregroundColor: Colors.white,
         elevation: 0,
       ),
-      body: SingleChildScrollView(
+      body: Padding(
         padding: const EdgeInsets.all(16),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 1. JUDUL
-              _buildTextField(_judulController, "Judul Iklan"),
-              const SizedBox(height: 16),
-
-              // 2. DESKRIPSI
-              _buildTextField(_deskripsiController, "Deskripsi Iklan", maxLines: 4),
-              _buildTextField(_urlThumbnailController, "URL Thumbnail (opsional)"),
-              const SizedBox(height: 16),
-
-              // 3. DROPDOWN LAPANGAN
-              DropdownButtonFormField<String>(
-                dropdownColor: const Color(0xFF374151),
-                style: const TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  labelText: "Pilih Lapangan",
-                  labelStyle: const TextStyle(color: Colors.grey),
-                  filled: true,
-                  fillColor: const Color(0xFF374151),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12), 
-                    borderSide: BorderSide.none
-                  ),
-                  focusedBorder: const OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.blueAccent)
-                  ),
+        child: Container(
+          decoration: BoxDecoration(
+            color: _cardColor,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.white10),
+          ),
+          padding: const EdgeInsets.all(16),
+          child: Form(
+            key: _formKey,
+            child: ListView(
+              children: [
+                _buildTextField(_judulController, "Judul Iklan"),
+                const SizedBox(height: 16),
+                _buildTextField(_deskripsiController, "Deskripsi Iklan", maxLines: 4),
+                const SizedBox(height: 16),
+                _buildTextField(_urlThumbnailController, "URL Thumbnail (opsional)"),
+                const SizedBox(height: 16),
+                DropdownButtonFormField<String>(
+                  dropdownColor: _cardColor,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: _inputDecoration("Pilih Lapangan"),
+                  value: _selectedLapanganId,
+                  items: _lapanganList.map((lap) {
+                    return DropdownMenuItem(
+                      value: lap.idLapangan.toString(),
+                      child: Text(
+                        lap.nama,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: (val) {
+                    setState(() {
+                      _selectedLapanganId = val;
+                    });
+                  },
+                  validator: (val) => val == null ? "Pilih lapangan" : null,
                 ),
-                value: _selectedLapanganId,
-                items: _lapanganList.map((lap) {
-                  return DropdownMenuItem(
-                    value: lap.idLapangan.toString(),
-                    child: Text(
-                      lap.nama,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  );
-                }).toList(),
-                onChanged: (val) {
-                  setState(() {
-                    _selectedLapanganId = val;
-                  });
-                },
-                validator: (val) => val == null ? "Pilih lapangan" : null,
-              ),
-              const SizedBox(height: 16),
-
-              // 4. BANNER (Image Picker dengan Logic Preview Gambar Lama)
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
+                const SizedBox(height: 16),
+                ElevatedButton(
                   onPressed: _pickImage,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF374151),
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    backgroundColor: Colors.black26,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    elevation: 0,
                   ),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                        // KONDISI 1: User baru saja memilih gambar baru dari galeri
-                        if (_selectedImage != null) ...[
-                         ClipRRect(
-                           borderRadius: BorderRadius.circular(4),
-                           child: kIsWeb
-                               ? Image.network(
-                                   _selectedImage!.path, 
-                                   width: 30,
-                                   height: 30,
-                                   fit: BoxFit.cover,
-                                 )
-                               : Image.file(
-                                   File(_selectedImage!.path), 
-                                   width: 30,
-                                   height: 30,
-                                   fit: BoxFit.cover,
-                                 ),
-                         ),
-                         const SizedBox(width: 12),
-                         Expanded(
-                           child: Text(
-                             _selectedImage!.name,
-                             style: const TextStyle(color: Colors.white),
-                             overflow: TextOverflow.ellipsis,
-                           ),
-                         ),
-                         const Icon(Icons.edit, color: Colors.blueAccent, size: 20),
-                        ] 
-                        // KONDISI 2: Mode Edit & User belum pilih gambar baru, tapi ada gambar lama
-                        else if (isEdit && widget.iklan?.banner != null && widget.iklan!.banner!.isNotEmpty) ...[
-                          ClipRRect(
-                           borderRadius: BorderRadius.circular(4),
-                           child: Image.network(
-                               widget.iklan!.banner!, 
-                               width: 30,
-                               height: 30,
-                               fit: BoxFit.cover,
-                               errorBuilder: (ctx, err, stack) => const Icon(Icons.broken_image, color: Colors.grey),
-                             ),
-                         ),
-                         const SizedBox(width: 12),
-                         const Expanded(
-                           child: Text(
-                             "Ganti Banner (Saat ini terpasang)",
-                             style: TextStyle(color: Colors.white),
-                             overflow: TextOverflow.ellipsis,
-                           ),
-                         ),
-                         const Icon(Icons.edit, color: Colors.blueAccent, size: 20),
-                        ]
-                        // KONDISI 3: Belum ada gambar sama sekali
-                        else ...[
-                          const Text(
-                            "Pilih Banner (Opsional)",
-                            style: TextStyle(color: Colors.white),
-                          ),
-                          const SizedBox(width: 8),
-                          const Icon(Icons.image, color: Colors.white, size: 20),
-                        ],
+                      const Icon(Icons.image),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: _selectedImage != null
+                            ? Text(
+                                _selectedImage!.name,
+                                overflow: TextOverflow.ellipsis,
+                              )
+                            : Text(
+                                isEdit && widget.iklan?.banner != null && widget.iklan!.banner!.isNotEmpty
+                                    ? "Ganti Banner (Saat ini terpasang)"
+                                    : "Pilih Banner (Opsional)",
+                              ),
+                      ),
+                      const Icon(Icons.edit, color: Colors.white70, size: 18),
                     ],
                   ),
                 ),
-              ),
-
-              const SizedBox(height: 32),
-
-              // 5. TOMBOL AKSI
-              Row(
-                children: [
-                  Expanded(
-                    child: SizedBox(
-                      height: 50,
-                      child: ElevatedButton(
-                        onPressed: () => Navigator.pop(context),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.transparent,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            side: const BorderSide(color: Colors.grey)
-                          ),
-                        ),
-                        child: const Text("Batal", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                      ),
+                if (_selectedImage != null || (isEdit && widget.iklan?.banner != null && widget.iklan!.banner!.isNotEmpty))
+                  Padding(
+                    padding: const EdgeInsets.only(top: 12),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: _selectedImage != null
+                          ? (kIsWeb
+                              ? Image.network(_selectedImage!.path, height: 140, fit: BoxFit.cover)
+                              : Image.file(File(_selectedImage!.path), height: 140, fit: BoxFit.cover))
+                          : Image.network(
+                              widget.iklan!.banner!,
+                              height: 140,
+                              fit: BoxFit.cover,
+                              errorBuilder: (ctx, err, stack) => Container(
+                                height: 140,
+                                color: Colors.black45,
+                                alignment: Alignment.center,
+                                child: const Icon(Icons.broken_image, color: Colors.white38),
+                              ),
+                            ),
                     ),
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: SizedBox(
-                      height: 50,
-                      child: ElevatedButton(
-                        onPressed: _isLoading ? null : _submit,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blueAccent,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: _isLoading
-                            ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                            : const Text("Simpan", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: _isLoading ? null : _submit,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _accentColor,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
                     ),
+                    child: _isLoading
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Text(
+                            "Simpan",
+                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                          ),
                   ),
-                ],
-              )
-            ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

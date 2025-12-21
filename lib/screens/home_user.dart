@@ -153,6 +153,8 @@ class _HomeUserScreenState extends State<HomeUserScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final bottomInset = MediaQuery.of(context).padding.bottom;
+    final navBottomPadding = bottomInset > 0 ? bottomInset + 8 : 16.0;
     return Scaffold(
       backgroundColor: backgroundColor,
       body: Container(
@@ -254,79 +256,74 @@ class _HomeUserScreenState extends State<HomeUserScreen> {
               const WishlistUserScreen(),
             ],
           ),
-          bottomNavigationBar: SizedBox(
-            height: 72,
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                // Background bar
-                Positioned.fill(
-                  top: 0,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: cardColor,
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(18),
-                        topRight: Radius.circular(18),
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.35),
-                          blurRadius: 14,
-                          offset: const Offset(0, -6),
-                        ),
-                      ],
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 10,
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: List.generate(4, (index) {
-                        final icons = [
-                          Icons.home,
-                          Icons.calendar_today,
-                          Icons.article,
-                          Icons.favorite,
-                        ];
-                        final labels = [
-                          "Home",
-                          "Booking",
-                          "Artikel",
-                          "Wishlist",
-                        ];
-                        final isSelected = _selectedIndex == index;
-                        return GestureDetector(
-                          onTap: () => _onNavItemTapped(index),
-                          behavior: HitTestBehavior.opaque,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                icons[index],
-                                size: 22,
-                                color: isSelected ? accent : Colors.white54,
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                labels[index],
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: isSelected ? accent : Colors.white54,
-                                  fontWeight: isSelected
-                                      ? FontWeight.w600
-                                      : FontWeight.normal,
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      }),
-                    ),
+          bottomNavigationBar: SafeArea(
+            top: false,
+            child: Padding(
+              padding: EdgeInsets.only(bottom: navBottomPadding),
+              child: Container(
+                height: 72,
+                decoration: BoxDecoration(
+                  color: cardColor,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(18),
+                    topRight: Radius.circular(18),
                   ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.35),
+                      blurRadius: 14,
+                      offset: const Offset(0, -6),
+                    ),
+                  ],
                 ),
-              ],
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 12,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: List.generate(4, (index) {
+                    final icons = [
+                      Icons.home,
+                      Icons.calendar_today,
+                      Icons.article,
+                      Icons.favorite,
+                    ];
+                    final labels = [
+                      "Home",
+                      "Booking",
+                      "Artikel",
+                      "Wishlist",
+                    ];
+                    final isSelected = _selectedIndex == index;
+                    return GestureDetector(
+                      onTap: () => _onNavItemTapped(index),
+                      behavior: HitTestBehavior.opaque,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            icons[index],
+                            size: 24,
+                            color: isSelected ? accent : Colors.white54,
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            labels[index],
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: isSelected ? accent : Colors.white54,
+                              fontWeight: isSelected
+                                  ? FontWeight.w600
+                                  : FontWeight.normal,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
+                ),
+              ),
             ),
           ),
         ),

@@ -17,6 +17,8 @@ class _NewsListPageState extends State<NewsListPage> {
   final NewsApiService service = NewsApiService();
   late Future<List<News>> _futureNews;
   late bool _isProvider;
+  final TextEditingController _searchController = TextEditingController();
+  String _selectedKategori = 'Semua';
 
   @override
   void initState() {
@@ -24,6 +26,12 @@ class _NewsListPageState extends State<NewsListPage> {
     _isProvider = widget.isProvider;
     _futureNews = _fetchForRole();
     _loadRole();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadRole() async {
@@ -81,6 +89,19 @@ class _NewsListPageState extends State<NewsListPage> {
     }
   }
 
+  List<News> _applyFilters(List<News> data) {
+    final q = _searchController.text.toLowerCase();
+    return data.where((news) {
+      final matchesQuery = q.isEmpty ||
+          news.title.toLowerCase().contains(q) ||
+          news.content.toLowerCase().contains(q) ||
+          news.author.toLowerCase().contains(q);
+      final matchesKategori =
+          _selectedKategori == 'Semua' || news.kategori == _selectedKategori;
+      return matchesQuery && matchesKategori;
+    }).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -125,17 +146,8 @@ class _NewsListPageState extends State<NewsListPage> {
 
           final newsList = snapshot.data!;
 
-          return RefreshIndicator(
-            onRefresh: () async => _loadNews(),
-            child: ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: newsList.length,
-              itemBuilder: (context, index) {
-                final news = newsList[index];
-                return _newsCard(news);
-              },
-            ),
-          );
+          final content = _isProvider ? _buildProviderList(newsList) : _buildUserList(newsList);
+          return content;
         },
       ),
       floatingActionButton: _isProvider
@@ -145,6 +157,166 @@ class _NewsListPageState extends State<NewsListPage> {
               child: const Icon(Icons.add),
             )
           : null,
+    );
+  }
+
+  Widget _buildUserList(List<News> newsList) {
+    final filtered = _applyFilters(newsList);
+    return RefreshIndicator(
+      onRefresh: () async => _loadNews(),
+      child: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: filtered.length + 1,
+        itemBuilder: (context, index) {
+          if (index == 0) return _userSearchBar();
+          final news = filtered[index - 1];
+          return _newsCard(news);
+        },
+      ),
+    );
+  }
+
+  Widget _userSearchBar() {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1F2937),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white10),
+      ),
+      child: TextField(
+        controller: _searchController,
+        style: const TextStyle(color: Colors.white),
+        decoration: InputDecoration(
+          hintText: "Cari judul artikel",
+          hintStyle: const TextStyle(color: Colors.white70),
+          filled: true,
+          fillColor: const Color(0xFF111827),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: BorderSide.none,
+          ),
+          prefixIcon: const Icon(Icons.search, color: Colors.white70),
+          suffixIcon: _searchController.text.isNotEmpty
+              ? IconButton(
+                  icon: const Icon(Icons.clear, color: Colors.white70),
+                  onPressed: () {
+                    _searchController.clear();
+                    setState(() {});
+                  },
+                )
+              : null,
+        ),
+        onChanged: (_) => setState(() {}),
+      ),
+    );
+  }
+
+  Widget _buildProviderList(List<News> newsList) {
+    final categories = <String>{'Semua', ...newsList.map((e) => e.kategori)}.toList();
+    final filtered = _applyFilters(newsList);
+
+    return RefreshIndicator(
+      onRefresh: () async => _loadNews(),
+      child: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFF1F2937),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.white10),
+            ),
+            child: Column(
+              children: [
+                TextField(
+                  controller: _searchController,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    hintText: "Cari judul, isi, atau penulis",
+                    hintStyle: const TextStyle(color: Colors.white60),
+                    filled: true,
+                    fillColor: const Color(0xFF111827),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide.none,
+                    ),
+                    prefixIcon: const Icon(Icons.search, color: Colors.white70),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                DropdownButtonFormField<String>(
+                  value: categories.contains(_selectedKategori) ? _selectedKategori : 'Semua',
+                  dropdownColor: const Color(0xFF111827),
+                  style: const TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    labelText: "Kategori",
+                    labelStyle: const TextStyle(color: Colors.white70),
+                    filled: true,
+                    fillColor: const Color(0xFF111827),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                  items: categories
+                      .map((k) => DropdownMenuItem(value: k, child: Text(k, overflow: TextOverflow.ellipsis)))
+                      .toList(),
+                  onChanged: (v) => setState(() => _selectedKategori = v ?? 'Semua'),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () => setState(() {}),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF2563EB),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
+                        child: const Text("Filter", style: TextStyle(color: Colors.white)),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            _searchController.clear();
+                            _selectedKategori = 'Semua';
+                          });
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.grey.shade600,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
+                        child: const Text("Reset", style: TextStyle(color: Colors.white)),
+                      ),
+                    ),
+                  ],
+                )
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          if (filtered.isEmpty)
+            const Center(
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 40),
+                child: Text(
+                  'Tidak ada artikel yang cocok dengan filter',
+                  style: TextStyle(color: Colors.white70),
+                ),
+              ),
+            )
+          else
+            ...filtered.map((news) => _newsCard(news)),
+        ],
+      ),
     );
   }
 

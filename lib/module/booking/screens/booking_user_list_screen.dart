@@ -15,6 +15,8 @@ class BookingUserListScreen extends StatefulWidget {
 class _BookingUserListScreenState extends State<BookingUserListScreen> {
   final BookingApiService _apiService = BookingApiService();
   late Future<List<Booking>> _futureBookings;
+  final TextEditingController _searchController = TextEditingController();
+  String _statusFilter = 'all';
 
   static const Color backgroundColor = Color(0xFF111827);
   static const Color cardColor = Color(0xFF1F2937);
@@ -23,6 +25,12 @@ class _BookingUserListScreenState extends State<BookingUserListScreen> {
   void initState() {
     super.initState();
     _loadBookings();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   void _loadBookings() {
@@ -137,9 +145,10 @@ class _BookingUserListScreenState extends State<BookingUserListScreen> {
             onRefresh: () async => _loadBookings(),
             child: ListView.builder(
               padding: const EdgeInsets.all(16),
-              itemCount: bookings.length,
+              itemCount: _filtered(bookings).length + 1,
               itemBuilder: (context, index) {
-                final booking = bookings[index];
+                if (index == 0) return _filterPanel();
+                final booking = _filtered(bookings)[index - 1];
                 return BookingCard(
                   booking: booking,
                   onCancel: _handleCancelBooking,
@@ -148,6 +157,94 @@ class _BookingUserListScreenState extends State<BookingUserListScreen> {
             ),
           );
         },
+      ),
+    );
+  }
+
+  List<Booking> _filtered(List<Booking> data) {
+    final q = _searchController.text.toLowerCase();
+    return data.where((b) {
+      final matchesSearch =
+          q.isEmpty || (b.lapangan?.nama.toLowerCase().contains(q) ?? false);
+      final matchesStatus = _statusFilter == 'all' || b.status == _statusFilter;
+      return matchesSearch && matchesStatus;
+    }).toList();
+  }
+
+  Widget _filterPanel() {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white10),
+      ),
+      child: Column(
+        children: [
+          TextField(
+            controller: _searchController,
+            style: const TextStyle(color: Colors.white),
+            decoration: InputDecoration(
+              hintText: "Cari berdasarkan nama lapangan",
+              hintStyle: const TextStyle(color: Colors.white70),
+              filled: true,
+              fillColor: const Color(0xFF111827),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide.none,
+              ),
+              prefixIcon: const Icon(Icons.search, color: Colors.white70),
+            ),
+            onChanged: (_) => setState(() {}),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF111827),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: Colors.white10),
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      value: _statusFilter,
+                      dropdownColor: const Color(0xFF111827),
+                      style: const TextStyle(color: Colors.white),
+                      items: const [
+                        DropdownMenuItem(value: 'all', child: Text('Semua')),
+                        DropdownMenuItem(value: 'pending', child: Text('Pending')),
+                        DropdownMenuItem(value: 'confirmed', child: Text('Confirmed')),
+                        DropdownMenuItem(value: 'cancelled', child: Text('Cancelled')),
+                      ],
+                      onChanged: (v) {
+                        if (v == null) return;
+                        setState(() => _statusFilter = v);
+                      },
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              ElevatedButton(
+                onPressed: () {
+                  _searchController.clear();
+                  setState(() => _statusFilter = 'all');
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.grey.shade700,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+                child: const Text("Reset"),
+              )
+            ],
+          ),
+        ],
       ),
     );
   }

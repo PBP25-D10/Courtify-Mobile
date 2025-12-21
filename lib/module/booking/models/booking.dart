@@ -8,6 +8,7 @@ class Booking {
   final String jamSelesai;
   final double totalHarga;
   final String status;
+  final String? createdAt;
 
   Booking({
     required this.id,
@@ -17,6 +18,7 @@ class Booking {
     required this.jamSelesai,
     required this.totalHarga,
     required this.status,
+    this.createdAt,
   });
 
   factory Booking.fromJson(Map<String, dynamic> json) {
@@ -32,6 +34,7 @@ class Booking {
       jamSelesai: json['jam_selesai']?.toString() ?? '',
       totalHarga: (json['total_harga'] as num?)?.toDouble() ?? 0.0,
       status: json['status']?.toString() ?? '',
+      createdAt: json['created_at']?.toString(),
     );
   }
 }
