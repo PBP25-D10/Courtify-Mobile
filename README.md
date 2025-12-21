@@ -162,6 +162,7 @@ Download aplikasi versi terbaru: [Download APK](https://github.com/PBP25-D10/Cou
 * **Tautan Deployment (PWS):** [link pws](https://justin-timothy-courtify.pbp.cs.ui.ac.id/)
 * **Link Desain (Figma):** [link figma](https://www.figma.com/design/WFXPpXYAMJKiQBmJfbklMn/PBP-COURTIFY?node-id=0-1&t=oJticVyhsjIw0hyG-1)
 
-## **Bonus Individu : Rafa Rally Soelistiono - 2406344675**
+## **Bonus Individu : **
+**Rafa Rally Soelistiono - 2406344675**
 * **Tautan Blog (Penerapan advanced widget : TweenAnimationBuilder):** [link linkedin post](https://www.linkedin.com/pulse/meningkatkan-perceived-quality-dengan-melakukan-pada-soelistiono-coxpc?utm_source=share&utm_medium=member_android&utm_campaign=share_via)
 
