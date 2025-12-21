@@ -6,6 +6,7 @@ import 'package:courtify_mobile/module/booking/screens/booking_create_screen.dar
 import 'package:courtify_mobile/module/booking/screens/booking_user_list_screen.dart';
 import 'package:courtify_mobile/module/booking/services/booking_api_service.dart';
 import 'package:courtify_mobile/module/lapangan/models/lapangan.dart';
+import 'package:courtify_mobile/theme/app_colors.dart';
 
 class BookingDashboardScreen extends StatefulWidget {
   const BookingDashboardScreen({super.key});
@@ -24,9 +25,9 @@ class _BookingDashboardScreenState extends State<BookingDashboardScreen> {
   int _itemsPerPage = 4;
   bool _isLoadingMore = false;
 
-  static const Color backgroundColor = Color(0xFF111827);
-  static const Color cardColor = Color(0xFF1F2937);
-  static const Color accent = Color(0xFF2563EB);
+  static const Color backgroundColor = AppColors.background;
+  static const Color cardColor = AppColors.card;
+  static const Color accent = AppColors.primary;
   static const Color muted = Colors.white70;
 
   @override
@@ -150,6 +151,7 @@ class _BookingDashboardScreenState extends State<BookingDashboardScreen> {
     return Scaffold(
       backgroundColor: backgroundColor,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: const Text(
           "Dashboard Booking",
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),

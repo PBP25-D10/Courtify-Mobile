@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:courtify_mobile/services/auth_service.dart';
 import 'package:courtify_mobile/module/lapangan/services/api_services.dart';
 import 'package:courtify_mobile/module/lapangan/models/lapangan.dart';
+import 'package:courtify_mobile/theme/app_colors.dart';
 
 class LapanganFormScreen extends StatefulWidget {
   final Lapangan? lapangan;
@@ -14,9 +15,9 @@ class LapanganFormScreen extends StatefulWidget {
 }
 
 class _LapanganFormScreenState extends State<LapanganFormScreen> {
-  static const Color _backgroundColor = Color(0xFF111827);
-  static const Color _cardColor = Color(0xFF1F2937);
-  static const Color _accent = Color(0xFF2563EB);
+  static const Color _backgroundColor = AppColors.background;
+  static const Color _cardColor = AppColors.card;
+  static const Color _accent = AppColors.primary;
 
   final _formKey = GlobalKey<FormState>();
   final LapanganApiService _api = LapanganApiService();

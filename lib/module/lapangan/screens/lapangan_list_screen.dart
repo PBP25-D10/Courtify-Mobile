@@ -5,6 +5,7 @@ import 'package:courtify_mobile/module/lapangan/services/api_services.dart';
 import 'package:courtify_mobile/module/lapangan/models/lapangan.dart';
 import 'package:courtify_mobile/module/lapangan/screens/lapangan_form_screen.dart';
 import 'package:courtify_mobile/widgets/lapangan_card.dart';
+import 'package:courtify_mobile/theme/app_colors.dart';
 
 class LapanganListScreen extends StatefulWidget {
   const LapanganListScreen({super.key});
@@ -57,19 +58,20 @@ class _LapanganListScreenState extends State<LapanganListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF111827),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: const Text(
           "Daftar Lapangan",
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
-        backgroundColor: const Color(0xFF111827),
+        backgroundColor: AppColors.background,
         foregroundColor: Colors.white,
         surfaceTintColor: Colors.transparent,
         scrolledUnderElevation: 0,
       ),
       body: Container(
-        color: const Color(0xFF111827),
+        color: AppColors.background,
         child: FutureBuilder<List<Lapangan>>(
           future: _futureLapangan,
           builder: (context, snapshot) {
@@ -123,7 +125,7 @@ class _LapanganListScreenState extends State<LapanganListScreen> {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1F2937),
+                    color: AppColors.card,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: Colors.white10),
                   ),
@@ -134,30 +136,16 @@ class _LapanganListScreenState extends State<LapanganListScreen> {
                         style: const TextStyle(color: Colors.white),
                         decoration: InputDecoration(
                           hintText: "Cari nama, lokasi, atau kategori",
-                          hintStyle: const TextStyle(color: Colors.white60),
-                          filled: true,
-                          fillColor: const Color(0xFF111827),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: BorderSide.none,
-                          ),
                           prefixIcon: const Icon(Icons.search, color: Colors.white70),
                         ),
                       ),
                       const SizedBox(height: 12),
                       DropdownButtonFormField<String>(
                         value: categories.contains(_selectedKategori) ? _selectedKategori : "Semua",
-                        dropdownColor: const Color(0xFF111827),
+                        dropdownColor: AppColors.input,
                         style: const TextStyle(color: Colors.white),
-                        decoration: InputDecoration(
+                        decoration: const InputDecoration(
                           labelText: "Kategori",
-                          labelStyle: const TextStyle(color: Colors.white70),
-                          filled: true,
-                          fillColor: const Color(0xFF111827),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: BorderSide.none,
-                          ),
                         ),
                         items: categories
                             .map((k) => DropdownMenuItem(value: k, child: Text(k, overflow: TextOverflow.ellipsis)))
@@ -177,7 +165,7 @@ class _LapanganListScreenState extends State<LapanganListScreen> {
                         min: minPrice,
                         max: maxPrice == minPrice ? minPrice + 1 : maxPrice,
                         divisions: (maxPrice - minPrice).abs() > 0 ? 10 : null,
-                        activeColor: const Color(0xFF2563EB),
+                        activeColor: AppColors.primary,
                         inactiveColor: Colors.white24,
                         labels: RangeLabels(
                           effectiveRange.start.toStringAsFixed(0),
@@ -193,7 +181,7 @@ class _LapanganListScreenState extends State<LapanganListScreen> {
                             child: ElevatedButton(
                               onPressed: () => setState(() {}),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF2563EB),
+                                backgroundColor: AppColors.primary,
                                 padding: const EdgeInsets.symmetric(vertical: 12),
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                               ),
@@ -211,7 +199,7 @@ class _LapanganListScreenState extends State<LapanganListScreen> {
                                 });
                               },
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.grey.shade600,
+                                backgroundColor: AppColors.reset,
                                 padding: const EdgeInsets.symmetric(vertical: 12),
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                               ),

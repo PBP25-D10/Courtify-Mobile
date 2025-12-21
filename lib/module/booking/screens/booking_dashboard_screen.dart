@@ -8,6 +8,7 @@ import 'package:courtify_mobile/module/booking/services/booking_api_service.dart
 import 'package:courtify_mobile/module/lapangan/models/lapangan.dart';
 import 'package:courtify_mobile/module/lapangan/services/api_services.dart';
 import 'package:courtify_mobile/module/wishlist/services/wishlist_api_service.dart';
+import 'package:courtify_mobile/theme/app_colors.dart';
 
 class BookingDashboardScreen extends StatefulWidget {
   const BookingDashboardScreen({super.key});
@@ -32,9 +33,9 @@ class _BookingDashboardScreenState extends State<BookingDashboardScreen> {
   final TextEditingController _jamController = TextEditingController();
   RangeValues? _priceRange;
 
-  static const Color backgroundColor = Color(0xFF111827);
-  static const Color cardColor = Color(0xFF1F2937);
-  static const Color accent = Color(0xFF2563EB);
+  static const Color backgroundColor = AppColors.background;
+  static const Color cardColor = AppColors.card;
+  static const Color accent = AppColors.primary;
   static const Color muted = Colors.white70;
 
   @override
@@ -263,12 +264,9 @@ class _BookingDashboardScreenState extends State<BookingDashboardScreen> {
             style: const TextStyle(color: Colors.white),
             decoration: InputDecoration(
               hintText: "Cari nama atau alamat",
-              hintStyle: const TextStyle(color: Colors.white70),
-              filled: true,
-              fillColor: const Color(0xFF111827),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide.none,
+                borderSide: const BorderSide(color: AppColors.border),
               ),
               prefixIcon: const Icon(Icons.search, color: Colors.white70),
               suffixIcon: _searchController.text.isNotEmpty
@@ -289,12 +287,9 @@ class _BookingDashboardScreenState extends State<BookingDashboardScreen> {
             style: const TextStyle(color: Colors.white),
             decoration: InputDecoration(
               hintText: "Filter jam buka/tutup (mis. 07:00)",
-              hintStyle: const TextStyle(color: Colors.white70),
-              filled: true,
-              fillColor: const Color(0xFF111827),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide.none,
+                borderSide: const BorderSide(color: AppColors.border),
               ),
               prefixIcon: const Icon(Icons.access_time, color: Colors.white70),
               suffixIcon: _jamController.text.isNotEmpty
@@ -355,7 +350,7 @@ class _BookingDashboardScreenState extends State<BookingDashboardScreen> {
                     });
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.grey.shade700,
+                    backgroundColor: AppColors.reset,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     shape: RoundedRectangleBorder(
@@ -377,6 +372,7 @@ class _BookingDashboardScreenState extends State<BookingDashboardScreen> {
     return Scaffold(
       backgroundColor: backgroundColor,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: const Text(
           "Dashboard Booking",
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),

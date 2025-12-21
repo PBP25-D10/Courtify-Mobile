@@ -5,6 +5,7 @@ import 'package:courtify_mobile/module/iklan/services/iklan_api_services.dart';
 import 'package:courtify_mobile/module/lapangan/services/api_services.dart';
 import 'package:courtify_mobile/module/iklan/models/iklan.dart';
 import 'package:courtify_mobile/module/lapangan/models/lapangan.dart';
+import 'package:courtify_mobile/theme/app_colors.dart';
 
 class IklanFormScreen extends StatefulWidget {
   final Iklan? iklan; 
@@ -17,9 +18,9 @@ class IklanFormScreen extends StatefulWidget {
 }
 
 class _IklanFormScreenState extends State<IklanFormScreen> {
-  static const Color _backgroundColor = Color(0xFF111827);
-  static const Color _cardColor = Color(0xFF1F2937);
-  static const Color _accentColor = Color(0xFF2563EB);
+  static const Color _backgroundColor = AppColors.background;
+  static const Color _cardColor = AppColors.card;
+  static const Color _accentColor = AppColors.primary;
 
   final _formKey = GlobalKey<FormState>();
   final IklanApiService _iklanApi = IklanApiService();

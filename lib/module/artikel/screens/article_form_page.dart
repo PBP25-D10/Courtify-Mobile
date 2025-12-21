@@ -3,6 +3,7 @@ import 'package:courtify_mobile/module/artikel/models/news.dart';
 import 'package:courtify_mobile/module/artikel/services/news_service.dart';
 import 'package:courtify_mobile/services/auth_service.dart';
 import 'package:provider/provider.dart';
+import 'package:courtify_mobile/theme/app_colors.dart';
 
 class ArticleFormPage extends StatefulWidget {
   final News? news;
@@ -19,9 +20,9 @@ class _ArticleFormPageState extends State<ArticleFormPage> {
   final _thumbnailController = TextEditingController();
   String _kategori = 'Komunitas';
 
-  static const Color backgroundColor = Color(0xFF111827);
-  static const Color cardColor = Color(0xFF1F2937);
-  static const Color accent = Color(0xFF2563EB);
+  static const Color backgroundColor = AppColors.background;
+  static const Color cardColor = AppColors.card;
+  static const Color accent = AppColors.primary;
 
   final List<String> _kategoriList = const [
     'Futsal',

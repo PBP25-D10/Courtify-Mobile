@@ -4,6 +4,7 @@ import 'package:courtify_mobile/services/auth_service.dart';
 import 'package:courtify_mobile/module/booking/models/booking.dart';
 import 'package:courtify_mobile/module/booking/services/booking_api_service.dart';
 import 'package:courtify_mobile/module/booking/widgets/booking_card.dart';
+import 'package:courtify_mobile/theme/app_colors.dart';
 
 class BookingUserListScreen extends StatefulWidget {
   const BookingUserListScreen({super.key});
@@ -18,8 +19,8 @@ class _BookingUserListScreenState extends State<BookingUserListScreen> {
   final TextEditingController _searchController = TextEditingController();
   String _statusFilter = 'all';
 
-  static const Color backgroundColor = Color(0xFF111827);
-  static const Color cardColor = Color(0xFF1F2937);
+  static const Color backgroundColor = AppColors.background;
+  static const Color cardColor = AppColors.card;
 
   @override
   void initState() {
@@ -187,12 +188,9 @@ class _BookingUserListScreenState extends State<BookingUserListScreen> {
             style: const TextStyle(color: Colors.white),
             decoration: InputDecoration(
               hintText: "Cari berdasarkan nama lapangan",
-              hintStyle: const TextStyle(color: Colors.white70),
-              filled: true,
-              fillColor: const Color(0xFF111827),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide.none,
+                borderSide: const BorderSide(color: AppColors.border),
               ),
               prefixIcon: const Icon(Icons.search, color: Colors.white70),
             ),
@@ -205,14 +203,14 @@ class _BookingUserListScreenState extends State<BookingUserListScreen> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF111827),
+                    color: AppColors.input,
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: Colors.white10),
+                    border: Border.all(color: AppColors.border.withOpacity(0.6)),
                   ),
                   child: DropdownButtonHideUnderline(
                     child: DropdownButton<String>(
                       value: _statusFilter,
-                      dropdownColor: const Color(0xFF111827),
+                      dropdownColor: AppColors.input,
                       style: const TextStyle(color: Colors.white),
                       items: const [
                         DropdownMenuItem(value: 'all', child: Text('Semua')),
@@ -235,7 +233,7 @@ class _BookingUserListScreenState extends State<BookingUserListScreen> {
                   setState(() => _statusFilter = 'all');
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.grey.shade700,
+                  backgroundColor: AppColors.reset,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
