@@ -167,3 +167,6 @@ Aplikasi Flutter terhubung sepenuhnya dengan web service Django yang sudah dibua
 **Rafa Rally Soelistiono - 2406344675**
 * **Tautan Blog (Penerapan advanced widget : TweenAnimationBuilder):** [link linkedin post](https://www.linkedin.com/pulse/meningkatkan-perceived-quality-dengan-melakukan-pada-soelistiono-coxpc?utm_source=share&utm_medium=member_android&utm_campaign=share_via)
 
+* Khayra Tazkiya - 2406428876
+* https://www.linkedin.com/posts/khayra-tazkiya-2111b130a_flutter-pemrogramanberbasisplatform-courtifymobile-activity-7408550793122963457-Ho7q?utm_source=share&utm_medium=member_desktop&rcm=ACoAAE6x7u0BdpADqH1SrCIB4KGlC8jNIbM48wM
+
